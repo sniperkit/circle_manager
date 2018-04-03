@@ -67,3 +67,10 @@ func (cm *CircleManager) GeneateSource(circleIDUint uint) error {
 	}
 	return nil
 }
+
+func (cm *CircleManager) GeneateSourceBySet(cs *CircleSet) error {
+	if err := cm.runGen(cs); err != nil {
+		return err
+	}
+	return nil
+}
