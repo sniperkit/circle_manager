@@ -52,6 +52,9 @@ func New(db *gorm.DB) (*CircleManager, error) {
 	if cm.ResponseBodyPath == "" {
 		cm.TemplatePath = "responses"
 	}
+	if cm.BuildPath == "" {
+		cm.BuildPath = "circle-build"
+	}
 
 	return cm, nil
 }
