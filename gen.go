@@ -76,14 +76,28 @@ func (cm *CircleManager) runGen(cs *CircleSet) error {
 
 	for _, target := range staticObjectTypes {
 		cs.Units = targetUnits
-		ts.AppendTarget(target, cs)
+
+		ts.Targets = append(ts.Targets, &Target{
+			TemplateFile: filepath.Join(cm.BuildPath, target.GetTemplateFilename()),
+			Path:         target.ExportPath,
+			BuildPath:    filepath.Join(ts.BuildRootPath, target.ExportPath),
+			GoFilename:   target.GetExportFilename(),
+			Object:       cs,
+		})
 	}
 
 	for _, unit := range targetUnits {
 		for _, target := range objectTypes {
 			target.ExportName = unit.Name
 			cp := unit
-			ts.AppendTarget(target, &cp)
+
+			ts.Targets = append(ts.Targets, &Target{
+				TemplateFile: filepath.Join(cm.BuildPath, target.GetTemplateFilename()),
+				Path:         target.ExportPath,
+				BuildPath:    filepath.Join(ts.BuildRootPath, target.ExportPath),
+				GoFilename:   target.GetExportFilename(),
+				Object:       &cp,
+			})
 		}
 	}
 

@@ -21,16 +21,6 @@ type Target struct {
 	Object       interface{}
 }
 
-func (ts *TargetSet) AppendTarget(target ObjectType, object interface{}) {
-	ts.Targets = append(ts.Targets, &Target{
-		TemplateFile: target.GetTemplateFilename(),
-		Path:         target.ExportPath,
-		BuildPath:    filepath.Join(ts.BuildRootPath, target.ExportPath),
-		GoFilename:   target.GetExportFilename(),
-		Object:       object,
-	})
-}
-
 func (target *Target) GenGo() {
 	os.MkdirAll(filepath.Join(target.BuildPath), 0777)
 	f, err := os.OpenFile(filepath.Join(target.BuildPath, target.GoFilename), os.O_CREATE|os.O_WRONLY, 0777)
