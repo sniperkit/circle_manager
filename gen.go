@@ -78,7 +78,7 @@ func (cm *CircleManager) runGen(cs *CircleSet) error {
 		cs.Units = targetUnits
 
 		ts.Targets = append(ts.Targets, &Target{
-			TemplateFile: filepath.Join(cm.BuildPath, target.GetTemplateFilename()),
+			TemplateFile: filepath.Join(cm.TemplatePath, target.GetTemplateFilename()),
 			Path:         target.ExportPath,
 			BuildPath:    filepath.Join(ts.BuildRootPath, target.ExportPath),
 			GoFilename:   target.GetExportFilename(),
@@ -92,7 +92,7 @@ func (cm *CircleManager) runGen(cs *CircleSet) error {
 			cp := unit
 
 			ts.Targets = append(ts.Targets, &Target{
-				TemplateFile: filepath.Join(cm.BuildPath, target.GetTemplateFilename()),
+				TemplateFile: filepath.Join(cm.TemplatePath, target.GetTemplateFilename()),
 				Path:         target.ExportPath,
 				BuildPath:    filepath.Join(ts.BuildRootPath, target.ExportPath),
 				GoFilename:   target.GetExportFilename(),
