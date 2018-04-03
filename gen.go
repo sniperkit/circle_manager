@@ -1,17 +1,18 @@
 package circle_manager
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	funk "github.com/thoas/go-funk"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
-	"github.com/jungju/circle/utils"
 )
 
 const (
@@ -41,11 +42,11 @@ var (
 )
 
 func (o ObjectType) GetTemplateFilename() string {
-	return fmt.Sprintf("%s.%s", utils.MakeFirstLowerCase(o.Target), TemplateExt)
+	return fmt.Sprintf("%s.%s", makeFirstLowerCase(o.Target), TemplateExt)
 }
 
 func (o ObjectType) GetExportFilename() string {
-	return fmt.Sprintf("%s.%s", utils.MakeFirstLowerCase(o.ExportName), GoExt)
+	return fmt.Sprintf("%s.%s", makeFirstLowerCase(o.ExportName), GoExt)
 }
 
 func getCircleSetByID(db *gorm.DB, id uint) (circleSet *CircleSet, err error) {
@@ -113,4 +114,17 @@ func (cm *CircleManager) runGen(cs *CircleSet) error {
 	}
 
 	return nil
+}
+
+func makeFirstLowerCase(s string) string {
+	if len(s) < 2 {
+		return strings.ToLower(s)
+	}
+
+	bts := []byte(s)
+
+	lc := bytes.ToLower([]byte{bts[0]})
+	rest := bts[1:]
+
+	return string(bytes.Join([][]byte{lc, rest}, nil))
 }
