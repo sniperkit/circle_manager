@@ -1,0 +1,8 @@
+package models
+
+func setTable() error {
+	return gGormDB.AutoMigrate(
+        {{range $i, $unit := .Units}}&{{.Name}}{},
+	    {{end}}
+    ).Error
+}

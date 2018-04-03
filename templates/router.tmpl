@@ -1,0 +1,50 @@
+// @APIVersion 1.0.0
+// @Title Circle API
+// @Description Circle API
+// @Contact leejungju.go@gmail.com
+// @TermsOfServiceUrl http://circle.com
+// @License Private
+// @SecurityDefinition userAPIKey apiKey X-USER-AUTH-TOKEN header "I love auto-generated docs
+package routers
+
+import (
+	"github.com/astaxie/beego"
+	"github.com/jungju/circle/controllers"
+)
+
+func init() {
+	ns := beego.NewNamespace("/v1",
+		beego.NSNamespace("/webhooks",
+			beego.NSInclude(
+				&controllers.WebhookController{},
+			),
+		),
+		beego.NSNamespace("/notifications",
+			beego.NSInclude(
+				&controllers.NotificationController{},
+			),
+		),
+		beego.NSNamespace("/notificationTypes",
+			beego.NSInclude(
+				&controllers.NotificationTypeController{},
+			),
+		),
+		beego.NSNamespace("/templates",
+			beego.NSInclude(
+				&controllers.TemplateController{},
+			),
+		),
+		beego.NSNamespace("/circles",
+			beego.NSInclude(
+				&controllers.CircleSetController{},
+			),
+		),
+		{{range $i, $unit := .Units}}
+		beego.NSNamespace("/{{.Url}}",
+			beego.NSInclude(
+				&controllers.{{.Name}}Controller{},
+			),
+		),{{end}}
+	)
+	beego.AddNamespace(ns)
+}

@@ -1,0 +1,55 @@
+package models
+
+import "time"
+
+var _ = time.Time{}
+
+// gen:qs
+type {{.Name}} struct {
+	ID          uint      `description:""`
+	CreatedAt   time.Time `description:"등록일"`
+	UpdatedAt   time.Time `description:"수정일"`
+	Name        string    `description:"이름"`
+	Description string    `description:"설명" sql:"type:text"`
+    {{range $i, $property := .Properties}}{{.Name}} {{.Type}}
+	{{end}}
+}
+
+func Add{{.Name}}({{.VariableName}} *{{.Name}}) (id uint, err error) {
+	err = {{.VariableName}}.Create(gGormDB)
+	id = {{.VariableName}}.ID
+	return
+}
+
+func Get{{.Name}}ByID(id uint) ({{.VariableName}} *{{.Name}}, err error) {
+	{{.VariableName}} = &{{.Name}}{
+		ID: id,
+	}
+	err = New{{.Name}}QuerySet(gGormDB).
+		One({{.VariableName}})
+	return
+}
+
+func GetAll{{.Name}}(queryPage *QueryPage) ({{.VariableName}}s []{{.Name}}, err error) {
+	err = New{{.Name}}QuerySet(gGormDB).
+		All(&{{.VariableName}}s)
+	return
+}
+
+func Update{{.Name}}ByID({{.VariableName}} *{{.Name}}) (err error) {
+	err = {{.VariableName}}.Update(gGormDB,
+		{{.Name}}DBSchema.Name,
+		{{.Name}}DBSchema.Description,
+		{{$name := .Name}}{{range $i, $property := .Properties}}{{$name}}DBSchema.{{.Name}},
+		{{end}}
+	)
+	return
+}
+
+func Delete{{.Name}}(id uint) (err error) {
+	{{.VariableName}} := &{{.Name}}{
+		ID: id,
+	}
+	err = {{.VariableName}}.Delete(gGormDB)
+	return
+}

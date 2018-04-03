@@ -1,0 +1,23 @@
+package requests
+
+import "time"
+
+var _ = time.Time{}
+
+type Create{{.Name}} struct {
+  {{range $i, $property := .Properties}}{{.Name}} {{.Type}}
+	{{end}}
+}
+
+type Update{{.Name}} struct {
+  {{range $i, $property := .Properties}}{{.Name}} {{.Type}}
+	{{end}}
+}
+
+func (c *Create{{.Name}}) Valid() error {
+  return validate.Struct(c)
+}
+
+func (c *Update{{.Name}}) Valid() error {
+  return validate.Struct(c)
+}

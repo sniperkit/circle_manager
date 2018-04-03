@@ -1,0 +1,14 @@
+package responses
+
+import "time"
+
+type Response{{.Name}} struct {
+  ID          uint      
+	CreatedAt   time.Time 
+	UpdatedAt   time.Time 
+	Name        string    
+	Description string    
+  {{range $i, $property := .Properties}}{{.Name}} {{.Type}}
+	{{end}}
+}
+

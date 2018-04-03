@@ -1,0 +1,11 @@
+package admin
+
+import (
+	"github.com/olimgroup/makezip/models"
+	"github.com/qor/admin"
+)
+
+func setCircle(a *admin.Admin) {
+	{{range $i, $unit := .Units}}addResourceAndMenu(&models.{{.Name}}{}, "{{.MenuName}}", "{{.MenuGroup}}", anyoneAllow, -1)
+	{{end}}
+}
