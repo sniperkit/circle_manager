@@ -33,12 +33,17 @@ func runGen() error {
 		return err
 	}
 
-	cm, err := New(db)
-	if err != nil {
+	cm := &CircleManager{}
+
+	if err := db.AutoMigrate(
+		&CircleSet{},
+		&CircleUnit{},
+		&CircleUnitProperty{},
+	).Error; err != nil {
 		return err
 	}
 
-	if err := cm.GeneateSource(envs.CircleID); err != nil {
+	if err := cm.GeneateSource(db, envs.CircleID); err != nil {
 		return err
 	}
 	return nil

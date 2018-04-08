@@ -1,0 +1,19 @@
+package models
+
+func setTable() error {
+	return gGormDB.AutoMigrate(
+		// @manual start
+		&GithubCommit{},
+		&GithubRelease{},
+		&Event{},
+		&Employee{},
+		&KeyEvent{},
+		&Project{},
+		&Todo{},
+		&Team{},
+		// @manual end
+
+		// @auto start
+		// @auto end
+	).Error
+}

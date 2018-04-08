@@ -14,31 +14,20 @@ import (
 
 func init() {
 	ns := beego.NewNamespace("/v1",
-		beego.NSNamespace("/webhooks",
+		{{range $i, $unit := .Units}}
+		beego.NSNamespace("/{{.Url}}",
 			beego.NSInclude(
-				&controllers.WebhookController{},
+				&controllers.{{.Name}}Controller{},
 			),
-		),
-		beego.NSNamespace("/notifications",
+		),{{end}}
+		
+		{{range $i, $unit := .Units}}
+		beego.NSNamespace("/{{.Url}}",
 			beego.NSInclude(
-				&controllers.NotificationController{},
+				&controllers.{{.Name}}Controller{},
 			),
-		),
-		beego.NSNamespace("/notificationTypes",
-			beego.NSInclude(
-				&controllers.NotificationTypeController{},
-			),
-		),
-		beego.NSNamespace("/templates",
-			beego.NSInclude(
-				&controllers.TemplateController{},
-			),
-		),
-		beego.NSNamespace("/circles",
-			beego.NSInclude(
-				&controllers.CircleSetController{},
-			),
-		),
+		),{{end}}
+		
 		{{range $i, $unit := .Units}}
 		beego.NSNamespace("/{{.Url}}",
 			beego.NSInclude(
