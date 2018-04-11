@@ -8,16 +8,9 @@ import (
 )
 
 func TestGo(t *testing.T) {
-	cm := &CircleManager{
-		TemplateDir:     "templates",
-		ModelsDir:       "test/models",
-		TablesPath:      "test/models/tables.go",
-		RoutersPath:     "test/routers/router.go",
-		ControllersDir:  "test/controllers",
-		QORAdminPath:    "test/admin/circle.go",
-		RequestsBodyDir: "test/requests",
-		ResponseBodyDir: "test/responses",
-	}
+	cm := &CircleManager{}
+	base = "test"
+
 	cm.GeneateSourceBySet(&CircleSet{
 		Name: "Office1",
 		Units: []CircleUnit{
@@ -82,7 +75,7 @@ func makeCircleUnit(name string, menuName string, menuGroup string, properties .
 	return CircleUnit{
 		Name:         name,
 		VariableName: utils.MakeFirstLowerCase(name),
-		Url:          inflection.Plural(utils.MakeFirstLowerCase(name)),
+		URL:          inflection.Plural(utils.MakeFirstLowerCase(name)),
 		MenuName:     menuName,
 		MenuGroup:    menuGroup,
 		Properties:   properties,
