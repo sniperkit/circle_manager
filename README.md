@@ -73,3 +73,4 @@ cm := &CircleManager{}
 - github.com/jinzhu/gorm
 - github.com/alecthomas/template
 - github.com/reiver/go-stringcase
+- github.com/go-task/task

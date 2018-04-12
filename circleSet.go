@@ -1,6 +1,10 @@
 package circle_manager
 
-import "time"
+import (
+	"time"
+
+	stringcase "github.com/reiver/go-stringcase"
+)
 
 type CircleSet struct {
 	ID          uint         `description:""`
@@ -48,9 +52,8 @@ type CircleUnitProperty struct {
 	IsSystem     bool       `description:""`
 }
 
-func (*CircleUnit) GetVariableName(updateCu *CircleUnit) error {
-	//TODO: ....
-	return nil
+func (c *CircleUnit) GetVariableName() string {
+	return stringcase.ToCamelCase(c.Name)
 }
 
 func SaveCircleUnit(nameAndValue map[string]interface{}) error {

@@ -86,7 +86,7 @@ func (cm *CircleManager) GeneateSourceBySet(cs *CircleSet) error {
 		if circleTemplateSet.IsMulti {
 			for _, unit := range cs.Units {
 				if err := ExecuteTemplate(
-					filepath.Join(circleTemplateSet.SourcePath, fmt.Sprintf("%s.go", unit.Name)),
+					filepath.Join(circleTemplateSet.SourcePath, fmt.Sprintf("%s.go", unit.GetVariableName())),
 					circleTemplateSet.TemplatePath,
 					unit,
 				); err != nil {
