@@ -20,29 +20,29 @@ func init() {
 	registModel(&GithubRelease{})
 }
 
-func AddGithubRelease(githubRelease *GithubRelease) (id uint, err error) {
-	err = githubRelease.Create(gGormDB)
-	id = githubRelease.ID
+func AddGithubRelease(githubrelease *GithubRelease) (id uint, err error) {
+	err = githubrelease.Create(gGormDB)
+	id = githubrelease.ID
 	return
 }
 
-func GetGithubReleaseByID(id uint) (githubRelease *GithubRelease, err error) {
-	githubRelease = &GithubRelease{
+func GetGithubReleaseByID(id uint) (githubrelease *GithubRelease, err error) {
+	githubrelease = &GithubRelease{
 		ID: id,
 	}
 	err = NewGithubReleaseQuerySet(gGormDB).
-		One(githubRelease)
+		One(githubrelease)
 	return
 }
 
-func GetAllGithubRelease(queryPage *QueryPage) (githubReleases []GithubRelease, err error) {
+func GetAllGithubRelease(queryPage *QueryPage) (githubreleases []GithubRelease, err error) {
 	err = NewGithubReleaseQuerySet(gGormDB).
-		All(&githubReleases)
+		All(&githubreleases)
 	return
 }
 
-func UpdateGithubReleaseByID(githubRelease *GithubRelease) (err error) {
-	err = githubRelease.Update(gGormDB,
+func UpdateGithubReleaseByID(githubrelease *GithubRelease) (err error) {
+	err = githubrelease.Update(gGormDB,
 		GithubReleaseDBSchema.Name,
 		GithubReleaseDBSchema.Description,
 		GithubReleaseDBSchema.RepoName,
@@ -55,9 +55,9 @@ func UpdateGithubReleaseByID(githubRelease *GithubRelease) (err error) {
 }
 
 func DeleteGithubRelease(id uint) (err error) {
-	githubRelease := &GithubRelease{
+	githubrelease := &GithubRelease{
 		ID: id,
 	}
-	err = githubRelease.Delete(gGormDB)
+	err = githubrelease.Delete(gGormDB)
 	return
 }

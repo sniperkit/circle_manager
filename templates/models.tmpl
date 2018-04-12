@@ -17,29 +17,29 @@ func init() {
 	registModel(&{{.Name}}{})
 }
 
-func Add{{.Name}}({{.VariableName}} *{{.Name}}) (id uint, err error) {
-	err = {{.VariableName}}.Create(gGormDB)
-	id = {{.VariableName}}.ID
+func Add{{.Name}}({{.GetVariableName}} *{{.Name}}) (id uint, err error) {
+	err = {{.GetVariableName}}.Create(gGormDB)
+	id = {{.GetVariableName}}.ID
 	return
 }
 
-func Get{{.Name}}ByID(id uint) ({{.VariableName}} *{{.Name}}, err error) {
-	{{.VariableName}} = &{{.Name}}{
+func Get{{.Name}}ByID(id uint) ({{.GetVariableName}} *{{.Name}}, err error) {
+	{{.GetVariableName}} = &{{.Name}}{
 		ID: id,
 	}
 	err = New{{.Name}}QuerySet(gGormDB).
-		One({{.VariableName}})
+		One({{.GetVariableName}})
 	return
 }
 
-func GetAll{{.Name}}(queryPage *QueryPage) ({{.VariableName}}s []{{.Name}}, err error) {
+func GetAll{{.Name}}(queryPage *QueryPage) ({{.GetVariableName}}s []{{.Name}}, err error) {
 	err = New{{.Name}}QuerySet(gGormDB).
-		All(&{{.VariableName}}s)
+		All(&{{.GetVariableName}}s)
 	return
 }
 
-func Update{{.Name}}ByID({{.VariableName}} *{{.Name}}) (err error) {
-	err = {{.VariableName}}.Update(gGormDB,
+func Update{{.Name}}ByID({{.GetVariableName}} *{{.Name}}) (err error) {
+	err = {{.GetVariableName}}.Update(gGormDB,
 		{{.Name}}DBSchema.Name,
 		{{.Name}}DBSchema.Description,
 		{{$name := .Name}}{{range $i, $property := .Properties}}{{$name}}DBSchema.{{.Name}},
@@ -49,9 +49,9 @@ func Update{{.Name}}ByID({{.VariableName}} *{{.Name}}) (err error) {
 }
 
 func Delete{{.Name}}(id uint) (err error) {
-	{{.VariableName}} := &{{.Name}}{
+	{{.GetVariableName}} := &{{.Name}}{
 		ID: id,
 	}
-	err = {{.VariableName}}.Delete(gGormDB)
+	err = {{.GetVariableName}}.Delete(gGormDB)
 	return
 }

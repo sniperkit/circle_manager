@@ -86,12 +86,11 @@ func TestGo(t *testing.T) {
 
 func makeCircleUnit(name string, menuName string, menuGroup string, properties ...CircleUnitProperty) CircleUnit {
 	return CircleUnit{
-		Name:         name,
-		VariableName: utils.MakeFirstLowerCase(name),
-		URL:          inflection.Plural(utils.MakeFirstLowerCase(name)),
-		MenuName:     menuName,
-		MenuGroup:    menuGroup,
-		Properties:   properties,
+		Name:       name,
+		URL:        inflection.Plural(utils.MakeFirstLowerCase(name)),
+		MenuName:   menuName,
+		MenuGroup:  menuGroup,
+		Properties: properties,
 	}
 }
 

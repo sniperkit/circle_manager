@@ -95,7 +95,6 @@ func merge(baseCU CircleUnit, changeCU CircleUnit) CircleUnit {
 	changeCU.Name = setOnlyExistValue(changeCU.Name, baseCU.Name)
 	changeCU.Description = setOnlyExistValue(changeCU.Description, baseCU.Description)
 	changeCU.ControllerName = setOnlyExistValue(changeCU.ControllerName, baseCU.ControllerName)
-	changeCU.VariableName = setOnlyExistValue(changeCU.VariableName, baseCU.VariableName)
 	changeCU.Import = setOnlyExistValue(changeCU.Import, baseCU.Import)
 	changeCU.URL = setOnlyExistValue(changeCU.URL, baseCU.URL)
 	changeCU.MenuName = setOnlyExistValue(changeCU.MenuName, baseCU.MenuName)

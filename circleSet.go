@@ -34,7 +34,6 @@ type CircleUnit struct {
 	CircleSetID    uint                 ``
 	ControllerName string               ``
 	Properties     []CircleUnitProperty `description:""`
-	VariableName   string               `description:""`
 	Import         string               `description:""`
 	URL            string               `description:""`
 	MenuName       string               `description:""`
@@ -59,7 +58,7 @@ type CircleUnitProperty struct {
 	IsSystem     bool       `description:""`
 }
 
-func (c *CircleUnit) GetVariableName() string {
+func (c CircleUnit) GetVariableName() string {
 	return stringcase.ToCamelCase(c.Name)
 }
 

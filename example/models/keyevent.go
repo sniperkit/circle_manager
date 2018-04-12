@@ -16,29 +16,29 @@ func init() {
 	registModel(&KeyEvent{})
 }
 
-func AddKeyEvent(keyEvent *KeyEvent) (id uint, err error) {
-	err = keyEvent.Create(gGormDB)
-	id = keyEvent.ID
+func AddKeyEvent(keyevent *KeyEvent) (id uint, err error) {
+	err = keyevent.Create(gGormDB)
+	id = keyevent.ID
 	return
 }
 
-func GetKeyEventByID(id uint) (keyEvent *KeyEvent, err error) {
-	keyEvent = &KeyEvent{
+func GetKeyEventByID(id uint) (keyevent *KeyEvent, err error) {
+	keyevent = &KeyEvent{
 		ID: id,
 	}
 	err = NewKeyEventQuerySet(gGormDB).
-		One(keyEvent)
+		One(keyevent)
 	return
 }
 
-func GetAllKeyEvent(queryPage *QueryPage) (keyEvents []KeyEvent, err error) {
+func GetAllKeyEvent(queryPage *QueryPage) (keyevents []KeyEvent, err error) {
 	err = NewKeyEventQuerySet(gGormDB).
-		All(&keyEvents)
+		All(&keyevents)
 	return
 }
 
-func UpdateKeyEventByID(keyEvent *KeyEvent) (err error) {
-	err = keyEvent.Update(gGormDB,
+func UpdateKeyEventByID(keyevent *KeyEvent) (err error) {
+	err = keyevent.Update(gGormDB,
 		KeyEventDBSchema.Name,
 		KeyEventDBSchema.Description,
 		KeyEventDBSchema.EventDate,
@@ -47,9 +47,9 @@ func UpdateKeyEventByID(keyEvent *KeyEvent) (err error) {
 }
 
 func DeleteKeyEvent(id uint) (err error) {
-	keyEvent := &KeyEvent{
+	keyevent := &KeyEvent{
 		ID: id,
 	}
-	err = keyEvent.Delete(gGormDB)
+	err = keyevent.Delete(gGormDB)
 	return
 }
