@@ -9,7 +9,7 @@ type Employee struct {
 	UpdatedAt   time.Time `description:"수정일"`
 	Name        string    `description:"이름"`
 	Description string    `description:"설명" sql:"type:text"`
-	OriginName  string
+	OriginName  string    `description:""`
 }
 
 func init() {

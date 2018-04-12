@@ -9,10 +9,10 @@ type GithubCommit struct {
 	UpdatedAt   time.Time `description:"수정일"`
 	Name        string    `description:"이름"`
 	Description string    `description:"설명" sql:"type:text"`
-	RepoName    string
-	Comments    string
-	UserName    string
-	BranchName  string
+	RepoName    string    `description:""`
+	Comments    string    `description:""`
+	UserName    string    `description:""`
+	BranchName  string    `description:""`
 }
 
 func init() {

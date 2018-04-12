@@ -9,13 +9,13 @@ type Todo struct {
 	UpdatedAt   time.Time `description:"수정일"`
 	Name        string    `description:"이름"`
 	Description string    `description:"설명" sql:"type:text"`
-	ListID      string
-	ListName    string
-	Status      string
-	CardID      string
-	BoardID     string
-	BoardName   string
-	Source      string
+	ListID      string    `description:""`
+	ListName    string    `description:""`
+	Status      string    `description:""`
+	CardID      string    `description:""`
+	BoardID     string    `description:""`
+	BoardName   string    `description:""`
+	Source      string    `description:""`
 }
 
 func init() {

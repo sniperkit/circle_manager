@@ -9,7 +9,7 @@ type KeyEvent struct {
 	UpdatedAt   time.Time `description:"수정일"`
 	Name        string    `description:"이름"`
 	Description string    `description:"설명" sql:"type:text"`
-	EventDate   time.Time
+	EventDate   time.Time `description:""`
 }
 
 func init() {

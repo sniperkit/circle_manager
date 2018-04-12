@@ -9,11 +9,11 @@ type GithubRelease struct {
 	UpdatedAt   time.Time `description:"수정일"`
 	Name        string    `description:"이름"`
 	Description string    `description:"설명" sql:"type:text"`
-	RepoName    string
-	TagName     string
-	UserName    string
-	PreRelease  bool
-	Message     string
+	RepoName    string    `description:""`
+	TagName     string    `description:""`
+	UserName    string    `description:""`
+	PreRelease  bool      `description:""`
+	Message     string    `description:""`
 }
 
 func init() {

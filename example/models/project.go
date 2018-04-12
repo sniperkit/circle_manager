@@ -9,7 +9,7 @@ type Project struct {
 	UpdatedAt   time.Time `description:"수정일"`
 	Name        string    `description:"이름"`
 	Description string    `description:"설명" sql:"type:text"`
-	Status      string
+	Status      string    `description:""`
 }
 
 func init() {

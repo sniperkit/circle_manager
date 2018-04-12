@@ -13,8 +13,8 @@ type EventController struct {
 // Post ...
 // @Title Post
 // @Description create Event
-// @Param	body		body 	models.Event	true		"body for Event content"
-// @Success 201 {int} models.Event
+// @Param	body		body 	requests.CreateEvent	true		"body for Event content"
+// @Success 201 {int} responses.ResponseEvent
 // @Failure 403 body is empty
 // @router / [post]
 // @Security userAPIKey
@@ -26,7 +26,7 @@ func (c *EventController) Post() {
 // @Title Get One
 // @Description get Event by id
 // @Param	id		path 	string	true		"The key for staticblock"
-// @Success 200 {object} models.Event
+// @Success 200 {object} responses.Event
 // @Failure 403 :id is empty
 // @router /:id [get]
 // @Security userAPIKey
@@ -43,7 +43,7 @@ func (c *EventController) GetOne() {
 // @Param	order	query	string	false	"Order corresponding to each sortby field, if single value, apply to all sortby fields. e.g. desc,asc ..."
 // @Param	limit	query	string	false	"Limit the size of result set. Must be an integer"
 // @Param	offset	query	string	false	"Start position of result set. Must be an integer"
-// @Success 200 {object} []models.Event
+// @Success 200 {object} []responses.ResponseEvent
 // @Failure 403
 // @router / [get]
 // @Security userAPIKey
@@ -55,8 +55,8 @@ func (c *EventController) GetAll() {
 // @Title Put
 // @Description update the Event
 // @Param	id		path 	string	true		"The id you want to update"
-// @Param	body		body 	models.Event	true		"body for Event content"
-// @Success 200 {object} models.Event
+// @Param	body		body 	requests.UpdateEvent	true		"body for Event content"
+// @Success 200 {object} responses.ResponseEvent
 // @Failure 403 :id is not int
 // @router /:id [put]
 // @Security userAPIKey

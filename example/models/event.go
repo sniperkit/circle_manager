@@ -4,21 +4,21 @@ import "time"
 
 // gen:qs
 type Event struct {
-	ID           uint      `description:""`
-	CreatedAt    time.Time `description:"등록일"`
-	UpdatedAt    time.Time `description:"수정일"`
-	Name         string    `description:"이름"`
-	Description  string    `description:"설명" sql:"type:text"`
-	EventCreated time.Time
-	EventEnds    *time.Time
-	Summary      string
-	Organizer    string
-	EventUser    string
-	EventBegins  time.Time
-	EventID      string
-	Location     string
-	Source       string
-	Attendees    string
+	ID           uint       `description:""`
+	CreatedAt    time.Time  `description:"등록일"`
+	UpdatedAt    time.Time  `description:"수정일"`
+	Name         string     `description:"이름"`
+	Description  string     `description:"설명" sql:"type:text"`
+	EventCreated time.Time  `description:""`
+	EventEnds    *time.Time `description:""`
+	Summary      string     `description:""`
+	Organizer    string     `description:""`
+	EventUser    string     `description:""`
+	EventBegins  time.Time  `description:""`
+	EventID      string     `description:""`
+	Location     string     `description:""`
+	Source       string     `description:""`
+	Attendees    string     `description:""`
 }
 
 func init() {

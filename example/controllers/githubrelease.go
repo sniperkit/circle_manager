@@ -13,8 +13,8 @@ type GithubReleaseController struct {
 // Post ...
 // @Title Post
 // @Description create GithubRelease
-// @Param	body		body 	models.GithubRelease	true		"body for GithubRelease content"
-// @Success 201 {int} models.GithubRelease
+// @Param	body		body 	requests.CreateGithubRelease	true		"body for GithubRelease content"
+// @Success 201 {int} responses.ResponseGithubRelease
 // @Failure 403 body is empty
 // @router / [post]
 // @Security userAPIKey
@@ -26,7 +26,7 @@ func (c *GithubReleaseController) Post() {
 // @Title Get One
 // @Description get GithubRelease by id
 // @Param	id		path 	string	true		"The key for staticblock"
-// @Success 200 {object} models.GithubRelease
+// @Success 200 {object} responses.GithubRelease
 // @Failure 403 :id is empty
 // @router /:id [get]
 // @Security userAPIKey
@@ -43,7 +43,7 @@ func (c *GithubReleaseController) GetOne() {
 // @Param	order	query	string	false	"Order corresponding to each sortby field, if single value, apply to all sortby fields. e.g. desc,asc ..."
 // @Param	limit	query	string	false	"Limit the size of result set. Must be an integer"
 // @Param	offset	query	string	false	"Start position of result set. Must be an integer"
-// @Success 200 {object} []models.GithubRelease
+// @Success 200 {object} []responses.ResponseGithubRelease
 // @Failure 403
 // @router / [get]
 // @Security userAPIKey
@@ -55,8 +55,8 @@ func (c *GithubReleaseController) GetAll() {
 // @Title Put
 // @Description update the GithubRelease
 // @Param	id		path 	string	true		"The id you want to update"
-// @Param	body		body 	models.GithubRelease	true		"body for GithubRelease content"
-// @Success 200 {object} models.GithubRelease
+// @Param	body		body 	requests.UpdateGithubRelease	true		"body for GithubRelease content"
+// @Success 200 {object} responses.ResponseGithubRelease
 // @Failure 403 :id is not int
 // @router /:id [put]
 // @Security userAPIKey

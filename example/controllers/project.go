@@ -13,8 +13,8 @@ type ProjectController struct {
 // Post ...
 // @Title Post
 // @Description create Project
-// @Param	body		body 	models.Project	true		"body for Project content"
-// @Success 201 {int} models.Project
+// @Param	body		body 	requests.CreateProject	true		"body for Project content"
+// @Success 201 {int} responses.ResponseProject
 // @Failure 403 body is empty
 // @router / [post]
 // @Security userAPIKey
@@ -26,7 +26,7 @@ func (c *ProjectController) Post() {
 // @Title Get One
 // @Description get Project by id
 // @Param	id		path 	string	true		"The key for staticblock"
-// @Success 200 {object} models.Project
+// @Success 200 {object} responses.Project
 // @Failure 403 :id is empty
 // @router /:id [get]
 // @Security userAPIKey
@@ -43,7 +43,7 @@ func (c *ProjectController) GetOne() {
 // @Param	order	query	string	false	"Order corresponding to each sortby field, if single value, apply to all sortby fields. e.g. desc,asc ..."
 // @Param	limit	query	string	false	"Limit the size of result set. Must be an integer"
 // @Param	offset	query	string	false	"Start position of result set. Must be an integer"
-// @Success 200 {object} []models.Project
+// @Success 200 {object} []responses.ResponseProject
 // @Failure 403
 // @router / [get]
 // @Security userAPIKey
@@ -55,8 +55,8 @@ func (c *ProjectController) GetAll() {
 // @Title Put
 // @Description update the Project
 // @Param	id		path 	string	true		"The id you want to update"
-// @Param	body		body 	models.Project	true		"body for Project content"
-// @Success 200 {object} models.Project
+// @Param	body		body 	requests.UpdateProject	true		"body for Project content"
+// @Success 200 {object} responses.ResponseProject
 // @Failure 403 :id is not int
 // @router /:id [put]
 // @Security userAPIKey
