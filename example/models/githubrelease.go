@@ -2,8 +2,6 @@ package models
 
 import "time"
 
-var _ = time.Time{}
-
 // gen:qs
 type GithubRelease struct {
 	ID          uint      `description:""`
@@ -16,6 +14,10 @@ type GithubRelease struct {
 	UserName    string
 	PreRelease  bool
 	Message     string
+}
+
+func init() {
+	registModel(&GithubRelease{})
 }
 
 func AddGithubRelease(githubRelease *GithubRelease) (id uint, err error) {

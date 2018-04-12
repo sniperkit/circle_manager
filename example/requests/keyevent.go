@@ -2,8 +2,6 @@ package requests
 
 import "time"
 
-var _ = time.Time{}
-
 type CreateKeyEvent struct {
 	EventDate time.Time
 }

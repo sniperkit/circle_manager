@@ -14,6 +14,7 @@ func TestGo(t *testing.T) {
 
 	err := cm.GeneateSourceBySet(&CircleSet{
 		Name:                  "Office1",
+		Import:                "jungju/circle",
 		AppVersion:            "10.1.1",
 		AppTitle:              "Circle",
 		AppDescription:        "wow",
@@ -78,8 +79,9 @@ func TestGo(t *testing.T) {
 			),
 		},
 	})
-
-	assert.Nil(t, err)
+	if err != nil {
+		assert.Fail(t, err.Error())
+	}
 }
 
 func makeCircleUnit(name string, menuName string, menuGroup string, properties ...CircleUnitProperty) CircleUnit {

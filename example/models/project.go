@@ -2,8 +2,6 @@ package models
 
 import "time"
 
-var _ = time.Time{}
-
 // gen:qs
 type Project struct {
 	ID          uint      `description:""`
@@ -12,6 +10,10 @@ type Project struct {
 	Name        string    `description:"이름"`
 	Description string    `description:"설명" sql:"type:text"`
 	Status      string
+}
+
+func init() {
+	registModel(&Project{})
 }
 
 func AddProject(project *Project) (id uint, err error) {

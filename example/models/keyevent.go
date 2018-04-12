@@ -2,8 +2,6 @@ package models
 
 import "time"
 
-var _ = time.Time{}
-
 // gen:qs
 type KeyEvent struct {
 	ID          uint      `description:""`
@@ -12,6 +10,10 @@ type KeyEvent struct {
 	Name        string    `description:"이름"`
 	Description string    `description:"설명" sql:"type:text"`
 	EventDate   time.Time
+}
+
+func init() {
+	registModel(&KeyEvent{})
 }
 
 func AddKeyEvent(keyEvent *KeyEvent) (id uint, err error) {

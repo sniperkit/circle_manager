@@ -2,8 +2,6 @@ package requests
 
 import "time"
 
-var _ = time.Time{}
-
 type CreateEmployee struct {
 	OriginName string
 }

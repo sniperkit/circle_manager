@@ -2,8 +2,6 @@ package models
 
 import "time"
 
-var _ = time.Time{}
-
 // gen:qs
 type Employee struct {
 	ID          uint      `description:""`
@@ -12,6 +10,10 @@ type Employee struct {
 	Name        string    `description:"이름"`
 	Description string    `description:"설명" sql:"type:text"`
 	OriginName  string
+}
+
+func init() {
+	registModel(&Employee{})
 }
 
 func AddEmployee(employee *Employee) (id uint, err error) {

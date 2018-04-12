@@ -2,8 +2,6 @@ package requests
 
 import "time"
 
-var _ = time.Time{}
-
 type CreateTodo struct {
 	ListID    string
 	ListName  string

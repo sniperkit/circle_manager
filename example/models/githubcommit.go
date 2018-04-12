@@ -2,8 +2,6 @@ package models
 
 import "time"
 
-var _ = time.Time{}
-
 // gen:qs
 type GithubCommit struct {
 	ID          uint      `description:""`
@@ -15,6 +13,10 @@ type GithubCommit struct {
 	Comments    string
 	UserName    string
 	BranchName  string
+}
+
+func init() {
+	registModel(&GithubCommit{})
 }
 
 func AddGithubCommit(githubCommit *GithubCommit) (id uint, err error) {

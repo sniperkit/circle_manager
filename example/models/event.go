@@ -2,8 +2,6 @@ package models
 
 import "time"
 
-var _ = time.Time{}
-
 // gen:qs
 type Event struct {
 	ID           uint      `description:""`
@@ -21,6 +19,10 @@ type Event struct {
 	Location     string
 	Source       string
 	Attendees    string
+}
+
+func init() {
+	registModel(&Event{})
 }
 
 func AddEvent(event *Event) (id uint, err error) {

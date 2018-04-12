@@ -2,8 +2,6 @@ package requests
 
 import "time"
 
-var _ = time.Time{}
-
 type Create{{.Name}} struct {
   {{range $i, $property := .Properties}}{{.Name}} {{.Type}}
 	{{end}}

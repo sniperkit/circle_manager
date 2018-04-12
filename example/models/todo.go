@@ -2,8 +2,6 @@ package models
 
 import "time"
 
-var _ = time.Time{}
-
 // gen:qs
 type Todo struct {
 	ID          uint      `description:""`
@@ -18,6 +16,10 @@ type Todo struct {
 	BoardID     string
 	BoardName   string
 	Source      string
+}
+
+func init() {
+	registModel(&Todo{})
 }
 
 func AddTodo(todo *Todo) (id uint, err error) {

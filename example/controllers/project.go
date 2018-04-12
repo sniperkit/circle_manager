@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"github.com/jungju/circle/models"
-	"github.com/jungju/circle/requests"
+	"github.com//models"
+	"github.com//requests"
 )
 
 //  ProjectController operations for Project

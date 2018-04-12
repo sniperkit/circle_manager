@@ -94,7 +94,9 @@ func (cm *CircleManager) GeneateSourceBySet(cs *CircleSet) error {
 				}
 			}
 		} else {
-			ExecuteTemplate(circleTemplateSet.SourcePath, circleTemplateSet.TemplatePath, cs)
+			if err := ExecuteTemplate(circleTemplateSet.SourcePath, circleTemplateSet.TemplatePath, cs); err != nil {
+				return err
+			}
 		}
 	}
 

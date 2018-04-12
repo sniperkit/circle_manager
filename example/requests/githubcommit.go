@@ -2,8 +2,6 @@ package requests
 
 import "time"
 
-var _ = time.Time{}
-
 type CreateGithubCommit struct {
 	RepoName   string
 	Comments   string

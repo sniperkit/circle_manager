@@ -75,7 +75,7 @@ err := cm.GeneateSourceBySet(&CircleSet{
 ```
 
 ## library
-- beego
+- github.com/astaxie/beego
 - github.com/jinzhu/gorm
 - github.com/alecthomas/template
 - github.com/reiver/go-stringcase
