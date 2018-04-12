@@ -1,107 +1,132 @@
 package circle_manager
 
-import (
-	"bufio"
-	"os"
-	"strings"
-)
+// func (source *CircleTemplateSet) ExtractWithProperty() []CircleUnit {
+// 	err := filepath.Walk(source.SourcePath, func(path string, info os.FileInfo, err error) error {
+// 		fset := token.NewFileSet()
+// 		d, err := parser.ParseDir(fset, "./", nil, parser.ParseComments)
+// 		if err != nil {
+// 			return err
+// 		}
 
-func (source *CircleTemplateSet) Extract() []CircleUnit {
-	inFile, _ := os.Open(source.SourcePath)
-	defer inFile.Close()
-	scanner := bufio.NewScanner(inFile)
-	scanner.Split(bufio.ScanLines)
+// 		for k, f := range d {
+// 			fmt.Println("package", k)
+// 			p := doc.New(f, "./", 0)
 
-	lineIndex := 0
-	status := "meta"
-	extractUnits := []CircleUnit{}
-	for scanner.Scan() {
-		l := scanner.Text()
-		l = strings.TrimSpace(l)
+// 			for _, t := range p.Types {
+// 				if strings.Index(t.Doc, "qs") >= 0 {
+// 					// t.Name
+// 					// t.
+// 				}
+// 				// fmt.Println("  type", t.Name)
+// 				// fmt.Println("    docs:", t.Doc)
+// 			}
+// 		}
 
-		status = setStatus(status, l, "// circle:system:start", "circle:system")
-		status = setStatus(status, l, "// circle:manual:start", "circle:manual")
-		status = setStatus(status, l, "// circle:auto:start", "circle:auto")
+// 		return nil
+// 	})
+// 	if err != nil {
+// 		return nil
+// 	}
 
-		if source.SourceType == "router" {
-			curAppInfo = &AppInfo{}
-			curAppInfo.APIVersion = replaceAndTrim(curAppInfo.APIVersion, l, "// @APIVersion")
-			curAppInfo.Title = replaceAndTrim(curAppInfo.Title, l, "// @Title")
-			curAppInfo.Description = replaceAndTrim(curAppInfo.Description, l, "// @Description")
-			curAppInfo.Contact = replaceAndTrim(curAppInfo.Contact, l, "// @Contact")
-			curAppInfo.TermsOfServiceUrl = replaceAndTrim(curAppInfo.TermsOfServiceUrl, l, "// @TermsOfServiceUrl")
-			curAppInfo.License = replaceAndTrim(curAppInfo.License, l, "// @License")
-			curAppInfo.SecurityDefinition = replaceAndTrim(curAppInfo.SecurityDefinition, l, "// @SecurityDefinition")
-		}
+// 	return nil
+// }
 
-		unit := GenUnit(status, l)
-		extractUnits = append(extractUnits, *unit)
-		lineIndex++
-	}
-	return extractUnits
-}
+// func (source *CircleTemplateSet) Extract() []CircleUnit {
+// 	inFile, _ := os.Open(source.SourcePath)
+// 	defer inFile.Close()
+// 	scanner := bufio.NewScanner(inFile)
+// 	scanner.Split(bufio.ScanLines)
 
-func GenUnit(l, itemType string) *CircleUnit {
-	if targetLine(l, "addResourceAndMenu(") {
-		return &CircleUnit{
-			Name:      getWord(l, "addResourceAndMenu(&models.", "{}, \""),
-			MenuGroup: getWord(l, "\", \"", "\", anyoneAllow, -1)"),
-			MenuName:  getWord(l, "{}, \"", "\", \""),
-			IsSystem:  itemType == "system",
-			IsManual:  itemType == "manual",
-		}
-	} else if targetLine(l, "addResourceAndMenu(") {
-		return &CircleUnit{
-			Name: getWord(l, "addResourceAndMenu(&models.", "{}, \""),
-		}
-	} else if targetLine(l, "addResourceAndMenu(") {
-		return &CircleUnit{
-			Name: getWord(l, "addResourceAndMenu(&models.", "{}, \""),
-		}
-	} else if targetLine(l, "addResourceAndMenu(") {
-		return &CircleUnit{
-			Name: getWord(l, "addResourceAndMenu(&models.", "{}, \""),
-		}
-	} else if targetLine(l, "addResourceAndMenu(") {
-		return &CircleUnit{
-			Name: getWord(l, "addResourceAndMenu(&models.", "{}, \""),
-		}
-	} else if targetLine(l, "addResourceAndMenu(") {
-		return &CircleUnit{
-			ControllerName: getWord(l, "beego.NSInclude(&controllers.", "Controller{}))"),
-			URL:            getWord(l, "beego.NSNamespace(\"", "\", beego.NSInclude(&controllers."),
-		}
-	} else if targetLine(l, "addResourceAndMenu(") {
-		return &CircleUnit{
-			Name: getWord(l, "&", "{},"),
-		}
-	}
-	return nil
-}
+// 	lineIndex := 0
+// 	status := "meta"
+// 	extractUnits := []CircleUnit{}
+// 	for scanner.Scan() {
+// 		l := scanner.Text()
+// 		l = strings.TrimSpace(l)
 
-func replaceAndTrim(target string, s string, old string) string {
-	if target != "" || strings.Index(s, old) != 0 {
-		return target
-	}
+// 		status = setStatus(status, l, "// circle:system:start", "circle:system")
+// 		status = setStatus(status, l, "// circle:manual:start", "circle:manual")
+// 		status = setStatus(status, l, "// circle:auto:start", "circle:auto")
 
-	ret := strings.Replace(s, old, "", -1)
-	return strings.TrimSpace(ret)
-}
+// 		//if source.SourceType == "router" {
+// 		curAppInfo.APIVersion = replaceAndTrim(curAppInfo.APIVersion, l, "// @APIVersion")
+// 		curAppInfo.Title = replaceAndTrim(curAppInfo.Title, l, "// @Title")
+// 		curAppInfo.Description = replaceAndTrim(curAppInfo.Description, l, "// @Description")
+// 		curAppInfo.Contact = replaceAndTrim(curAppInfo.Contact, l, "// @Contact")
+// 		curAppInfo.TermsOfServiceUrl = replaceAndTrim(curAppInfo.TermsOfServiceUrl, l, "// @TermsOfServiceUrl")
+// 		curAppInfo.License = replaceAndTrim(curAppInfo.License, l, "// @License")
+// 		curAppInfo.SecurityDefinition = replaceAndTrim(curAppInfo.SecurityDefinition, l, "// @SecurityDefinition")
+// 		//}
 
-func getWord(s string, start string, end string) string {
-	startIndex := strings.Index(s, start) + len(start)
-	endIndex := strings.Index(s, end)
+// 		unit := GenUnit(status, l)
+// 		extractUnits = append(extractUnits, *unit)
 
-	return s[startIndex:endIndex]
-}
+// 		lineIndex++
+// 	}
+// 	return extractUnits
+// }
 
-func setStatus(rawSatatus, l, targetLine, newStatus string) string {
-	if strings.Index(l, targetLine) == 0 {
-		return strings.Replace(newStatus, "circle:", "", -1)
-	}
-	return rawSatatus
-}
+// func GenUnit(l, itemType string) *CircleUnit {
+// 	if targetLine(l, "addResourceAndMenu(") {
+// 		return &CircleUnit{
+// 			Name:      getWord(l, "addResourceAndMenu(&models.", "{}, \""),
+// 			MenuGroup: getWord(l, "\", \"", "\", anyoneAllow, -1)"),
+// 			MenuName:  getWord(l, "{}, \"", "\", \""),
+// 			IsSystem:  itemType == "system",
+// 			IsManual:  itemType == "manual",
+// 		}
+// 	} else if targetLine(l, "addResourceAndMenu(") {
+// 		return &CircleUnit{
+// 			Name: getWord(l, "addResourceAndMenu(&models.", "{}, \""),
+// 		}
+// 	} else if targetLine(l, "addResourceAndMenu(") {
+// 		return &CircleUnit{
+// 			Name: getWord(l, "addResourceAndMenu(&models.", "{}, \""),
+// 		}
+// 	} else if targetLine(l, "addResourceAndMenu(") {
+// 		return &CircleUnit{
+// 			Name: getWord(l, "addResourceAndMenu(&models.", "{}, \""),
+// 		}
+// 	} else if targetLine(l, "addResourceAndMenu(") {
+// 		return &CircleUnit{
+// 			Name: getWord(l, "addResourceAndMenu(&models.", "{}, \""),
+// 		}
+// 	} else if targetLine(l, "addResourceAndMenu(") {
+// 		return &CircleUnit{
+// 			ControllerName: getWord(l, "beego.NSInclude(&controllers.", "Controller{}))"),
+// 			URL:            getWord(l, "beego.NSNamespace(\"", "\", beego.NSInclude(&controllers."),
+// 		}
+// 	} else if targetLine(l, "addResourceAndMenu(") {
+// 		return &CircleUnit{
+// 			Name: getWord(l, "&", "{},"),
+// 		}
+// 	}
+// 	return nil
+// }
 
-func targetLine(l, target string) bool {
-	return strings.Index(l, target) == 0
-}
+// func replaceAndTrim(target string, s string, old string) string {
+// 	if target != "" || strings.Index(s, old) != 0 {
+// 		return target
+// 	}
+
+// 	ret := strings.Replace(s, old, "", -1)
+// 	return strings.TrimSpace(ret)
+// }
+
+// func getWord(s string, start string, end string) string {
+// 	startIndex := strings.Index(s, start) + len(start)
+// 	endIndex := strings.Index(s, end)
+
+// 	return s[startIndex:endIndex]
+// }
+
+// func setStatus(rawSatatus, l, targetLine, newStatus string) string {
+// 	if strings.Index(l, targetLine) == 0 {
+// 		return strings.Replace(newStatus, "circle:", "", -1)
+// 	}
+// 	return rawSatatus
+// }
+
+// func targetLine(l, target string) bool {
+// 	return strings.Index(l, target) == 0
+// }

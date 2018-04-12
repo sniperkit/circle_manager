@@ -48,10 +48,10 @@ type CircleUnitProperty struct {
 	IsSystem     bool       `description:""`
 }
 
-// func SaveCircleUnit(updateCu *CircleUnit) error {
-// 	//TODO: ....
-// 	return nil
-// }
+func (*CircleUnit) GetVariableName(updateCu *CircleUnit) error {
+	//TODO: ....
+	return nil
+}
 
 func SaveCircleUnit(nameAndValue map[string]interface{}) error {
 	//TODO: ....

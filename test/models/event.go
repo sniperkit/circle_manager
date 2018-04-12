@@ -6,22 +6,21 @@ var _ = time.Time{}
 
 // gen:qs
 type Event struct {
-	ID          uint      `description:""`
-	CreatedAt   time.Time `description:"등록일"`
-	UpdatedAt   time.Time `description:"수정일"`
-	Name        string    `description:"이름"`
-	Description string    `description:"설명" sql:"type:text"`
-    EventCreated time.Time
-	EventEnds *time.Time
-	Summary string
-	Organizer string
-	EventUser string
-	EventBegins time.Time
-	EventID string
-	Location string
-	Source string
-	Attendees string
-	
+	ID           uint      `description:""`
+	CreatedAt    time.Time `description:"등록일"`
+	UpdatedAt    time.Time `description:"수정일"`
+	Name         string    `description:"이름"`
+	Description  string    `description:"설명" sql:"type:text"`
+	EventCreated time.Time
+	EventEnds    *time.Time
+	Summary      string
+	Organizer    string
+	EventUser    string
+	EventBegins  time.Time
+	EventID      string
+	Location     string
+	Source       string
+	Attendees    string
 }
 
 func AddEvent(event *Event) (id uint, err error) {
@@ -59,7 +58,6 @@ func UpdateEventByID(event *Event) (err error) {
 		EventDBSchema.Location,
 		EventDBSchema.Source,
 		EventDBSchema.Attendees,
-		
 	)
 	return
 }
@@ -69,8 +67,5 @@ func DeleteEvent(id uint) (err error) {
 		ID: id,
 	}
 	err = event.Delete(gGormDB)
-	return
-}
-ent.Delete(gGormDB)
 	return
 }

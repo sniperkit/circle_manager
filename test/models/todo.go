@@ -11,14 +11,13 @@ type Todo struct {
 	UpdatedAt   time.Time `description:"수정일"`
 	Name        string    `description:"이름"`
 	Description string    `description:"설명" sql:"type:text"`
-    ListID string
-	ListName string
-	Status string
-	CardID string
-	BoardID string
-	BoardName string
-	Source string
-	
+	ListID      string
+	ListName    string
+	Status      string
+	CardID      string
+	BoardID     string
+	BoardName   string
+	Source      string
 }
 
 func AddTodo(todo *Todo) (id uint, err error) {
@@ -53,7 +52,6 @@ func UpdateTodoByID(todo *Todo) (err error) {
 		TodoDBSchema.BoardID,
 		TodoDBSchema.BoardName,
 		TodoDBSchema.Source,
-		
 	)
 	return
 }
@@ -63,8 +61,5 @@ func DeleteTodo(id uint) (err error) {
 		ID: id,
 	}
 	err = todo.Delete(gGormDB)
-	return
-}
-e(gGormDB)
 	return
 }

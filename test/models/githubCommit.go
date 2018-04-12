@@ -11,11 +11,10 @@ type GithubCommit struct {
 	UpdatedAt   time.Time `description:"수정일"`
 	Name        string    `description:"이름"`
 	Description string    `description:"설명" sql:"type:text"`
-    RepoName string
-	Comments string
-	UserName string
-	BranchName string
-	
+	RepoName    string
+	Comments    string
+	UserName    string
+	BranchName  string
 }
 
 func AddGithubCommit(githubCommit *GithubCommit) (id uint, err error) {
@@ -47,7 +46,6 @@ func UpdateGithubCommitByID(githubCommit *GithubCommit) (err error) {
 		GithubCommitDBSchema.Comments,
 		GithubCommitDBSchema.UserName,
 		GithubCommitDBSchema.BranchName,
-		
 	)
 	return
 }
@@ -58,5 +56,4 @@ func DeleteGithubCommit(id uint) (err error) {
 	}
 	err = githubCommit.Delete(gGormDB)
 	return
-}
 }

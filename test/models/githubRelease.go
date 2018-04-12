@@ -11,12 +11,11 @@ type GithubRelease struct {
 	UpdatedAt   time.Time `description:"수정일"`
 	Name        string    `description:"이름"`
 	Description string    `description:"설명" sql:"type:text"`
-    RepoName string
-	TagName string
-	UserName string
-	PreRelease bool
-	Message string
-	
+	RepoName    string
+	TagName     string
+	UserName    string
+	PreRelease  bool
+	Message     string
 }
 
 func AddGithubRelease(githubRelease *GithubRelease) (id uint, err error) {
@@ -49,7 +48,6 @@ func UpdateGithubReleaseByID(githubRelease *GithubRelease) (err error) {
 		GithubReleaseDBSchema.UserName,
 		GithubReleaseDBSchema.PreRelease,
 		GithubReleaseDBSchema.Message,
-		
 	)
 	return
 }
@@ -60,6 +58,4 @@ func DeleteGithubRelease(id uint) (err error) {
 	}
 	err = githubRelease.Delete(gGormDB)
 	return
-}
-turn
 }

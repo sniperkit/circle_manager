@@ -1,6 +1,7 @@
 package circle_manager
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -10,55 +11,60 @@ import (
 )
 
 var (
-	curAppInfo *AppInfo
-	base       string
+	basePath string
 )
 
 type CircleManager struct {
-	ByType              string
-	ModelsDir           string
-	ControllersDir      string
-	RequestsBodyDir     string
-	ResponseBodyDir     string
-	TablesTemplateSet   CircleTemplateSet
-	RouterTemplateSet   CircleTemplateSet
-	QORAdminTemplateSet CircleTemplateSet
+	ByType          string
+	MapTemplateSets map[string]*CircleTemplateSet
 }
 
 type CircleTemplateSet struct {
 	SourceType   string
 	SourcePath   string
 	TemplatePath string
+	IsMulti      bool
 }
 
-type AppInfo struct {
-	APIVersion         string
-	Title              string
-	Description        string
-	Contact            string
-	TermsOfServiceUrl  string
-	License            string
-	SecurityDefinition string
+func (cm *CircleManager) GetSourcePath(sourceType string) string {
+	if _, ok := cm.MapTemplateSets[sourceType]; !ok {
+		return ""
+	}
+	return cm.MapTemplateSets[sourceType].SourcePath
+}
+
+func (cm *CircleManager) GetTemplatePath(sourceType string) string {
+	if _, ok := cm.MapTemplateSets[sourceType]; !ok {
+		return ""
+	}
+	return cm.MapTemplateSets[sourceType].TemplatePath
 }
 
 func (cm *CircleManager) prepare() {
 	sd := func(raw, def string) string {
 		if raw == "" {
-			return filepath.Join("/", base, def)
+			return def
 		}
-		return filepath.Join("/", base, raw)
+		return raw
 	}
 
-	cm.ModelsDir = sd(cm.ModelsDir, "/models")
-	cm.ControllersDir = sd(cm.ControllersDir, "/controllers")
-	cm.RequestsBodyDir = sd(cm.RequestsBodyDir, "/requests")
-	cm.ResponseBodyDir = sd(cm.ResponseBodyDir, "/responses")
-	cm.RouterTemplateSet.SourceType = "router"
-	cm.RouterTemplateSet.SourcePath = sd(cm.RouterTemplateSet.SourcePath, "/routers/router.go")
-	cm.RouterTemplateSet.TemplatePath = sd(cm.RouterTemplateSet.TemplatePath, "/templates/router.tmpl")
-	cm.QORAdminTemplateSet.SourceType = "admin"
-	cm.QORAdminTemplateSet.SourcePath = sd(cm.QORAdminTemplateSet.SourcePath, "/admin/circle.go")
-	cm.QORAdminTemplateSet.TemplatePath = sd(cm.QORAdminTemplateSet.TemplatePath, "/templates/circle.tmpl")
+	setTemplateSet := func(sourceType, sourcePath, templatePath string, isMulti bool) {
+		if cm.MapTemplateSets == nil {
+			cm.MapTemplateSets = map[string]*CircleTemplateSet{}
+		}
+		cm.MapTemplateSets[sourceType] = &CircleTemplateSet{
+			SourcePath:   sd(cm.GetSourcePath(sourceType), filepath.Join(basePath, sourcePath)),
+			TemplatePath: sd(cm.GetTemplatePath(sourceType), templatePath),
+			IsMulti:      isMulti,
+		}
+	}
+
+	setTemplateSet("router", "routers/router.go", "templates/router.tmpl", false)
+	setTemplateSet("admin", "admin/circle.go", "templates/admin.tmpl", false)
+	setTemplateSet("models", "models", "templates/models.tmpl", true)
+	setTemplateSet("controllers", "controllers", "templates/controllers.tmpl", true)
+	setTemplateSet("requests", "requests", "templates/requests.tmpl", true)
+	setTemplateSet("responses", "responses", "templates/responses.tmpl", true)
 }
 
 var circleSet *CircleSet
@@ -76,99 +82,23 @@ func (cm *CircleManager) GeneateSourceBySet(cs *CircleSet) error {
 	circleSet = cs
 	cm.prepare()
 
-	mapDBUnit := map[string]CircleUnit{}
-	for _, dbUnit := range cs.Units {
-		mapDBUnit[dbUnit.Name] = dbUnit
-	}
-
-	newCS := &CircleSet{
-		Units: []CircleUnit{},
-	}
-	if cm.ByType == "db" {
-
-	} else if cm.ByType == "source" {
-
-	}
-
-	mapUpdateUnit := map[string]CircleUnit{}
-	for _, circleTemplateSet := range []CircleTemplateSet{
-		cm.QORAdminTemplateSet,
-		cm.RouterTemplateSet,
-	} {
-		for _, sourceUnit := range circleTemplateSet.Extract() {
-			var newUnit CircleUnit
-			if dbUnit, ok := mapDBUnit[sourceUnit.Name]; ok {
-				if cm.ByType == "db" {
-					newUnit = merge(dbUnit, sourceUnit)
-				} else if cm.ByType == "source" {
-					newUnit = merge(sourceUnit, dbUnit)
+	for _, circleTemplateSet := range cm.MapTemplateSets {
+		if circleTemplateSet.IsMulti {
+			for _, unit := range cs.Units {
+				if err := ExecuteTemplate(
+					filepath.Join(circleTemplateSet.SourcePath, fmt.Sprintf("%s.go", unit.Name)),
+					circleTemplateSet.TemplatePath,
+					unit,
+				); err != nil {
+					return err
 				}
-			} else {
-				newUnit = sourceUnit
 			}
-			mapUpdateUnit[newUnit.Name] = newUnit
+		} else {
+			ExecuteTemplate(circleTemplateSet.SourcePath, circleTemplateSet.TemplatePath, cs)
 		}
-
 	}
-
-	// for _, dbUnit := range cs.Units {
-	// 	if sourceUnit, ok := mapSourceUnit[dbUnit.Name]; ok {
-	// 		if cm.ByType == "db" {
-	// 			mapSourceUnit[dbUnit.Name] = merge(dbUnit, sourceUnit)
-	// 		} else if cm.ByType == "source" {
-	// 			mapSourceUnit[dbUnit.Name] = merge(sourceUnit, dbUnit)
-	// 		}
-	// 	}
-	// }
-
-	// newCS := &CircleSet{
-	// 	Units: []CircleUnit{},
-	// }
-	// if cm.ByType == "db" {
-
-	// } else if cm.ByType == "source" {
-
-	// }
-
-	for _, unit := range mapSourceUnit {
-		newCS.Units = append(newCS.Units, unit)
-	}
-
-	ExecuteTemplate()
-
-	// gen(cm.ModelsDir, makePath("models.tmpl"), cs)
-	// gen(cm.ControllersDir, makePath("controllers.tmpl"), cs)
-	// gen(cm.RequestsBodyDir, makePath("requests.tmpl"), cs)
-	// gen(cm.ResponseBodyDir, makePath("responses.tmpl"), cs)
 
 	return nil
-}
-
-func merge(baseCU CircleUnit, changeCU CircleUnit) CircleUnit {
-	setOnlyExistValue := func(baseString, newValue string) string {
-		if newValue == "" {
-			return baseString
-		}
-		return newValue
-	}
-	setOnlyExistValueForBool := func(baseString, newValue bool) bool {
-		if newValue == false {
-			return baseString
-		}
-		return newValue
-	}
-	changeCU.Name = setOnlyExistValue(changeCU.Name, baseCU.Name)
-	changeCU.Description = setOnlyExistValue(changeCU.Description, baseCU.Description)
-	changeCU.ControllerName = setOnlyExistValue(changeCU.ControllerName, baseCU.ControllerName)
-	changeCU.VariableName = setOnlyExistValue(changeCU.VariableName, baseCU.VariableName)
-	changeCU.Import = setOnlyExistValue(changeCU.Import, baseCU.Import)
-	changeCU.URL = setOnlyExistValue(changeCU.URL, baseCU.URL)
-	changeCU.MenuName = setOnlyExistValue(changeCU.MenuName, baseCU.MenuName)
-	changeCU.MenuGroup = setOnlyExistValue(changeCU.MenuGroup, baseCU.MenuGroup)
-	changeCU.IsEnable = setOnlyExistValueForBool(changeCU.IsEnable, baseCU.IsEnable)
-	changeCU.IsManual = setOnlyExistValueForBool(changeCU.IsManual, baseCU.IsManual)
-	changeCU.IsSystem = setOnlyExistValueForBool(changeCU.IsSystem, baseCU.IsSystem)
-	return changeCU
 }
 
 func getCircleSetByID(db *gorm.DB, id uint) (circleSet *CircleSet, err error) {

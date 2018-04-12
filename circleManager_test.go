@@ -5,13 +5,14 @@ import (
 
 	"github.com/jinzhu/inflection"
 	"github.com/jungju/circle/utils"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGo(t *testing.T) {
 	cm := &CircleManager{}
-	base = "test"
+	basePath = "test"
 
-	cm.GeneateSourceBySet(&CircleSet{
+	err := cm.GeneateSourceBySet(&CircleSet{
 		Name: "Office1",
 		Units: []CircleUnit{
 			makeCircleUnit(
@@ -69,6 +70,8 @@ func TestGo(t *testing.T) {
 			),
 		},
 	})
+
+	assert.Nil(t, err)
 }
 
 func makeCircleUnit(name string, menuName string, menuGroup string, properties ...CircleUnitProperty) CircleUnit {
