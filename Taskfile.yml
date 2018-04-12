@@ -8,7 +8,7 @@ test:
 clean:
   cmds:
     - rm -rf test/admin/*
-    - rm -rf test/controller/*
+    - rm -rf test/controllers/*
     - rm -rf test/models/*
     - rm -rf test/requests/*
     - rm -rf test/responses/*

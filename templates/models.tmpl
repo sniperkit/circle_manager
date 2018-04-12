@@ -15,6 +15,10 @@ type {{.Name}} struct {
 	{{end}}
 }
 
+func init() {
+	registModel(&{{.Name}}{})
+}
+
 func Add{{.Name}}({{.VariableName}} *{{.Name}}) (id uint, err error) {
 	err = {{.VariableName}}.Create(gGormDB)
 	id = {{.VariableName}}.ID

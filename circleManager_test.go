@@ -10,10 +10,18 @@ import (
 
 func TestGo(t *testing.T) {
 	cm := &CircleManager{}
-	basePath = "test"
+	basePath = "example"
 
 	err := cm.GeneateSourceBySet(&CircleSet{
-		Name: "Office1",
+		Name:                  "Office1",
+		AppVersion:            "10.1.1",
+		AppTitle:              "Circle",
+		AppDescription:        "wow",
+		AppContact:            "myapp@myapp.com",
+		AppTermsOfServiceUrl:  "http://circle.circle",
+		AppLicense:            "MIT",
+		AppSecurityDefinition: `"userAPIKey apiKey X-USER-AUTH-TOKEN header "I love auto-generated docs"`,
+
 		Units: []CircleUnit{
 			makeCircleUnit(
 				"GithubCommit", "Commits", "이벤트관리",

@@ -1,10 +1,10 @@
-// @APIVersion 1.0.0
-// @Title Circle API
-// @Description Circle API
-// @Contact leejungju.go@gmail.com
-// @TermsOfServiceUrl http://circle.com
-// @License Private
-// @SecurityDefinition userAPIKey apiKey X-USER-AUTH-TOKEN header "I love auto-generated docs
+// @APIVersion 10.1.1
+// @Title Circle
+// @Description wow
+// @Contact myapp@myapp.com
+// @TermsOfServiceUrl http://circle.circle
+// @License MIT
+// @SecurityDefinition "userAPIKey apiKey X-USER-AUTH-TOKEN header "I love auto-generated docs"
 package routers
 
 import (
