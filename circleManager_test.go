@@ -13,7 +13,7 @@ import (
 func TestGo(t *testing.T) {
 	cm := &CircleManager{}
 	envs = &Envs{
-		RootPath: "example",
+		RootPath: ".example",
 	}
 
 	err := cm.GeneateSourceBySet(&modules.CircleSet{
