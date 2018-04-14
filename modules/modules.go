@@ -2,6 +2,8 @@ package modules
 
 import (
 	"errors"
+
+	"github.com/jinzhu/gorm"
 )
 
 var (
@@ -15,3 +17,18 @@ var (
 	ErrInvalidToken        = errors.New("ErrInvalidToken")
 	ErrUnknown             = errors.New("Unknown")
 )
+
+func Initzation(db *gorm.DB) error {
+	gGormDB = db
+	if err := gGormDB.AutoMigrate(
+		&Notification{},
+		&NotificationType{},
+
+		&CircleSet{},
+		&CircleUnit{},
+		&CircleUnitProperty{},
+	).Error; err != nil {
+		return err
+	}
+	return nil
+}
