@@ -82,25 +82,25 @@ package main
 // func merge(baseCU modules.CircleUnit, changeCU modules.CircleUnit) modules.CircleUnit {
 // 	setOnlyExistValue := func(baseString, newValue string) string {
 // 		if newValue == "" {
-// 			return baseString
+// 			return BaseString
 // 		}
 // 		return newValue
 // 	}
 // 	setOnlyExistValueForBool := func(baseString, newValue bool) bool {
 // 		if newValue == false {
-// 			return baseString
+// 			return BaseString
 // 		}
 // 		return newValue
 // 	}
-// 	changeCU.Name = setOnlyExistValue(changeCU.Name, baseCU.Name)
-// 	changeCU.Description = setOnlyExistValue(changeCU.Description, baseCU.Description)
-// 	changeCU.ControllerName = setOnlyExistValue(changeCU.ControllerName, baseCU.ControllerName)
-// 	changeCU.Import = setOnlyExistValue(changeCU.Import, baseCU.Import)
-// 	changeCU.URL = setOnlyExistValue(changeCU.URL, baseCU.URL)
-// 	changeCU.MenuName = setOnlyExistValue(changeCU.MenuName, baseCU.MenuName)
-// 	changeCU.MenuGroup = setOnlyExistValue(changeCU.MenuGroup, baseCU.MenuGroup)
-// 	changeCU.IsEnable = setOnlyExistValueForBool(changeCU.IsEnable, baseCU.IsEnable)
-// 	changeCU.IsManual = setOnlyExistValueForBool(changeCU.IsManual, baseCU.IsManual)
-// 	changeCU.IsSystem = setOnlyExistValueForBool(changeCU.IsSystem, baseCU.IsSystem)
+// 	changeCU.Name = setOnlyExistValue(changeCU.Name, BaseCU.Name)
+// 	changeCU.Description = setOnlyExistValue(changeCU.Description, BaseCU.Description)
+// 	changeCU.ControllerName = setOnlyExistValue(changeCU.ControllerName, BaseCU.ControllerName)
+// 	changeCU.Import = setOnlyExistValue(changeCU.Import, BaseCU.Import)
+// 	changeCU.URL = setOnlyExistValue(changeCU.URL, BaseCU.URL)
+// 	changeCU.MenuName = setOnlyExistValue(changeCU.MenuName, BaseCU.MenuName)
+// 	changeCU.MenuGroup = setOnlyExistValue(changeCU.MenuGroup, BaseCU.MenuGroup)
+// 	changeCU.IsEnable = setOnlyExistValueForBool(changeCU.IsEnable, BaseCU.IsEnable)
+// 	changeCU.IsManual = setOnlyExistValueForBool(changeCU.IsManual, BaseCU.IsManual)
+// 	changeCU.IsSystem = setOnlyExistValueForBool(changeCU.IsSystem, BaseCU.IsSystem)
 // 	return changeCU
 // }

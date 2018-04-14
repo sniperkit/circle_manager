@@ -24,7 +24,7 @@ type BaseCircleController struct {
 	BaseController
 }
 
-func (c *BaseCircleController) basePost(reqBody RequestBody, object interface{}) {
+func (c *BaseCircleController) BasePost(reqBody RequestBody, object interface{}) {
 	c.setRequestDataAndValid(reqBody)
 
 	copier.Copy(object, reqBody)
@@ -35,7 +35,7 @@ func (c *BaseCircleController) basePost(reqBody RequestBody, object interface{})
 	c.Success(http.StatusCreated, object)
 }
 
-func (c *BaseCircleController) baseGetOne(object interface{}) {
+func (c *BaseCircleController) BaseGetOne(object interface{}) {
 	id := c.GetParamID()
 
 	if err := GetItemByID(id, object); err != nil {
@@ -47,7 +47,7 @@ func (c *BaseCircleController) baseGetOne(object interface{}) {
 	c.Success(http.StatusOK, object)
 }
 
-func (c *BaseCircleController) baseGetAll(objects interface{}) {
+func (c *BaseCircleController) BaseGetAll(objects interface{}) {
 	reqPage, err := c.getQueryPage()
 	if err != nil {
 		c.ErrorAbort(400, err)
@@ -60,7 +60,7 @@ func (c *BaseCircleController) baseGetAll(objects interface{}) {
 	c.Success(http.StatusOK, objects)
 }
 
-func (c *BaseCircleController) basePut(reqBody RequestBody, object interface{}) {
+func (c *BaseCircleController) BasePut(reqBody RequestBody, object interface{}) {
 	id := c.GetParamID()
 	c.setRequestDataAndValid(reqBody)
 
@@ -80,7 +80,7 @@ func (c *BaseCircleController) basePut(reqBody RequestBody, object interface{}) 
 	c.Success(http.StatusOK, object)
 }
 
-func (c *BaseCircleController) baseDelete(object interface{}) {
+func (c *BaseCircleController) BaseDelete(object interface{}) {
 	id := c.GetParamID()
 
 	if err := GetItemByID(id, object); err != nil {
