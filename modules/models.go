@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/jungju/gorm"
+	"github.com/jinzhu/gorm"
 	validator "gopkg.in/go-playground/validator.v9"
 )
 
