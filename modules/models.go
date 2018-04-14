@@ -197,8 +197,6 @@ func ResetTable(tableName string) error {
 	return gGormDB.Exec(fmt.Sprintf("ALTER TABLE %s AUTO_INCREMENT = 1", tableName)).Error
 }
 
-func _er(err error) {
-	if err != nil {
-		panic("테스트 파일 넣는중 에러발생 : " + err.Error())
-	}
+func DeleteItemByColName(tableName string, colName string, value string) error {
+	return gGormDB.Table(tableName).Where(fmt.Sprintf("%s = ?", colName), value).Delete(nil).Error
 }
