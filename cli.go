@@ -58,13 +58,13 @@ func main() {
 	app.Usage = "for NO-CODE Platform"
 	app.Version = "0.0.1"
 	app.Flags = []cli.Flag{
-		cli.StringFlag{Name: "dbHost", Value: "localhost", Usage: "DB Host"},
-		cli.StringFlag{Name: "dbPort", Value: "3306", Usage: "DB Port"},
-		cli.StringFlag{Name: "dbName", Value: "circle", Usage: "DB Name"},
-		cli.StringFlag{Name: "dbUser", Value: "root", Usage: "DB User"},
-		cli.StringFlag{Name: "dbPassword", Value: "password", Usage: "DB Password"},
-		cli.StringFlag{Name: "circleID", Value: "1", Usage: "CircleID"},
-		cli.StringFlag{Name: "rootPath", Value: "./", Usage: "RootPath"},
+		cli.StringFlag{Name: "dbHost", Value: "localhost", Usage: "DB Host", EnvVar: "DB_HOST"},
+		cli.IntFlag{Name: "dbPort", Value: 3306, Usage: "DB Port", EnvVar: "DB_PORT"},
+		cli.StringFlag{Name: "dbName", Value: "circle", Usage: "DB Name", EnvVar: "DB_NAME"},
+		cli.StringFlag{Name: "dbUser", Value: "root", Usage: "DB User", EnvVar: "DB_USER"},
+		cli.StringFlag{Name: "dbPassword", Value: "password", Usage: "DB Password", EnvVar: "DB_PASSWORD"},
+		cli.UintFlag{Name: "circleID", Value: 1, Usage: "CircleID", EnvVar: "CIRCLE_ID"},
+		cli.StringFlag{Name: "rootPath", Value: "./", Usage: "RootPath", EnvVar: "ROOT_PATH"},
 	}
 	app.Action = func(c *cli.Context) error {
 		envs = &Envs{
