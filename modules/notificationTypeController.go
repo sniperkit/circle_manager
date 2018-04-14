@@ -1,9 +1,5 @@
 package modules
 
-import (
-	"github.com/jungju/circle/requests"
-)
-
 //  NotificationTypeController operations for NotificationType
 type NotificationTypeController struct {
 	BaseCircleController
@@ -18,7 +14,7 @@ type NotificationTypeController struct {
 // @router / [post]
 // @Security userAPIKey
 func (c *NotificationTypeController) Post() {
-	c.BasePost(&requests.CreateNotificationType{}, &NotificationType{})
+	c.BasePost(&CreateNotificationType{}, &NotificationType{})
 }
 
 // GetOne ...
@@ -60,7 +56,7 @@ func (c *NotificationTypeController) GetAll() {
 // @router /:id [put]
 // @Security userAPIKey
 func (c *NotificationTypeController) Put() {
-	c.BasePut(&requests.UpdateNotificationType{}, &NotificationType{})
+	c.BasePut(&UpdateNotificationType{}, &NotificationType{})
 }
 
 // Delete ...
@@ -73,4 +69,74 @@ func (c *NotificationTypeController) Put() {
 // @Security userAPIKey
 func (c *NotificationTypeController) Delete() {
 	c.BaseDelete(&NotificationType{})
+}
+
+type CreateNotificationType struct {
+	Name                            string
+	Description                     string
+	ManualSend                      bool
+	TargetObject                    string
+	TargetAction                    string
+	PosibleSendSMS                  bool
+	PosibleSendEmail                bool
+	PosibleSendWeb                  bool
+	PosibleSendSlack                bool
+	PosibleSendWebhook              bool
+	UseLink                         bool
+	TitleTemplateForSMS             string
+	MessageTemplateForSMS           string
+	ListItemTemplateForSMS          string
+	TitleTemplateForEmail           string
+	MessageTemplateForEmail         string
+	ListItemTemplateForEmail        string
+	TitleTemplateForWeb             string
+	MessageTemplateForWeb           string
+	ListItemTemplateForWeb          string
+	TitleTemplateForSlack           string
+	MessageTemplateForSlack         string
+	ListItemTemplateForSlack        string
+	TitleTemplateForWebhook         string
+	MessageTemplateForWebhook       string
+	ListItemTemplateForWebhook      string
+	SlackChannelIDForWebhook        string
+	SlackPrivateChannelIDForWebhook string
+}
+
+type UpdateNotificationType struct {
+	Name                            string
+	Description                     string
+	ManualSend                      bool
+	TargetObject                    string
+	TargetAction                    string
+	PosibleSendSMS                  bool
+	PosibleSendEmail                bool
+	PosibleSendWeb                  bool
+	PosibleSendSlack                bool
+	PosibleSendWebhook              bool
+	UseLink                         bool
+	TitleTemplateForSMS             string
+	MessageTemplateForSMS           string
+	ListItemTemplateForSMS          string
+	TitleTemplateForEmail           string
+	MessageTemplateForEmail         string
+	ListItemTemplateForEmail        string
+	TitleTemplateForWeb             string
+	MessageTemplateForWeb           string
+	ListItemTemplateForWeb          string
+	TitleTemplateForSlack           string
+	MessageTemplateForSlack         string
+	ListItemTemplateForSlack        string
+	TitleTemplateForWebhook         string
+	MessageTemplateForWebhook       string
+	ListItemTemplateForWebhook      string
+	SlackChannelIDForWebhook        string
+	SlackPrivateChannelIDForWebhook string
+}
+
+func (c *CreateNotificationType) Valid() error {
+	return validate.Struct(c)
+}
+
+func (c *UpdateNotificationType) Valid() error {
+	return validate.Struct(c)
 }
