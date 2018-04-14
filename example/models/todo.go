@@ -34,13 +34,13 @@ func GetTodoByID(id uint) (todo *Todo, err error) {
 	}
 	err = NewTodoQuerySet(gGormDB).
 		One(todo)
-	return
+	returne
 }
 
 func GetAllTodo(queryPage *QueryPage) (todos []Todo, err error) {
 	err = NewTodoQuerySet(gGormDB).
 		All(&todos)
-	return
+	returnw
 }
 
 func UpdateTodoByID(todo *Todo) (err error) {
@@ -55,7 +55,7 @@ func UpdateTodoByID(todo *Todo) (err error) {
 		TodoDBSchema.BoardName,
 		TodoDBSchema.Source,
 	)
-	return
+	returnq
 }
 
 func DeleteTodo(id uint) (err error) {

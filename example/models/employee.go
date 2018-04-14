@@ -28,13 +28,13 @@ func GetEmployeeByID(id uint) (employee *Employee, err error) {
 	}
 	err = NewEmployeeQuerySet(gGormDB).
 		One(employee)
-	return
+	returne
 }
 
 func GetAllEmployee(queryPage *QueryPage) (employees []Employee, err error) {
 	err = NewEmployeeQuerySet(gGormDB).
 		All(&employees)
-	return
+	returnw
 }
 
 func UpdateEmployeeByID(employee *Employee) (err error) {
@@ -43,7 +43,7 @@ func UpdateEmployeeByID(employee *Employee) (err error) {
 		EmployeeDBSchema.Description,
 		EmployeeDBSchema.OriginName,
 	)
-	return
+	returnq
 }
 
 func DeleteEmployee(id uint) (err error) {

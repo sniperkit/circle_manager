@@ -1,16 +1,19 @@
-package circle_manager
+package main
 
 import (
+	"bytes"
+	"strings"
 	"testing"
 
 	"github.com/jinzhu/inflection"
-	"github.com/jungju/circle/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestGo(t *testing.T) {
 	cm := &CircleManager{}
-	basePath = "example"
+	envs = &Envs{
+		RootPath: "example",
+	}
 
 	err := cm.GeneateSourceBySet(&CircleSet{
 		Name:                  "Office1",
@@ -87,7 +90,7 @@ func TestGo(t *testing.T) {
 func makeCircleUnit(name string, menuName string, menuGroup string, properties ...CircleUnitProperty) CircleUnit {
 	return CircleUnit{
 		Name:       name,
-		URL:        inflection.Plural(utils.MakeFirstLowerCase(name)),
+		URL:        inflection.Plural(makeFirstLowerCase(name)),
 		MenuName:   menuName,
 		MenuGroup:  menuGroup,
 		Properties: properties,
@@ -99,4 +102,17 @@ func makeCircleUnitProperty(name string, typeName string) CircleUnitProperty {
 		Name: name,
 		Type: typeName,
 	}
+}
+
+func makeFirstLowerCase(s string) string {
+	if len(s) < 2 {
+		return strings.ToLower(s)
+	}
+
+	bts := []byte(s)
+
+	lc := bytes.ToLower([]byte{bts[0]})
+	rest := bts[1:]
+
+	return string(bytes.Join([][]byte{lc, rest}, nil))
 }

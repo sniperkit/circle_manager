@@ -1,4 +1,4 @@
-package circle_manager
+package main
 
 import (
 	"fmt"
@@ -8,10 +8,6 @@ import (
 
 	"github.com/alecthomas/template"
 	"github.com/jinzhu/gorm"
-)
-
-var (
-	basePath string
 )
 
 type CircleManager struct {
@@ -53,7 +49,7 @@ func (cm *CircleManager) prepare() {
 			cm.MapTemplateSets = map[string]*CircleTemplateSet{}
 		}
 		cm.MapTemplateSets[sourceType] = &CircleTemplateSet{
-			SourcePath:   sd(cm.GetSourcePath(sourceType), filepath.Join(basePath, sourcePath)),
+			SourcePath:   sd(cm.GetSourcePath(sourceType), filepath.Join(envs.RootPath, sourcePath)),
 			TemplatePath: sd(cm.GetTemplatePath(sourceType), templatePath),
 			IsMulti:      isMulti,
 		}
@@ -81,6 +77,10 @@ func (cm *CircleManager) GeneateSource(db *gorm.DB, circleIDUint uint) error {
 func (cm *CircleManager) GeneateSourceBySet(cs *CircleSet) error {
 	circleSet = cs
 	cm.prepare()
+
+	for i, _ := range circleSet.Units {
+		circleSet.Units[i].Import = circleSet.Import
+	}
 
 	for _, circleTemplateSet := range cm.MapTemplateSets {
 		if circleTemplateSet.IsMulti {
@@ -113,6 +113,8 @@ func getCircleSetByID(db *gorm.DB, id uint) (circleSet *CircleSet, err error) {
 }
 
 func ExecuteTemplate(dest string, templatePath string, templateObject interface{}) error {
+	os.Remove(dest)
+
 	f, err := os.OpenFile(dest, os.O_CREATE|os.O_WRONLY, 0777)
 	if err != nil {
 		return err

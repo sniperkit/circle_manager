@@ -1,4 +1,4 @@
-package circle_manager
+package main
 
 import (
 	"time"

@@ -1,7 +1,7 @@
 package admin
 
 import (
-	"github.com/jungju/circle/models"
+	"github.com/jungju/demo/models"
 	"github.com/qor/admin"
 )
 

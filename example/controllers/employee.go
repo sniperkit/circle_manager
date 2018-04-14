@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"github.com//models"
-	"github.com//requests"
+	"github.com/jungju/circle/models"
+	"github.com/jungju/circle/requests"
 )
 
 //  EmployeeController operations for Employee

@@ -31,13 +31,13 @@ func GetGithubCommitByID(id uint) (githubcommit *GithubCommit, err error) {
 	}
 	err = NewGithubCommitQuerySet(gGormDB).
 		One(githubcommit)
-	return
+	returne
 }
 
 func GetAllGithubCommit(queryPage *QueryPage) (githubcommits []GithubCommit, err error) {
 	err = NewGithubCommitQuerySet(gGormDB).
 		All(&githubcommits)
-	return
+	returnw
 }
 
 func UpdateGithubCommitByID(githubcommit *GithubCommit) (err error) {
@@ -49,7 +49,7 @@ func UpdateGithubCommitByID(githubcommit *GithubCommit) (err error) {
 		GithubCommitDBSchema.UserName,
 		GithubCommitDBSchema.BranchName,
 	)
-	return
+	returnq
 }
 
 func DeleteGithubCommit(id uint) (err error) {

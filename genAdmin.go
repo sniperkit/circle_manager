@@ -1,4 +1,4 @@
-package circle_manager
+package main
 
 // func (source *CircleTemplateSet) ExtractWithProperty() []CircleUnit {
 // 	err := filepath.Walk(source.SourcePath, func(path string, info os.FileInfo, err error) error {
