@@ -25,7 +25,7 @@ type BaseCircleController struct {
 }
 
 func (c *BaseCircleController) BasePost(reqBody RequestBody, object interface{}) {
-	c.setRequestDataAndValid(reqBody)
+	c.SetRequestDataAndValid(reqBody)
 
 	copier.Copy(object, reqBody)
 
@@ -48,7 +48,7 @@ func (c *BaseCircleController) BaseGetOne(object interface{}) {
 }
 
 func (c *BaseCircleController) BaseGetAll(objects interface{}) {
-	reqPage, err := c.getQueryPage()
+	reqPage, err := c.GetQueryPage()
 	if err != nil {
 		c.ErrorAbort(400, err)
 	}
@@ -62,7 +62,7 @@ func (c *BaseCircleController) BaseGetAll(objects interface{}) {
 
 func (c *BaseCircleController) BasePut(reqBody RequestBody, object interface{}) {
 	id := c.GetParamID()
-	c.setRequestDataAndValid(reqBody)
+	c.SetRequestDataAndValid(reqBody)
 
 	if err := GetItemByID(id, object); err != nil {
 		if err == gorm.ErrRecordNotFound {

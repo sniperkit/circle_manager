@@ -39,7 +39,7 @@ func (c *BaseController) ErrorAbort(code int, err error, withMsg ...interface{})
 	c.CustomAbort(code, "")
 }
 
-func (c *BaseController) getQueryPage() (*QueryPage, error) {
+func (c *BaseController) GetQueryPage() (*QueryPage, error) {
 	queryPage := &QueryPage{
 		Query: make(map[string]string),
 		Limit: 10,
@@ -101,7 +101,7 @@ func (c *BaseController) setRequestData(reqBody RequestBody) error {
 	return nil
 }
 
-func (c *BaseController) setRequestDataAndValid(reqBody RequestBody) {
+func (c *BaseController) SetRequestDataAndValid(reqBody RequestBody) {
 	if len(c.Ctx.Input.RequestBody) == 0 {
 		logrus.Error("Body에 정보가 없습니다.")
 		c.ErrorAbort(400, ErrInvalidRequestBody)
@@ -118,7 +118,7 @@ func (c *BaseController) setRequestDataAndValid(reqBody RequestBody) {
 	}
 }
 
-func (c *BaseController) getParamForUintTypeRequired(key string, retID *uint) error {
+func (c *BaseController) GetParamForUintTypeRequired(key string, retID *uint) error {
 	idString := c.Ctx.Input.Param(key)
 	if idString == "" {
 		return ErrInvalidRequestParam
@@ -137,7 +137,7 @@ func (c *BaseController) getParamForUintTypeRequired(key string, retID *uint) er
 
 func (c *BaseController) GetParamID() uint {
 	id := uint(0)
-	if err := c.getParamForUintTypeRequired(":id", &id); err != nil {
+	if err := c.GetParamForUintTypeRequired(":id", &id); err != nil {
 		c.ErrorAbort(400, err)
 	}
 	return id
