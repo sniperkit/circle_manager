@@ -8,6 +8,7 @@ import (
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"github.com/jungju/circle_manager/modules"
 	"github.com/jungju/gorm_manager"
 	"github.com/urfave/cli"
 )
@@ -100,9 +101,9 @@ func runGen() error {
 	cm := &CircleManager{}
 
 	if err := db.AutoMigrate(
-		&CircleSet{},
-		&CircleUnit{},
-		&CircleUnitProperty{},
+		&modules.CircleSet{},
+		&modules.CircleUnit{},
+		&modules.CircleUnitProperty{},
 	).Error; err != nil {
 		return err
 	}

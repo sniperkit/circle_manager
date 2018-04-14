@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/jinzhu/inflection"
+	"github.com/jungju/circle_manager/modules"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -15,7 +16,7 @@ func TestGo(t *testing.T) {
 		RootPath: "example",
 	}
 
-	err := cm.GeneateSourceBySet(&CircleSet{
+	err := cm.GeneateSourceBySet(&modules.CircleSet{
 		Name:                  "Office1",
 		Import:                "jungju/circle",
 		AppVersion:            "10.1.1",
@@ -26,7 +27,7 @@ func TestGo(t *testing.T) {
 		AppLicense:            "MIT",
 		AppSecurityDefinition: `"userAPIKey apiKey X-USER-AUTH-TOKEN header "I love auto-generated docs"`,
 
-		Units: []CircleUnit{
+		Units: []modules.CircleUnit{
 			makeCircleUnit(
 				"GithubCommit", "Commits", "이벤트관리",
 				makeCircleUnitProperty("RepoName", "string"),
@@ -87,8 +88,8 @@ func TestGo(t *testing.T) {
 	}
 }
 
-func makeCircleUnit(name string, menuName string, menuGroup string, properties ...CircleUnitProperty) CircleUnit {
-	return CircleUnit{
+func makeCircleUnit(name string, menuName string, menuGroup string, properties ...modules.CircleUnitProperty) modules.CircleUnit {
+	return modules.CircleUnit{
 		Name:       name,
 		URL:        inflection.Plural(makeFirstLowerCase(name)),
 		MenuName:   menuName,
@@ -97,8 +98,8 @@ func makeCircleUnit(name string, menuName string, menuGroup string, properties .
 	}
 }
 
-func makeCircleUnitProperty(name string, typeName string) CircleUnitProperty {
-	return CircleUnitProperty{
+func makeCircleUnitProperty(name string, typeName string) modules.CircleUnitProperty {
+	return modules.CircleUnitProperty{
 		Name: name,
 		Type: typeName,
 	}

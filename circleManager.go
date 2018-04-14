@@ -8,6 +8,7 @@ import (
 
 	"github.com/alecthomas/template"
 	"github.com/jinzhu/gorm"
+	"github.com/jungju/circle_manager/modules"
 )
 
 type CircleManager struct {
@@ -63,7 +64,7 @@ func (cm *CircleManager) prepare() {
 	setTemplateSet("responses", "responses", "templates/responses.tmpl", true)
 }
 
-var circleSet *CircleSet
+var circleSet *modules.CircleSet
 
 func (cm *CircleManager) GeneateSource(db *gorm.DB, circleIDUint uint) error {
 	cs, err := getCircleSetByID(db, circleIDUint)
@@ -74,7 +75,7 @@ func (cm *CircleManager) GeneateSource(db *gorm.DB, circleIDUint uint) error {
 	return cm.GeneateSourceBySet(cs)
 }
 
-func (cm *CircleManager) GeneateSourceBySet(cs *CircleSet) error {
+func (cm *CircleManager) GeneateSourceBySet(cs *modules.CircleSet) error {
 	circleSet = cs
 	cm.prepare()
 
@@ -103,8 +104,8 @@ func (cm *CircleManager) GeneateSourceBySet(cs *CircleSet) error {
 	return nil
 }
 
-func getCircleSetByID(db *gorm.DB, id uint) (circleSet *CircleSet, err error) {
-	circleSet = &CircleSet{
+func getCircleSetByID(db *gorm.DB, id uint) (circleSet *modules.CircleSet, err error) {
+	circleSet = &modules.CircleSet{
 		ID: id,
 	}
 

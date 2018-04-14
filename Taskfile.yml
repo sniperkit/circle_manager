@@ -2,7 +2,7 @@
 
 dev:
   cmds:
-    - go run ./cli.go ./circleSet.go  ./circleManager.go --dbHost 127.0.0.1 --dbPort 3306 --dbName circle --dbUser root --dbPassword jjgo --circleID 1 --rootPath example
+    - go run ./cli.go ./circleManager.go --dbHost 127.0.0.1 --dbPort 3306 --dbName circle --dbUser root --dbPassword jjgo --circleID 1 --rootPath example
 
 test:
   cmds:
