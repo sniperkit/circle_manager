@@ -37,13 +37,13 @@ func GetEventByID(id uint) (event *Event, err error) {
 	}
 	err = NewEventQuerySet(gGormDB).
 		One(event)
-	returne
+	return
 }
 
 func GetAllEvent(queryPage *QueryPage) (events []Event, err error) {
 	err = NewEventQuerySet(gGormDB).
 		All(&events)
-	returnw
+	return
 }
 
 func UpdateEventByID(event *Event) (err error) {
@@ -61,7 +61,7 @@ func UpdateEventByID(event *Event) (err error) {
 		EventDBSchema.Source,
 		EventDBSchema.Attendees,
 	)
-	returnq
+	return
 }
 
 func DeleteEvent(id uint) (err error) {

@@ -26,7 +26,7 @@ func (c *EventController) Post() {
 // @Title Get One
 // @Description get Event by id
 // @Param	id		path 	string	true		"The key for staticblock"
-// @Success 200 {object} responses.Event
+// @Success 200 {object} responses.ResponseEvent
 // @Failure 403 :id is empty
 // @router /:id [get]
 // @Security userAPIKey

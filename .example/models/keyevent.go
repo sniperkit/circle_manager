@@ -28,13 +28,13 @@ func GetKeyEventByID(id uint) (keyevent *KeyEvent, err error) {
 	}
 	err = NewKeyEventQuerySet(gGormDB).
 		One(keyevent)
-	returne
+	return
 }
 
 func GetAllKeyEvent(queryPage *QueryPage) (keyevents []KeyEvent, err error) {
 	err = NewKeyEventQuerySet(gGormDB).
 		All(&keyevents)
-	returnw
+	return
 }
 
 func UpdateKeyEventByID(keyevent *KeyEvent) (err error) {
@@ -43,7 +43,7 @@ func UpdateKeyEventByID(keyevent *KeyEvent) (err error) {
 		KeyEventDBSchema.Description,
 		KeyEventDBSchema.EventDate,
 	)
-	returnq
+	return
 }
 
 func DeleteKeyEvent(id uint) (err error) {

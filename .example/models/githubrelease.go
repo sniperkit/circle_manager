@@ -32,13 +32,13 @@ func GetGithubReleaseByID(id uint) (githubrelease *GithubRelease, err error) {
 	}
 	err = NewGithubReleaseQuerySet(gGormDB).
 		One(githubrelease)
-	returne
+	return
 }
 
 func GetAllGithubRelease(queryPage *QueryPage) (githubreleases []GithubRelease, err error) {
 	err = NewGithubReleaseQuerySet(gGormDB).
 		All(&githubreleases)
-	returnw
+	return
 }
 
 func UpdateGithubReleaseByID(githubrelease *GithubRelease) (err error) {
@@ -51,7 +51,7 @@ func UpdateGithubReleaseByID(githubrelease *GithubRelease) (err error) {
 		GithubReleaseDBSchema.PreRelease,
 		GithubReleaseDBSchema.Message,
 	)
-	returnq
+	return
 }
 
 func DeleteGithubRelease(id uint) (err error) {

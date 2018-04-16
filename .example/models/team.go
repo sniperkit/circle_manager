@@ -27,13 +27,13 @@ func GetTeamByID(id uint) (team *Team, err error) {
 	}
 	err = NewTeamQuerySet(gGormDB).
 		One(team)
-	returne
+	return
 }
 
 func GetAllTeam(queryPage *QueryPage) (teams []Team, err error) {
 	err = NewTeamQuerySet(gGormDB).
 		All(&teams)
-	returnw
+	return
 }
 
 func UpdateTeamByID(team *Team) (err error) {
@@ -41,7 +41,7 @@ func UpdateTeamByID(team *Team) (err error) {
 		TeamDBSchema.Name,
 		TeamDBSchema.Description,
 	)
-	returnq
+	return
 }
 
 func DeleteTeam(id uint) (err error) {

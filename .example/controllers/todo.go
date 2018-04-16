@@ -26,7 +26,7 @@ func (c *TodoController) Post() {
 // @Title Get One
 // @Description get Todo by id
 // @Param	id		path 	string	true		"The key for staticblock"
-// @Success 200 {object} responses.Todo
+// @Success 200 {object} responses.ResponseTodo
 // @Failure 403 :id is empty
 // @router /:id [get]
 // @Security userAPIKey

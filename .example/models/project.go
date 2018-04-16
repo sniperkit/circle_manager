@@ -28,13 +28,13 @@ func GetProjectByID(id uint) (project *Project, err error) {
 	}
 	err = NewProjectQuerySet(gGormDB).
 		One(project)
-	returne
+	return
 }
 
 func GetAllProject(queryPage *QueryPage) (projects []Project, err error) {
 	err = NewProjectQuerySet(gGormDB).
 		All(&projects)
-	returnw
+	return
 }
 
 func UpdateProjectByID(project *Project) (err error) {
@@ -43,7 +43,7 @@ func UpdateProjectByID(project *Project) (err error) {
 		ProjectDBSchema.Description,
 		ProjectDBSchema.Status,
 	)
-	returnq
+	return
 }
 
 func DeleteProject(id uint) (err error) {

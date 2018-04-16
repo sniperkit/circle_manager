@@ -124,7 +124,7 @@ func initDB() (*gorm.DB, error) {
 		DBPort:             fmt.Sprintf("%d", envs.DBPort),
 		DBName:             envs.DBName,
 		DBUser:             envs.DBUser,
-		DBPass:             envs.DBPassWord,
+		DBPassword:         envs.DBPassWord,
 		AutoCreateDatabase: true,
 		RecreateDatabase:   false,
 		OnLog:              true,

@@ -26,7 +26,7 @@ func (c *GithubCommitController) Post() {
 // @Title Get One
 // @Description get GithubCommit by id
 // @Param	id		path 	string	true		"The key for staticblock"
-// @Success 200 {object} responses.GithubCommit
+// @Success 200 {object} responses.ResponseGithubCommit
 // @Failure 403 :id is empty
 // @router /:id [get]
 // @Security userAPIKey
