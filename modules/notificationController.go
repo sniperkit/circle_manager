@@ -43,8 +43,8 @@ func init() {
 // PostMessage ...
 // @Title PostMessage
 // @Description create Notification
-// @Param	body		body 	Notification	true		"body for Notification content"
-// @Success 201 {int} Notification
+// @Param	body		body 	modules.Notification	true		"body for Notification content"
+// @Success 201 {int} modules.Notification
 // @Failure 403 body is empty
 // @router /post [post]
 func (c *NotificationController) PostMessage() {
@@ -76,8 +76,8 @@ func SendActiveNotifications() error {
 // PostMessage ...
 // @Title PostMessage
 // @Description create Notification
-// @Param	body		body 	Notification	true		"body for Notification content"
-// @Success 201 {int} Notification
+// @Param	body		body 	modules.Notification	true		"body for Notification content"
+// @Success 201 {int} modules.Notification
 // @Failure 403 body is empty
 // @router /post/:key [post]
 func (c *NotificationController) PostMenualMessage() {
