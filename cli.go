@@ -43,9 +43,6 @@ func (envs *Envs) Valid() error {
 	if envs.DBPassWord == "" {
 		return errors.New("Require DBPassWord")
 	}
-	if envs.CircleID <= 0 {
-		return errors.New("Require CircleID")
-	}
 	if envs.RootPath == "" {
 		envs.RootPath = "./"
 	}
@@ -75,6 +72,11 @@ func main() {
 			DBPassWord: c.String("dbPassword"),
 			CircleID:   c.Uint("circleID"),
 			RootPath:   c.String("rootPath"),
+		}
+
+		if envs.CircleID <= 0 {
+			log.Println("circleID가 없으므로 종료")
+			return nil
 		}
 
 		err := envs.Valid()

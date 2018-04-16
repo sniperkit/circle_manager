@@ -29,13 +29,13 @@ func Get{{.Name}}ByID(id uint) ({{.GetVariableName}} *{{.Name}}, err error) {
 	}
 	err = New{{.Name}}QuerySet(gGormDB).
 		One({{.GetVariableName}})
-	returne
+	return
 }
 
 func GetAll{{.Name}}(queryPage *QueryPage) ({{.GetVariableName}}s []{{.Name}}, err error) {
 	err = New{{.Name}}QuerySet(gGormDB).
 		All(&{{.GetVariableName}}s)
-	returnw
+	return
 }
 
 func Update{{.Name}}ByID({{.GetVariableName}} *{{.Name}}) (err error) {
@@ -45,7 +45,7 @@ func Update{{.Name}}ByID({{.GetVariableName}} *{{.Name}}) (err error) {
 		{{$name := .Name}}{{range $i, $property := .Properties}}{{$name}}DBSchema.{{.Name}},
 		{{end}}
 	)
-	returnq
+	return
 }
 
 func Delete{{.Name}}(id uint) (err error) {
