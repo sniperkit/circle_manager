@@ -53,7 +53,7 @@ func (c *BaseCircleController) BaseGetAll(objects interface{}) {
 		c.ErrorAbort(400, err)
 	}
 
-	if err := GetItems(&objects, reqPage); err != nil {
+	if err := GetItems(objects, reqPage); err != nil {
 		c.ErrorAbort(500, err)
 	}
 

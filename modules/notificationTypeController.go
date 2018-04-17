@@ -43,7 +43,7 @@ func (c *NotificationTypeController) GetOne() {
 // @router / [get]
 // @Security userAPIKey
 func (c *NotificationTypeController) GetAll() {
-	c.BaseGetAll([]NotificationType{})
+	c.BaseGetAll(&[]NotificationType{})
 }
 
 // Put ...
