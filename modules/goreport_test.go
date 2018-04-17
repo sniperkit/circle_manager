@@ -1,4 +1,4 @@
-package goreport
+package modules
 
 import (
 	"fmt"
