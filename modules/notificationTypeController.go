@@ -72,65 +72,29 @@ func (c *NotificationTypeController) Delete() {
 }
 
 type CreateNotificationType struct {
-	Name                            string
-	Description                     string
-	ManualSend                      bool
-	TargetObject                    string
-	TargetAction                    string
-	PosibleSendSMS                  bool
-	PosibleSendEmail                bool
-	PosibleSendWeb                  bool
-	PosibleSendSlack                bool
-	PosibleSendWebhook              bool
-	UseLink                         bool
-	TitleTemplateForSMS             string
-	MessageTemplateForSMS           string
-	ListItemTemplateForSMS          string
-	TitleTemplateForEmail           string
-	MessageTemplateForEmail         string
-	ListItemTemplateForEmail        string
-	TitleTemplateForWeb             string
-	MessageTemplateForWeb           string
-	ListItemTemplateForWeb          string
-	TitleTemplateForSlack           string
-	MessageTemplateForSlack         string
-	ListItemTemplateForSlack        string
-	TitleTemplateForWebhook         string
-	MessageTemplateForWebhook       string
-	ListItemTemplateForWebhook      string
-	SlackChannelIDForWebhook        string
-	SlackPrivateChannelIDForWebhook string
+	Name             string
+	Description      string
+	ManualSend       bool
+	TargetObject     string
+	TargetAction     string
+	IsEnable         bool
+	UseLink          bool
+	TitleTemplate    string
+	MessageTemplate  string
+	ListItemTemplate string
 }
 
 type UpdateNotificationType struct {
-	Name                            string
-	Description                     string
-	ManualSend                      bool
-	TargetObject                    string
-	TargetAction                    string
-	PosibleSendSMS                  bool
-	PosibleSendEmail                bool
-	PosibleSendWeb                  bool
-	PosibleSendSlack                bool
-	PosibleSendWebhook              bool
-	UseLink                         bool
-	TitleTemplateForSMS             string
-	MessageTemplateForSMS           string
-	ListItemTemplateForSMS          string
-	TitleTemplateForEmail           string
-	MessageTemplateForEmail         string
-	ListItemTemplateForEmail        string
-	TitleTemplateForWeb             string
-	MessageTemplateForWeb           string
-	ListItemTemplateForWeb          string
-	TitleTemplateForSlack           string
-	MessageTemplateForSlack         string
-	ListItemTemplateForSlack        string
-	TitleTemplateForWebhook         string
-	MessageTemplateForWebhook       string
-	ListItemTemplateForWebhook      string
-	SlackChannelIDForWebhook        string
-	SlackPrivateChannelIDForWebhook string
+	Name             string
+	Description      string
+	ManualSend       bool
+	TargetObject     string
+	TargetAction     string
+	IsEnable         bool
+	UseLink          bool
+	TitleTemplate    string
+	MessageTemplate  string
+	ListItemTemplate string
 }
 
 func (c *CreateNotificationType) Valid() error {

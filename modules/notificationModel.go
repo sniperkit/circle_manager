@@ -10,12 +10,13 @@ type Notification struct {
 	CreatedAt          time.Time        `description:"등록일"`
 	UpdatedAt          time.Time        `description:"수정일"`
 	Name               string           `description:"이름"`
-	Description        string           `description:"설명" sql:"type:text"`
+	Description        string           `description:"설명" gorm:"size:2500"`
+	EventUserID        *uint            `description:""`
 	NotificationType   NotificationType `description:""`
 	NotificationTypeID uint             `description:""`
 	NotiType           string           `description:""`
 	Title              string           `description:""`
-	Message            string           `description:"" sql:"type:text"`
+	Message            string           `description:"" gorm:"size:2500"`
 	SentAt             *time.Time       `description:""`
 }
 
