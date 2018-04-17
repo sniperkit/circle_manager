@@ -2,7 +2,7 @@ package modules
 
 //  NotificationTypeController operations for NotificationType
 type NotificationTypeController struct {
-	BaseCircleController
+	BaseUserController
 }
 
 // Post ...

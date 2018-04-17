@@ -14,7 +14,7 @@ import (
 
 //  NotificationController operations for Notification
 type NotificationController struct {
-	BaseCircleController
+	BaseUserController
 }
 
 // PostMessage ...
