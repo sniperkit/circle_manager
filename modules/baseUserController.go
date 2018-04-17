@@ -1,10 +1,10 @@
 package modules
 
 import (
+	"errors"
 	"fmt"
 
 	jwt "github.com/dgrijalva/jwt-go"
-	"github.com/jungju/aha/errors"
 	"github.com/sirupsen/logrus"
 )
 
@@ -34,7 +34,7 @@ type BaseUserController struct {
 }
 
 // Prepare ...
-func (c *UserBaseController) Prepare() {
+func (c *BaseUserController) Prepare() {
 	logrus.Debug("UserBaseController", "Prepare")
 	var err error
 	if c.CurrentUserMeta, err = c.GetCurrentUserMeta(); err != nil {
@@ -46,7 +46,7 @@ func (c *UserBaseController) Prepare() {
 	//TODO: User 승인 여부 맵. 403.
 }
 
-func (c *UserBaseController) GetCurrentUserMeta() (*UserMeta, error) {
+func (c *BaseUserController) GetCurrentUserMeta() (*UserMeta, error) {
 	tokenString := c.Ctx.Request.Header.Get(userTokenHeaderName)
 	return GetCurrentUserMeta(tokenString)
 }
@@ -80,7 +80,7 @@ func parseToken(tokenString string) (*jwt.Token, error) {
 	return token, nil
 }
 
-func (c *UserBaseController) checkExistsObject(getExistsObjectFunc getExistsObjectInUserFunc, id uint, ErrRecordNotFoundMsg string) {
+func (c *BaseUserController) checkExistsObject(getExistsObjectFunc getExistsObjectInUserFunc, id uint, ErrRecordNotFoundMsg string) {
 	exists, err := getExistsObjectFunc(id)
 	if err != nil {
 		c.ErrorAbort(500, err)
@@ -99,7 +99,7 @@ func getCurrentUserMetaByToken(token *jwt.Token) (*UserMeta, error) {
 		userMeta.UserID = claims.UserID
 		userMeta.GroupID = claims.GroupID
 	} else {
-		return nil, errors.ErrInvalidToken
+		return nil, ErrInvalidToken
 	}
 	return userMeta, nil
 }
