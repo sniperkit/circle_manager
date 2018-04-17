@@ -1,9 +1,10 @@
 package modules
 
 import (
+	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
-	"time"
 
 	"github.com/jinzhu/copier"
 	"github.com/sirupsen/logrus"
@@ -11,34 +12,9 @@ import (
 	"github.com/jungju/goreport"
 )
 
-var notiManager goreport.NotiManager
-
 //  NotificationController operations for Notification
 type NotificationController struct {
 	BaseCircleController
-}
-
-func init() {
-	notiManager = goreport.NotiManager{
-		GetRowFunc:             GetRows,
-		UpdateSentNotification: UpdateSentNotification,
-		AddNotification: func(gorNotification *goreport.Notification, isSent bool) error {
-			notification := &Notification{}
-			copier.Copy(notification, &gorNotification)
-			notification.NotificationType = NotificationType{}
-
-			if isSent {
-				now := time.Now()
-				notification.SentAt = &now
-			}
-
-			if _, err := AddNotification(notification); err != nil {
-				return err
-			}
-
-			return nil
-		},
-	}
 }
 
 // PostMessage ...
@@ -63,10 +39,7 @@ func SendActiveNotifications() error {
 	}
 
 	for _, notification := range notifications {
-		gorNotification := &goreport.Notification{}
-		copier.Copy(gorNotification, &notification)
-
-		if err := notiManager.Send(gorNotification); err != nil {
+		if err := sendNotification(&notification); err != nil {
 			logrus.Error(err)
 			continue
 		}
@@ -104,8 +77,27 @@ func (c *NotificationController) PostMenualMessage() {
 		gorNotificationType := &goreport.NotificationType{}
 		copier.Copy(gorNotificationType, &notificationType)
 
-		if err := notiManager.SendManual(gorNotificationType); err != nil {
-			logrus.Error(err)
+		rows := []map[string]interface{}{}
+		if notificationType.TargetObject != "" {
+			var err error
+			rows, err = GetRows(notificationType.TargetObject, notificationType.TargetWhere)
+			if err != nil {
+				logrus.WithError(err).Error()
+				continue
+			}
+		}
+
+		notification := MakeNotification(&notificationType, rows)
+		notification.NotificationType = notificationType
+		notification.NotificationTypeID = notificationType.ID
+
+		if err := sendNotification(notification); err != nil {
+			logrus.WithError(err).Error()
+			continue
+		}
+
+		if _, err := AddNotification(notification); err != nil {
+			logrus.WithError(err).Error()
 			continue
 		}
 	}
@@ -113,7 +105,7 @@ func (c *NotificationController) PostMenualMessage() {
 	c.Success(http.StatusNoContent, nil)
 }
 
-func AddActionNotification(tags string, objects ...interface{}) error {
+func AddActionNotification(tags string, eventUserID uint, objects ...interface{}) error {
 	notificationTypes, err := GetNotificationsTypesByManualSend(false)
 	if err != nil {
 		return err
@@ -124,13 +116,16 @@ func AddActionNotification(tags string, objects ...interface{}) error {
 			continue
 		}
 
-		gorNotificationType := &goreport.NotificationType{}
-		copier.Copy(gorNotificationType, &notificationType)
+		notification := MakeNotification(&notificationType, nil, objects...)
+		notification.EventUserID = &eventUserID
+		notification.NotificationType = notificationType
+		notification.NotificationTypeID = notificationType.ID
 
-		if err := notiManager.AddActionNotification(gorNotificationType); err != nil {
-			logrus.Error(err)
-			continue
+		if _, err := AddNotification(notification); err != nil {
+			return err
 		}
+
+		return nil
 	}
 	return nil
 }
@@ -152,4 +147,32 @@ func isExistsTag(reqTags string, notiTypeTags string) bool {
 		}
 	}
 	return true
+}
+
+func sendNotification(notification *Notification) error {
+	if notification.NotificationType.WebhookURLs == "" {
+		return nil
+	}
+	for _, targetURL := range strings.Split(notification.NotificationType.WebhookURLs, "\n") {
+		webhookURL, err := url.Parse(strings.TrimSpace(targetURL))
+		if err != nil {
+			fmt.Printf("Error : %s", err.Error())
+			continue
+		}
+
+		parameters := webhookURL.Query()
+		parameters.Add("title", notification.Title)
+		parameters.Add("message", notification.Message)
+		webhookURL.RawQuery = parameters.Encode()
+
+		if _, err := req("GET", webhookURL.String(), nil, nil, nil); err != nil {
+			fmt.Printf("Error : %s", err.Error())
+		}
+	}
+
+	if err := UpdateSentNotification(notification.ID); err != nil {
+		return err
+	}
+
+	return nil
 }
