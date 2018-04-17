@@ -2,6 +2,7 @@ package modules
 
 import (
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/jinzhu/copier"
@@ -96,10 +97,14 @@ func (c *NotificationController) PostMenualMessage() {
 	}
 
 	for _, notificationType := range notificationTypes {
+		if !isExistsTag(tags, notificationType.Tags) {
+			continue
+		}
+
 		gorNotificationType := &goreport.NotificationType{}
 		copier.Copy(gorNotificationType, &notificationType)
 
-		if err := notiManager.SendManual(tags, gorNotificationType); err != nil {
+		if err := notiManager.SendManual(gorNotificationType); err != nil {
 			logrus.Error(err)
 			continue
 		}
@@ -115,13 +120,36 @@ func AddActionNotification(tags string, objects ...interface{}) error {
 	}
 
 	for _, notificationType := range notificationTypes {
+		if !isExistsTag(tags, notificationType.Tags) {
+			continue
+		}
+
 		gorNotificationType := &goreport.NotificationType{}
 		copier.Copy(gorNotificationType, &notificationType)
 
-		if err := notiManager.AddActionNotification(tags, gorNotificationType); err != nil {
+		if err := notiManager.AddActionNotification(gorNotificationType); err != nil {
 			logrus.Error(err)
 			continue
 		}
 	}
 	return nil
+}
+
+func isExistsTag(reqTags string, notiTypeTags string) bool {
+	mapTag := map[string]bool{}
+	for _, tag := range strings.Split(reqTags, ",") {
+		mapTag[tag] = true
+	}
+
+	mapNotiTypeTags := map[string]bool{}
+	for _, notiTypeTag := range strings.Split(notiTypeTags, ",") {
+		mapNotiTypeTags[notiTypeTag] = true
+	}
+
+	for _, tag := range strings.Split(reqTags, ",") {
+		if _, ok := mapNotiTypeTags[tag]; !ok {
+			return false
+		}
+	}
+	return true
 }
