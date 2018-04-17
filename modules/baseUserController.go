@@ -28,7 +28,7 @@ type CircleCustomClaims struct {
 type getExistsObjectInUserFunc func(uint) (bool, error)
 
 //BaseController ...
-type UserBaseController struct {
+type BaseUserController struct {
 	BaseCircleController
 	CurrentUserMeta *UserMeta
 }
