@@ -9,8 +9,9 @@ import (
 )
 
 var (
-	userTokenHeaderName = ""
-	secretKeys          = ""
+	UserTokenHeaderName = ""
+	SecretKeys          = ""
+	SystemToken         = ""
 )
 
 type UserMeta struct {
@@ -47,7 +48,13 @@ func (c *BaseUserController) Prepare() {
 }
 
 func (c *BaseUserController) GetCurrentUserMeta() (*UserMeta, error) {
-	tokenString := c.Ctx.Request.Header.Get(userTokenHeaderName)
+	tokenString := c.Ctx.Request.Header.Get(UserTokenHeaderName)
+	if tokenString == SystemToken {
+		return &UserMeta{
+			UserID: 1,
+			Token:  tokenString,
+		}, nil
+	}
 	return GetCurrentUserMeta(tokenString)
 }
 
@@ -72,7 +79,7 @@ func parseToken(tokenString string) (*jwt.Token, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 		}
-		return []byte(secretKeys), nil
+		return []byte(SecretKeys), nil
 	})
 	if err != nil {
 		return nil, err
