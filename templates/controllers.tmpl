@@ -48,7 +48,7 @@ func (c *{{.Name}}Controller) GetOne() {
 // @router / [get]
 // @Security userAPIKey
 func (c *{{.Name}}Controller) GetAll() {
-	c.getAll([]models.{{.Name}}{})
+	c.getAll(&[]models.{{.Name}}{})
 }
 
 // Put ...
