@@ -55,6 +55,7 @@ func (cm *CircleManager) prepare() {
 			cm.MapTemplateSets = map[string]*CircleTemplateSet{}
 		}
 		cm.MapTemplateSets[sourceType] = &CircleTemplateSet{
+			SourceType:   sourceType,
 			SourcePath:   sd(cm.GetSourcePath(sourceType), filepath.Join(envs.RootPath, sourcePath)),
 			TemplatePath: sd(cm.GetTemplatePath(sourceType), templatePath),
 			IsMulti:      isMulti,
@@ -98,15 +99,22 @@ func (cm *CircleManager) GeneateSourceBySet(cs *modules.CircleSet) error {
 
 		if circleTemplateSet.IsMulti {
 			for _, unit := range cs.Units {
-				if unit.IsManual {
-					continue
-				}
+				unitSourceFile := filepath.Join(circleTemplateSet.SourcePath, fmt.Sprintf("%s.go", unit.GetVariableName()))
 				if err := ExecuteTemplate(
-					filepath.Join(circleTemplateSet.SourcePath, fmt.Sprintf("%s.go", unit.GetVariableName())),
+					unitSourceFile,
 					circleTemplateSet.TemplatePath,
 					unit,
 				); err != nil {
 					return err
+				}
+				if circleTemplateSet.SourceType == "models" {
+					cmd := exec.Command("goqueryset", "-in", fmt.Sprintf("%s.go", unit.GetVariableName()))
+					cmd.Dir = circleTemplateSet.SourcePath
+					if out, err := cmd.Output(); err != nil {
+						logrus.WithError(err).
+							WithField("source", unitSourceFile).
+							Error("goqueryset 에러:", string(out))
+					}
 				}
 			}
 		} else {
@@ -246,12 +254,14 @@ func ExecuteTemplate(dest string, templatePath string, templateObject interface{
 		return err
 	}
 
+	logrus.Info("Created source :" + dest)
 	if _, err = exec.Command("gofmt", "-w", dest).Output(); err != nil {
 		logrus.WithError(err).
 			WithField("dest", dest).
 			WithField("TemplatePath", templatePath).
 			Error("formating중 에러")
 	}
+
 	return nil
 }
 
