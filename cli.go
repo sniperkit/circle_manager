@@ -69,8 +69,8 @@ func main() {
 	app.Usage = "for NO-CODE Platform"
 	app.Version = "0.0.1"
 	app.Flags = []cli.Flag{
-		cli.StringFlag{Name: "mode", Value: "", Usage: "generate, add, scan"},
-		cli.StringFlag{Name: "name", Value: "", Usage: "add mame"},
+		cli.StringFlag{Name: "mode", Value: "", Usage: "generate, add, delete,scan"},
+		cli.StringFlag{Name: "name", Value: "", Usage: "target name, ex)Car, Group, User"},
 		cli.StringFlag{Name: "dbHost", Value: "localhost", Usage: "DB Host", EnvVar: "DB_HOST"},
 		cli.IntFlag{Name: "dbPort", Value: 3306, Usage: "DB Port", EnvVar: "DB_PORT"},
 		cli.StringFlag{Name: "dbName", Value: "circle", Usage: "DB Name", EnvVar: "DB_NAME"},

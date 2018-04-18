@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -121,12 +122,16 @@ func (cm *CircleManager) AppendManual(unit *modules.CircleUnit) error {
 			),
 		),
 		`
-	appendManual(routerTemplateSet.TemplatePath, routerTemplate, unit)
+	if err := appendManual(routerTemplateSet.TemplatePath, routerTemplate, unit); err != nil {
+		return err
+	}
 
 	adminTemplateSet := cm.MapTemplateSets["admin"]
 	adminTemplate := `addResourceAndMenu(&models.{{.Name}}{}, "{{.MenuName}}", "{{.MenuGroup}}", anyoneAllow, -1)
 	`
-	appendManual(adminTemplateSet.TemplatePath, adminTemplate, unit)
+	if err := appendManual(adminTemplateSet.TemplatePath, adminTemplate, unit); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -145,6 +150,10 @@ func appendManual(templatefile string, appendText string, unit *modules.CircleUn
 	}
 
 	append := fmt.Sprintf("%s// circle:manual:end", tpl.String())
+
+	if strings.Index(string(read), tpl.String()) >= 0 {
+		return errors.New("이미 추가된 수동 소스 입니다.")
+	}
 
 	newContents := strings.Replace(string(read), "// circle:manual:end", append, -1)
 
