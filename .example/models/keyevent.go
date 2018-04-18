@@ -1,6 +1,10 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"github.com/jungju/circle_manager/modules"
+)
 
 // gen:qs
 type KeyEvent struct {
@@ -31,7 +35,7 @@ func GetKeyEventByID(id uint) (keyevent *KeyEvent, err error) {
 	return
 }
 
-func GetAllKeyEvent(queryPage *QueryPage) (keyevents []KeyEvent, err error) {
+func GetAllKeyEvent(queryPage *modules.QueryPage) (keyevents []KeyEvent, err error) {
 	err = NewKeyEventQuerySet(gGormDB).
 		All(&keyevents)
 	return

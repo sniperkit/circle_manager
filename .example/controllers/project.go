@@ -3,11 +3,12 @@ package controllers
 import (
 	"github.com/jungju/circle/models"
 	"github.com/jungju/circle/requests"
+	"github.com/jungju/circle_manager/modules"
 )
 
 //  ProjectController operations for Project
 type ProjectController struct {
-	BaseCircleController
+	modules.BaseCircleController
 }
 
 // Post ...
@@ -19,7 +20,7 @@ type ProjectController struct {
 // @router / [post]
 // @Security userAPIKey
 func (c *ProjectController) Post() {
-	c.post(&requests.CreateProject{}, &models.Project{})
+	c.BasePost(&requests.CreateProject{}, &models.Project{})
 }
 
 // GetOne ...
@@ -31,7 +32,7 @@ func (c *ProjectController) Post() {
 // @router /:id [get]
 // @Security userAPIKey
 func (c *ProjectController) GetOne() {
-	c.getOne(&models.Project{})
+	c.BaseGetOne(&models.Project{})
 }
 
 // GetAll ...
@@ -48,7 +49,7 @@ func (c *ProjectController) GetOne() {
 // @router / [get]
 // @Security userAPIKey
 func (c *ProjectController) GetAll() {
-	c.getAll([]models.Project{})
+	c.BaseGetAll(&[]models.Project{})
 }
 
 // Put ...
@@ -61,7 +62,7 @@ func (c *ProjectController) GetAll() {
 // @router /:id [put]
 // @Security userAPIKey
 func (c *ProjectController) Put() {
-	c.put(&requests.UpdateProject{}, &models.Project{})
+	c.BasePut(&requests.UpdateProject{}, &models.Project{})
 }
 
 // Delete ...
@@ -73,5 +74,5 @@ func (c *ProjectController) Put() {
 // @router /:id [delete]
 // @Security userAPIKey
 func (c *ProjectController) Delete() {
-	c.delete(&models.Project{})
+	c.BaseDelete(&models.Project{})
 }

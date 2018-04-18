@@ -3,11 +3,12 @@ package controllers
 import (
 	"github.com/jungju/circle/models"
 	"github.com/jungju/circle/requests"
+	"github.com/jungju/circle_manager/modules"
 )
 
 //  GithubCommitController operations for GithubCommit
 type GithubCommitController struct {
-	BaseCircleController
+	modules.BaseCircleController
 }
 
 // Post ...
@@ -19,7 +20,7 @@ type GithubCommitController struct {
 // @router / [post]
 // @Security userAPIKey
 func (c *GithubCommitController) Post() {
-	c.post(&requests.CreateGithubCommit{}, &models.GithubCommit{})
+	c.BasePost(&requests.CreateGithubCommit{}, &models.GithubCommit{})
 }
 
 // GetOne ...
@@ -31,7 +32,7 @@ func (c *GithubCommitController) Post() {
 // @router /:id [get]
 // @Security userAPIKey
 func (c *GithubCommitController) GetOne() {
-	c.getOne(&models.GithubCommit{})
+	c.BaseGetOne(&models.GithubCommit{})
 }
 
 // GetAll ...
@@ -48,7 +49,7 @@ func (c *GithubCommitController) GetOne() {
 // @router / [get]
 // @Security userAPIKey
 func (c *GithubCommitController) GetAll() {
-	c.getAll([]models.GithubCommit{})
+	c.BaseGetAll(&[]models.GithubCommit{})
 }
 
 // Put ...
@@ -61,7 +62,7 @@ func (c *GithubCommitController) GetAll() {
 // @router /:id [put]
 // @Security userAPIKey
 func (c *GithubCommitController) Put() {
-	c.put(&requests.UpdateGithubCommit{}, &models.GithubCommit{})
+	c.BasePut(&requests.UpdateGithubCommit{}, &models.GithubCommit{})
 }
 
 // Delete ...
@@ -73,5 +74,5 @@ func (c *GithubCommitController) Put() {
 // @router /:id [delete]
 // @Security userAPIKey
 func (c *GithubCommitController) Delete() {
-	c.delete(&models.GithubCommit{})
+	c.BaseDelete(&models.GithubCommit{})
 }

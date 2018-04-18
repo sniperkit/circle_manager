@@ -1,6 +1,10 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"github.com/jungju/circle_manager/modules"
+)
 
 // gen:qs
 type GithubCommit struct {
@@ -34,7 +38,7 @@ func GetGithubCommitByID(id uint) (githubcommit *GithubCommit, err error) {
 	return
 }
 
-func GetAllGithubCommit(queryPage *QueryPage) (githubcommits []GithubCommit, err error) {
+func GetAllGithubCommit(queryPage *modules.QueryPage) (githubcommits []GithubCommit, err error) {
 	err = NewGithubCommitQuerySet(gGormDB).
 		All(&githubcommits)
 	return

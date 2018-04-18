@@ -3,11 +3,12 @@ package controllers
 import (
 	"github.com/jungju/circle/models"
 	"github.com/jungju/circle/requests"
+	"github.com/jungju/circle_manager/modules"
 )
 
 //  EmployeeController operations for Employee
 type EmployeeController struct {
-	BaseCircleController
+	modules.BaseCircleController
 }
 
 // Post ...
@@ -19,7 +20,7 @@ type EmployeeController struct {
 // @router / [post]
 // @Security userAPIKey
 func (c *EmployeeController) Post() {
-	c.post(&requests.CreateEmployee{}, &models.Employee{})
+	c.BasePost(&requests.CreateEmployee{}, &models.Employee{})
 }
 
 // GetOne ...
@@ -31,7 +32,7 @@ func (c *EmployeeController) Post() {
 // @router /:id [get]
 // @Security userAPIKey
 func (c *EmployeeController) GetOne() {
-	c.getOne(&models.Employee{})
+	c.BaseGetOne(&models.Employee{})
 }
 
 // GetAll ...
@@ -48,7 +49,7 @@ func (c *EmployeeController) GetOne() {
 // @router / [get]
 // @Security userAPIKey
 func (c *EmployeeController) GetAll() {
-	c.getAll([]models.Employee{})
+	c.BaseGetAll(&[]models.Employee{})
 }
 
 // Put ...
@@ -61,7 +62,7 @@ func (c *EmployeeController) GetAll() {
 // @router /:id [put]
 // @Security userAPIKey
 func (c *EmployeeController) Put() {
-	c.put(&requests.UpdateEmployee{}, &models.Employee{})
+	c.BasePut(&requests.UpdateEmployee{}, &models.Employee{})
 }
 
 // Delete ...
@@ -73,5 +74,5 @@ func (c *EmployeeController) Put() {
 // @router /:id [delete]
 // @Security userAPIKey
 func (c *EmployeeController) Delete() {
-	c.delete(&models.Employee{})
+	c.BaseDelete(&models.Employee{})
 }

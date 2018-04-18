@@ -3,11 +3,12 @@ package controllers
 import (
 	"github.com/jungju/circle/models"
 	"github.com/jungju/circle/requests"
+	"github.com/jungju/circle_manager/modules"
 )
 
 //  GithubReleaseController operations for GithubRelease
 type GithubReleaseController struct {
-	BaseCircleController
+	modules.BaseCircleController
 }
 
 // Post ...
@@ -19,7 +20,7 @@ type GithubReleaseController struct {
 // @router / [post]
 // @Security userAPIKey
 func (c *GithubReleaseController) Post() {
-	c.post(&requests.CreateGithubRelease{}, &models.GithubRelease{})
+	c.BasePost(&requests.CreateGithubRelease{}, &models.GithubRelease{})
 }
 
 // GetOne ...
@@ -31,7 +32,7 @@ func (c *GithubReleaseController) Post() {
 // @router /:id [get]
 // @Security userAPIKey
 func (c *GithubReleaseController) GetOne() {
-	c.getOne(&models.GithubRelease{})
+	c.BaseGetOne(&models.GithubRelease{})
 }
 
 // GetAll ...
@@ -48,7 +49,7 @@ func (c *GithubReleaseController) GetOne() {
 // @router / [get]
 // @Security userAPIKey
 func (c *GithubReleaseController) GetAll() {
-	c.getAll([]models.GithubRelease{})
+	c.BaseGetAll(&[]models.GithubRelease{})
 }
 
 // Put ...
@@ -61,7 +62,7 @@ func (c *GithubReleaseController) GetAll() {
 // @router /:id [put]
 // @Security userAPIKey
 func (c *GithubReleaseController) Put() {
-	c.put(&requests.UpdateGithubRelease{}, &models.GithubRelease{})
+	c.BasePut(&requests.UpdateGithubRelease{}, &models.GithubRelease{})
 }
 
 // Delete ...
@@ -73,5 +74,5 @@ func (c *GithubReleaseController) Put() {
 // @router /:id [delete]
 // @Security userAPIKey
 func (c *GithubReleaseController) Delete() {
-	c.delete(&models.GithubRelease{})
+	c.BaseDelete(&models.GithubRelease{})
 }

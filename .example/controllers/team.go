@@ -3,11 +3,12 @@ package controllers
 import (
 	"github.com/jungju/circle/models"
 	"github.com/jungju/circle/requests"
+	"github.com/jungju/circle_manager/modules"
 )
 
 //  TeamController operations for Team
 type TeamController struct {
-	BaseCircleController
+	modules.BaseCircleController
 }
 
 // Post ...
@@ -19,7 +20,7 @@ type TeamController struct {
 // @router / [post]
 // @Security userAPIKey
 func (c *TeamController) Post() {
-	c.post(&requests.CreateTeam{}, &models.Team{})
+	c.BasePost(&requests.CreateTeam{}, &models.Team{})
 }
 
 // GetOne ...
@@ -31,7 +32,7 @@ func (c *TeamController) Post() {
 // @router /:id [get]
 // @Security userAPIKey
 func (c *TeamController) GetOne() {
-	c.getOne(&models.Team{})
+	c.BaseGetOne(&models.Team{})
 }
 
 // GetAll ...
@@ -48,7 +49,7 @@ func (c *TeamController) GetOne() {
 // @router / [get]
 // @Security userAPIKey
 func (c *TeamController) GetAll() {
-	c.getAll([]models.Team{})
+	c.BaseGetAll(&[]models.Team{})
 }
 
 // Put ...
@@ -61,7 +62,7 @@ func (c *TeamController) GetAll() {
 // @router /:id [put]
 // @Security userAPIKey
 func (c *TeamController) Put() {
-	c.put(&requests.UpdateTeam{}, &models.Team{})
+	c.BasePut(&requests.UpdateTeam{}, &models.Team{})
 }
 
 // Delete ...
@@ -73,5 +74,5 @@ func (c *TeamController) Put() {
 // @router /:id [delete]
 // @Security userAPIKey
 func (c *TeamController) Delete() {
-	c.delete(&models.Team{})
+	c.BaseDelete(&models.Team{})
 }

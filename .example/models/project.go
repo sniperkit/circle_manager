@@ -1,6 +1,10 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"github.com/jungju/circle_manager/modules"
+)
 
 // gen:qs
 type Project struct {
@@ -31,7 +35,7 @@ func GetProjectByID(id uint) (project *Project, err error) {
 	return
 }
 
-func GetAllProject(queryPage *QueryPage) (projects []Project, err error) {
+func GetAllProject(queryPage *modules.QueryPage) (projects []Project, err error) {
 	err = NewProjectQuerySet(gGormDB).
 		All(&projects)
 	return

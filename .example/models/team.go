@@ -1,6 +1,10 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"github.com/jungju/circle_manager/modules"
+)
 
 // gen:qs
 type Team struct {
@@ -30,7 +34,7 @@ func GetTeamByID(id uint) (team *Team, err error) {
 	return
 }
 
-func GetAllTeam(queryPage *QueryPage) (teams []Team, err error) {
+func GetAllTeam(queryPage *modules.QueryPage) (teams []Team, err error) {
 	err = NewTeamQuerySet(gGormDB).
 		All(&teams)
 	return

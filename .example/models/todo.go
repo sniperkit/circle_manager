@@ -1,6 +1,10 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"github.com/jungju/circle_manager/modules"
+)
 
 // gen:qs
 type Todo struct {
@@ -37,7 +41,7 @@ func GetTodoByID(id uint) (todo *Todo, err error) {
 	return
 }
 
-func GetAllTodo(queryPage *QueryPage) (todos []Todo, err error) {
+func GetAllTodo(queryPage *modules.QueryPage) (todos []Todo, err error) {
 	err = NewTodoQuerySet(gGormDB).
 		All(&todos)
 	return

@@ -3,11 +3,12 @@ package controllers
 import (
 	"github.com/jungju/circle/models"
 	"github.com/jungju/circle/requests"
+	"github.com/jungju/circle_manager/modules"
 )
 
 //  TodoController operations for Todo
 type TodoController struct {
-	BaseCircleController
+	modules.BaseCircleController
 }
 
 // Post ...
@@ -19,7 +20,7 @@ type TodoController struct {
 // @router / [post]
 // @Security userAPIKey
 func (c *TodoController) Post() {
-	c.post(&requests.CreateTodo{}, &models.Todo{})
+	c.BasePost(&requests.CreateTodo{}, &models.Todo{})
 }
 
 // GetOne ...
@@ -31,7 +32,7 @@ func (c *TodoController) Post() {
 // @router /:id [get]
 // @Security userAPIKey
 func (c *TodoController) GetOne() {
-	c.getOne(&models.Todo{})
+	c.BaseGetOne(&models.Todo{})
 }
 
 // GetAll ...
@@ -48,7 +49,7 @@ func (c *TodoController) GetOne() {
 // @router / [get]
 // @Security userAPIKey
 func (c *TodoController) GetAll() {
-	c.getAll([]models.Todo{})
+	c.BaseGetAll(&[]models.Todo{})
 }
 
 // Put ...
@@ -61,7 +62,7 @@ func (c *TodoController) GetAll() {
 // @router /:id [put]
 // @Security userAPIKey
 func (c *TodoController) Put() {
-	c.put(&requests.UpdateTodo{}, &models.Todo{})
+	c.BasePut(&requests.UpdateTodo{}, &models.Todo{})
 }
 
 // Delete ...
@@ -73,5 +74,5 @@ func (c *TodoController) Put() {
 // @router /:id [delete]
 // @Security userAPIKey
 func (c *TodoController) Delete() {
-	c.delete(&models.Todo{})
+	c.BaseDelete(&models.Todo{})
 }

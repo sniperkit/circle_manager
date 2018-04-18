@@ -3,11 +3,12 @@ package controllers
 import (
 	"github.com/jungju/circle/models"
 	"github.com/jungju/circle/requests"
+	"github.com/jungju/circle_manager/modules"
 )
 
 //  EventController operations for Event
 type EventController struct {
-	BaseCircleController
+	modules.BaseCircleController
 }
 
 // Post ...
@@ -19,7 +20,7 @@ type EventController struct {
 // @router / [post]
 // @Security userAPIKey
 func (c *EventController) Post() {
-	c.post(&requests.CreateEvent{}, &models.Event{})
+	c.BasePost(&requests.CreateEvent{}, &models.Event{})
 }
 
 // GetOne ...
@@ -31,7 +32,7 @@ func (c *EventController) Post() {
 // @router /:id [get]
 // @Security userAPIKey
 func (c *EventController) GetOne() {
-	c.getOne(&models.Event{})
+	c.BaseGetOne(&models.Event{})
 }
 
 // GetAll ...
@@ -48,7 +49,7 @@ func (c *EventController) GetOne() {
 // @router / [get]
 // @Security userAPIKey
 func (c *EventController) GetAll() {
-	c.getAll([]models.Event{})
+	c.BaseGetAll(&[]models.Event{})
 }
 
 // Put ...
@@ -61,7 +62,7 @@ func (c *EventController) GetAll() {
 // @router /:id [put]
 // @Security userAPIKey
 func (c *EventController) Put() {
-	c.put(&requests.UpdateEvent{}, &models.Event{})
+	c.BasePut(&requests.UpdateEvent{}, &models.Event{})
 }
 
 // Delete ...
@@ -73,5 +74,5 @@ func (c *EventController) Put() {
 // @router /:id [delete]
 // @Security userAPIKey
 func (c *EventController) Delete() {
-	c.delete(&models.Event{})
+	c.BaseDelete(&models.Event{})
 }

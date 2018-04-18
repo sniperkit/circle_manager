@@ -3,11 +3,12 @@ package controllers
 import (
 	"github.com/jungju/circle/models"
 	"github.com/jungju/circle/requests"
+	"github.com/jungju/circle_manager/modules"
 )
 
 //  KeyEventController operations for KeyEvent
 type KeyEventController struct {
-	BaseCircleController
+	modules.BaseCircleController
 }
 
 // Post ...
@@ -19,7 +20,7 @@ type KeyEventController struct {
 // @router / [post]
 // @Security userAPIKey
 func (c *KeyEventController) Post() {
-	c.post(&requests.CreateKeyEvent{}, &models.KeyEvent{})
+	c.BasePost(&requests.CreateKeyEvent{}, &models.KeyEvent{})
 }
 
 // GetOne ...
@@ -31,7 +32,7 @@ func (c *KeyEventController) Post() {
 // @router /:id [get]
 // @Security userAPIKey
 func (c *KeyEventController) GetOne() {
-	c.getOne(&models.KeyEvent{})
+	c.BaseGetOne(&models.KeyEvent{})
 }
 
 // GetAll ...
@@ -48,7 +49,7 @@ func (c *KeyEventController) GetOne() {
 // @router / [get]
 // @Security userAPIKey
 func (c *KeyEventController) GetAll() {
-	c.getAll([]models.KeyEvent{})
+	c.BaseGetAll(&[]models.KeyEvent{})
 }
 
 // Put ...
@@ -61,7 +62,7 @@ func (c *KeyEventController) GetAll() {
 // @router /:id [put]
 // @Security userAPIKey
 func (c *KeyEventController) Put() {
-	c.put(&requests.UpdateKeyEvent{}, &models.KeyEvent{})
+	c.BasePut(&requests.UpdateKeyEvent{}, &models.KeyEvent{})
 }
 
 // Delete ...
@@ -73,5 +74,5 @@ func (c *KeyEventController) Put() {
 // @router /:id [delete]
 // @Security userAPIKey
 func (c *KeyEventController) Delete() {
-	c.delete(&models.KeyEvent{})
+	c.BaseDelete(&models.KeyEvent{})
 }

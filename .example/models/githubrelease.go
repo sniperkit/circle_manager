@@ -1,6 +1,10 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"github.com/jungju/circle_manager/modules"
+)
 
 // gen:qs
 type GithubRelease struct {
@@ -35,7 +39,7 @@ func GetGithubReleaseByID(id uint) (githubrelease *GithubRelease, err error) {
 	return
 }
 
-func GetAllGithubRelease(queryPage *QueryPage) (githubreleases []GithubRelease, err error) {
+func GetAllGithubRelease(queryPage *modules.QueryPage) (githubreleases []GithubRelease, err error) {
 	err = NewGithubReleaseQuerySet(gGormDB).
 		All(&githubreleases)
 	return

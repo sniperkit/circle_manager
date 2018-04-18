@@ -1,6 +1,10 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"github.com/jungju/circle_manager/modules"
+)
 
 // gen:qs
 type Employee struct {
@@ -31,7 +35,7 @@ func GetEmployeeByID(id uint) (employee *Employee, err error) {
 	return
 }
 
-func GetAllEmployee(queryPage *QueryPage) (employees []Employee, err error) {
+func GetAllEmployee(queryPage *modules.QueryPage) (employees []Employee, err error) {
 	err = NewEmployeeQuerySet(gGormDB).
 		All(&employees)
 	return
