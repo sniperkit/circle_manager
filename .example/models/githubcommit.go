@@ -23,29 +23,29 @@ func init() {
 	registModel(&GithubCommit{})
 }
 
-func AddGithubCommit(githubcommit *GithubCommit) (id uint, err error) {
-	err = githubcommit.Create(gGormDB)
-	id = githubcommit.ID
+func AddGithubCommit(githubCommit *GithubCommit) (id uint, err error) {
+	err = githubCommit.Create(gGormDB)
+	id = githubCommit.ID
 	return
 }
 
-func GetGithubCommitByID(id uint) (githubcommit *GithubCommit, err error) {
-	githubcommit = &GithubCommit{
+func GetGithubCommitByID(id uint) (githubCommit *GithubCommit, err error) {
+	githubCommit = &GithubCommit{
 		ID: id,
 	}
 	err = NewGithubCommitQuerySet(gGormDB).
-		One(githubcommit)
+		One(githubCommit)
 	return
 }
 
-func GetAllGithubCommit(queryPage *modules.QueryPage) (githubcommits []GithubCommit, err error) {
+func GetAllGithubCommit(queryPage *modules.QueryPage) (githubCommits []GithubCommit, err error) {
 	err = NewGithubCommitQuerySet(gGormDB).
-		All(&githubcommits)
+		All(&githubCommits)
 	return
 }
 
-func UpdateGithubCommitByID(githubcommit *GithubCommit) (err error) {
-	err = githubcommit.Update(gGormDB,
+func UpdateGithubCommitByID(githubCommit *GithubCommit) (err error) {
+	err = githubCommit.Update(gGormDB,
 		GithubCommitDBSchema.Name,
 		GithubCommitDBSchema.Description,
 		GithubCommitDBSchema.RepoName,
@@ -57,9 +57,9 @@ func UpdateGithubCommitByID(githubcommit *GithubCommit) (err error) {
 }
 
 func DeleteGithubCommit(id uint) (err error) {
-	githubcommit := &GithubCommit{
+	githubCommit := &GithubCommit{
 		ID: id,
 	}
-	err = githubcommit.Delete(gGormDB)
+	err = githubCommit.Delete(gGormDB)
 	return
 }

@@ -3,8 +3,8 @@ package modules
 import (
 	"fmt"
 	"time"
-
-	stringcase "github.com/reiver/go-stringcase"
+	"unicode"
+	"unicode/utf8"
 )
 
 // gen:qs
@@ -27,7 +27,15 @@ type CircleUnit struct {
 }
 
 func (c CircleUnit) GetVariableName() string {
-	return stringcase.ToCamelCase(c.Name)
+	return lowerFirst(c.Name)
+}
+
+func lowerFirst(s string) string {
+	if s == "" {
+		return ""
+	}
+	r, n := utf8.DecodeRuneInString(s)
+	return string(unicode.ToLower(r)) + s[n:]
 }
 
 func (c CircleUnit) GetControllerName() string {

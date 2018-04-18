@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
@@ -19,19 +20,23 @@ var (
 )
 
 type Envs struct {
-	Mode       string
-	Name       string
-	DBHost     string
-	DBPort     int
-	DBName     string
-	DBUser     string
-	DBPassWord string
-	CircleID   uint
-	RootPath   string
+	Mode            string
+	Name            string
+	DBHost          string
+	DBPort          int
+	DBName          string
+	DBUser          string
+	DBPassWord      string
+	CircleID        uint
+	RootPath        string
+	OnlyControllers bool
+	OnlyModels      bool
+	OnlyRequests    bool
+	OnlyResponses   bool
 }
 
 func envsValid() error {
-	if envs.Mode == "generate" {
+	if envs.Mode == "generate" || envs.Mode == "envs" {
 		if envs.CircleID <= 0 {
 			return errors.New("circleID가 없으므로 종료")
 		}
@@ -69,7 +74,7 @@ func main() {
 	app.Usage = "for NO-CODE Platform"
 	app.Version = "0.0.1"
 	app.Flags = []cli.Flag{
-		cli.StringFlag{Name: "mode", Value: "", Usage: "generate, add, delete, scan"},
+		cli.StringFlag{Name: "mode", Value: "", Usage: "generate, add, delete, scan, safe, envs"},
 		cli.StringFlag{Name: "name", Value: "", Usage: "target name, ex)Car, Group, User"},
 		cli.StringFlag{Name: "dbHost", Value: "localhost", Usage: "DB Host", EnvVar: "DB_HOST"},
 		cli.IntFlag{Name: "dbPort", Value: 3306, Usage: "DB Port", EnvVar: "DB_PORT"},
@@ -78,18 +83,26 @@ func main() {
 		cli.StringFlag{Name: "dbPassword", Value: "password", Usage: "DB Password", EnvVar: "DB_PASSWORD"},
 		cli.UintFlag{Name: "circleID", Value: 1, Usage: "CircleID", EnvVar: "CIRCLE_ID"},
 		cli.StringFlag{Name: "rootPath", Value: "./", Usage: "RootPath", EnvVar: "ROOT_PATH"},
+		cli.BoolFlag{Name: "onlyControllers", Usage: "RootPaths"},
+		cli.BoolFlag{Name: "onlyModels", Usage: "onlyModels"},
+		cli.BoolFlag{Name: "onlyRequests", Usage: "onlyRequests"},
+		cli.BoolFlag{Name: "onlyResponses", Usage: "onlyResponses"},
 	}
 	app.Action = func(c *cli.Context) error {
 		envs = &Envs{
-			Mode:       c.String("mode"),
-			Name:       c.String("name"),
-			DBHost:     c.String("dbHost"),
-			DBPort:     c.Int("dbPort"),
-			DBName:     c.String("dbName"),
-			DBUser:     c.String("dbUser"),
-			DBPassWord: c.String("dbPassword"),
-			CircleID:   c.Uint("circleID"),
-			RootPath:   c.String("rootPath"),
+			Mode:            c.String("mode"),
+			Name:            c.String("name"),
+			DBHost:          c.String("dbHost"),
+			DBPort:          c.Int("dbPort"),
+			DBName:          c.String("dbName"),
+			DBUser:          c.String("dbUser"),
+			DBPassWord:      c.String("dbPassword"),
+			CircleID:        c.Uint("circleID"),
+			RootPath:        c.String("rootPath"),
+			OnlyControllers: c.Bool("onlyControllers"),
+			OnlyModels:      c.Bool("onlyModels"),
+			OnlyRequests:    c.Bool("onlyRequests"),
+			OnlyResponses:   c.Bool("onlyResponses"),
 		}
 
 		err := envsValid()
@@ -104,6 +117,26 @@ func main() {
 			return runAdd()
 		} else if envs.Mode == "delete" {
 			return runDelete()
+		} else if envs.Mode == "safe" {
+			cm := &CircleManager{}
+			if err := cm.GeneateSourceBySet(&modules.CircleSet{}); err != nil {
+				return err
+			}
+		} else if envs.Mode == "envs" {
+			var err error
+			db, err := initDB()
+			if err != nil {
+				return err
+			}
+
+			cs, err := getCircleSetByID(db, envs.CircleID)
+			if err != nil {
+				return err
+			}
+
+			if err := setRunAppEnv(cs.RunAppEnvs); err != nil {
+				return err
+			}
 		}
 		return nil
 	}
@@ -112,6 +145,18 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func setRunAppEnv(runAppEnvs string) error {
+	for _, envStr := range strings.Split(runAppEnvs, " ") {
+		envKeyValue := strings.Split(envStr, "=")
+		if len(envKeyValue) == 2 {
+			if envKeyValue[0] != "" && envKeyValue[1] != "" {
+				os.Setenv(envKeyValue[0], envKeyValue[1])
+			}
+		}
+	}
+	return nil
 }
 
 func runDelete() error {
@@ -130,9 +175,7 @@ func runDelete() error {
 		return err
 	}
 
-	if err := cm.GeneateSourceBySet(&modules.CircleSet{
-	//Units: []modules.CircleUnit{manualUnit},
-	}); err != nil {
+	if err := cm.GeneateSourceBySet(&modules.CircleSet{}); err != nil {
 		return err
 	}
 
@@ -173,14 +216,6 @@ func runGen() error {
 
 	cm := &CircleManager{}
 
-	if err := db.AutoMigrate(
-		&modules.CircleSet{},
-		&modules.CircleUnit{},
-		&modules.CircleUnitProperty{},
-	).Error; err != nil {
-		return err
-	}
-
 	if err := cm.GeneateSource(db, envs.CircleID); err != nil {
 		return err
 	}
@@ -203,5 +238,15 @@ func initDB() (*gorm.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	return dbm.GetDB(), nil
+
+	db := dbm.GetDB()
+	if err := db.AutoMigrate(
+		&modules.CircleSet{},
+		&modules.CircleUnit{},
+		&modules.CircleUnitProperty{},
+	).Error; err != nil {
+		return nil, err
+	}
+
+	return db, nil
 }

@@ -90,6 +90,19 @@ func (cm *CircleManager) GeneateSourceBySet(cs *modules.CircleSet) error {
 	}
 
 	for _, circleTemplateSet := range cm.MapTemplateSets {
+		if circleTemplateSet.SourceType != "models" && envs.OnlyModels {
+			continue
+		}
+		if circleTemplateSet.SourceType != "controllers" && envs.OnlyControllers {
+			continue
+		}
+		if circleTemplateSet.SourceType != "requests" && envs.OnlyRequests {
+			continue
+		}
+		if circleTemplateSet.SourceType != "responses" && envs.OnlyResponses {
+			continue
+		}
+
 		if _, err := os.Stat(filepath.Join(circleTemplateSet.SourcePath)); os.IsNotExist(err) {
 			return errors.New("Not found" + filepath.Join(circleTemplateSet.SourcePath))
 		}
@@ -132,6 +145,10 @@ func (cm *CircleManager) GeneateSourceBySet(cs *modules.CircleSet) error {
 
 func (cm *CircleManager) AppendManual(unit *modules.CircleUnit) error {
 	cm.prepare()
+
+	if envs.OnlyModels || envs.OnlyControllers || envs.OnlyRequests || envs.OnlyResponses {
+		return nil
+	}
 
 	routerTemplateSet := cm.MapTemplateSets["router"]
 	routerTemplate := `beego.NSNamespace("/{{.URL}}",
