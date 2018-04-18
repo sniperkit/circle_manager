@@ -8,6 +8,10 @@ add:
   cmds:
     - go run ./cli.go ./circleManager.go --mode add --name Test --rootPath .example
 
+delete:
+  cmds:
+    - go run ./cli.go ./circleManager.go --mode delete --name Test --rootPath .example
+
 test:
   cmds:
     - ^clean

@@ -1,7 +1,5 @@
 package requests
 
-import "time"
-
 type CreateCar struct {
 	Key1 string
 }

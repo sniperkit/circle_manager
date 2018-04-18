@@ -91,6 +91,9 @@ func (cm *CircleManager) GeneateSourceBySet(cs *modules.CircleSet) error {
 	for _, circleTemplateSet := range cm.MapTemplateSets {
 		if circleTemplateSet.IsMulti {
 			for _, unit := range cs.Units {
+				if unit.IsManual {
+					continue
+				}
 				if err := ExecuteTemplate(
 					filepath.Join(circleTemplateSet.SourcePath, fmt.Sprintf("%s.go", unit.GetVariableName())),
 					circleTemplateSet.TemplatePath,
@@ -133,6 +136,57 @@ func (cm *CircleManager) AppendManual(unit *modules.CircleUnit) error {
 		return err
 	}
 
+	return nil
+}
+
+func (cm *CircleManager) DeleteManual(unit *modules.CircleUnit) error {
+	cm.prepare()
+
+	routerTemplateSet := cm.MapTemplateSets["router"]
+	routerTemplate := `beego.NSNamespace("/{{.URL}}",
+			beego.NSInclude(
+				&controllers.{{.Name}}Controller{},
+			),
+		),
+		`
+	if err := deleteManual(routerTemplateSet.TemplatePath, routerTemplate, unit); err != nil {
+		return err
+	}
+
+	adminTemplateSet := cm.MapTemplateSets["admin"]
+	adminTemplate := `addResourceAndMenu(&models.{{.Name}}{}, "{{.MenuName}}", "{{.MenuGroup}}", anyoneAllow, -1)
+	`
+	if err := deleteManual(adminTemplateSet.TemplatePath, adminTemplate, unit); err != nil {
+		return err
+	}
+
+	os.Remove(filepath.Join(envs.RootPath, "controllers", fmt.Sprintf("%s.go", unit.GetVariableName())))
+	os.Remove(filepath.Join(envs.RootPath, "models", fmt.Sprintf("%s.go", unit.GetVariableName())))
+	os.Remove(filepath.Join(envs.RootPath, "requests", fmt.Sprintf("%s.go", unit.GetVariableName())))
+	os.Remove(filepath.Join(envs.RootPath, "responses", fmt.Sprintf("%s.go", unit.GetVariableName())))
+
+	return nil
+}
+
+func deleteManual(templatefile string, appendText string, unit *modules.CircleUnit) error {
+	t := template.Must(template.New("t1").Parse(appendText))
+
+	var tpl bytes.Buffer
+	if err := t.Execute(&tpl, unit); err != nil {
+		return err
+	}
+
+	read, err := ioutil.ReadFile(templatefile)
+	if err != nil {
+		return err
+	}
+
+	newContents := strings.Replace(string(read), tpl.String(), "", -1)
+
+	err = ioutil.WriteFile(templatefile, []byte(newContents), 0)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

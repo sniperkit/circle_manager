@@ -1,11 +1,14 @@
 package admin
 
 import (
-	"github.com/jungju/circle/models"
+	"github.com//models"
 	"github.com/qor/admin"
 )
 
 func setCircle(a *admin.Admin) {
+	// circle:system:start
+	// circle:system:end
+
 	// circle:manual:start
 	addResourceAndMenu(&models.GithubCommit{}, "Commits", "이벤트관리", anyoneAllow, -1)
 	addResourceAndMenu(&models.GithubRelease{}, "Releases", "이벤트관리", anyoneAllow, -1)
@@ -18,5 +21,6 @@ func setCircle(a *admin.Admin) {
 	// circle:manual:end
 
 	// circle:auto:start
+
 	// circle:auto:end
 }

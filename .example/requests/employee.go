@@ -1,7 +1,5 @@
 package requests
 
-import "time"
-
 type CreateEmployee struct {
 	OriginName string
 }

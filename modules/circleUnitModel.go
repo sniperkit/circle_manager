@@ -14,8 +14,8 @@ type CircleUnit struct {
 	UpdatedAt   time.Time            `description:"수정일"`
 	Name        string               `description:"이름"`
 	Description string               `description:"설명" sql:"type:text"`
-	CircleSet   CircleSet            ``
-	CircleSetID uint                 ``
+	CircleSet   CircleSet            `description:""`
+	CircleSetID uint                 `description:""`
 	Properties  []CircleUnitProperty `description:""`
 	Import      string               `description:""`
 	URL         string               `description:""`

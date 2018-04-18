@@ -48,20 +48,10 @@ func init() {
 		// circle:system:end
 
 		// circle:manual:start
-		beego.NSNamespace("/Tests",
-			beego.NSInclude(
-				&controllers.TestController{},
-			),
-		),
-		beego.NSNamespace("/Tests",
-			beego.NSInclude(
-				&controllers.TestController{},
-			),
-		),
 		// circle:manual:end
 
 		// circle:auto:start
-		{{range $i, $unit := .Units}}
+		{{range $i, $unit := .GetAutoGenUnits}}
 		beego.NSNamespace("/{{.URL}}",
 			beego.NSInclude(
 				&controllers.{{.Name}}Controller{},

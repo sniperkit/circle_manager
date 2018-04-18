@@ -54,7 +54,7 @@ func envsValid() error {
 		if envs.RootPath == "" {
 			envs.RootPath = "./"
 		}
-	} else if envs.Mode == "add" {
+	} else if envs.Mode == "add" || envs.Mode == "delete" {
 		if envs.Name == "" {
 			return errors.New("Require Name")
 		}
@@ -69,7 +69,7 @@ func main() {
 	app.Usage = "for NO-CODE Platform"
 	app.Version = "0.0.1"
 	app.Flags = []cli.Flag{
-		cli.StringFlag{Name: "mode", Value: "", Usage: "generate, add, delete,scan"},
+		cli.StringFlag{Name: "mode", Value: "", Usage: "generate, add, delete, scan"},
 		cli.StringFlag{Name: "name", Value: "", Usage: "target name, ex)Car, Group, User"},
 		cli.StringFlag{Name: "dbHost", Value: "localhost", Usage: "DB Host", EnvVar: "DB_HOST"},
 		cli.IntFlag{Name: "dbPort", Value: 3306, Usage: "DB Port", EnvVar: "DB_PORT"},
@@ -102,6 +102,8 @@ func main() {
 			return runGen()
 		} else if envs.Mode == "add" {
 			return runAdd()
+		} else if envs.Mode == "delete" {
+			return runDelete()
 		}
 		return nil
 	}
@@ -110,6 +112,31 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func runDelete() error {
+	cm := &CircleManager{}
+
+	manualUnit := modules.CircleUnit{
+		Name:      envs.Name,
+		URL:       inflection.Plural(envs.Name),
+		MenuName:  envs.Name,
+		MenuGroup: "etc.",
+		IsManual:  true,
+		IsEnable:  true,
+	}
+
+	if err := cm.DeleteManual(&manualUnit); err != nil {
+		return err
+	}
+
+	if err := cm.GeneateSourceBySet(&modules.CircleSet{
+	//Units: []modules.CircleUnit{manualUnit},
+	}); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func runAdd() error {

@@ -24,6 +24,16 @@ type CircleSet struct {
 	RunAppEnvs            string       `description:""`
 }
 
+func (c CircleSet) GetAutoGenUnits() []CircleUnit {
+	units := []CircleUnit{}
+	for _, unit := range c.Units {
+		if !unit.IsManual && !unit.IsSystem {
+			units = append(units, unit)
+		}
+	}
+	return units
+}
+
 func AddCircleSet(circleSet *CircleSet) (id uint, err error) {
 	err = circleSet.Create(gGormDB)
 	id = circleSet.ID

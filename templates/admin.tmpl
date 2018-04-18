@@ -18,10 +18,11 @@ func setCircle(a *admin.Admin) {
 	addResourceAndMenu(&models.Project{}, "프로젝트", "이벤트관리", anyoneAllow, -1)
 	addResourceAndMenu(&models.Todo{}, "할일", "이벤트관리", anyoneAllow, -1)
 	addResourceAndMenu(&models.Team{}, "팀", "이벤트관리", anyoneAllow, -1)
-	addResourceAndMenu(&models.Test{}, "Test", "etc.", anyoneAllow, -1)
-	addResourceAndMenu(&models.Test{}, "Test", "etc.", anyoneAllow, -1)
 	// circle:manual:end
 
 	// circle:auto:start
+	{{range $i, $unit := .GetAutoGenUnits}}
+	addResourceAndMenu(&models.{{.Name}}{}, "{{.MenuName}}", "{{.MenuGroup}}", anyoneAllow, -1)
+	{{end}}
 	// circle:auto:end
 }
