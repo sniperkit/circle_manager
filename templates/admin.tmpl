@@ -6,6 +6,9 @@ import (
 )
 
 func setCircle(a *admin.Admin) {
+	// circle:system:start
+	// circle:system:end
+
 	// circle:manual:start
 	addResourceAndMenu(&models.GithubCommit{}, "Commits", "이벤트관리", anyoneAllow, -1)
 	addResourceAndMenu(&models.GithubRelease{}, "Releases", "이벤트관리", anyoneAllow, -1)
@@ -15,6 +18,8 @@ func setCircle(a *admin.Admin) {
 	addResourceAndMenu(&models.Project{}, "프로젝트", "이벤트관리", anyoneAllow, -1)
 	addResourceAndMenu(&models.Todo{}, "할일", "이벤트관리", anyoneAllow, -1)
 	addResourceAndMenu(&models.Team{}, "팀", "이벤트관리", anyoneAllow, -1)
+	addResourceAndMenu(&models.Test{}, "Test", "etc.", anyoneAllow, -1)
+	addResourceAndMenu(&models.Test{}, "Test", "etc.", anyoneAllow, -1)
 	// circle:manual:end
 
 	// circle:auto:start

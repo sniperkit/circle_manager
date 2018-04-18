@@ -8,6 +8,7 @@ import (
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"github.com/jinzhu/inflection"
 	"github.com/jungju/circle_manager/modules"
 	"github.com/jungju/gorm_manager"
 	"github.com/urfave/cli"
@@ -18,6 +19,8 @@ var (
 )
 
 type Envs struct {
+	Mode       string
+	Name       string
 	DBHost     string
 	DBPort     int
 	DBName     string
@@ -27,25 +30,36 @@ type Envs struct {
 	RootPath   string
 }
 
-func (envs *Envs) Valid() error {
-	if envs.DBHost == "" {
-		return errors.New("Require DBHost")
+func envsValid() error {
+	if envs.Mode == "generate" {
+		if envs.CircleID <= 0 {
+			return errors.New("circleID가 없으므로 종료")
+		}
+
+		if envs.DBHost == "" {
+			return errors.New("Require DBHost")
+		}
+		if envs.DBPort <= 0 {
+			return errors.New("Require DBPort")
+		}
+		if envs.DBName == "" {
+			return errors.New("Require DBName")
+		}
+		if envs.DBUser == "" {
+			return errors.New("Require DBUser")
+		}
+		if envs.DBPassWord == "" {
+			return errors.New("Require DBPassWord")
+		}
+		if envs.RootPath == "" {
+			envs.RootPath = "./"
+		}
+	} else if envs.Mode == "add" {
+		if envs.Name == "" {
+			return errors.New("Require Name")
+		}
 	}
-	if envs.DBPort <= 0 {
-		return errors.New("Require DBPort")
-	}
-	if envs.DBName == "" {
-		return errors.New("Require DBName")
-	}
-	if envs.DBUser == "" {
-		return errors.New("Require DBUser")
-	}
-	if envs.DBPassWord == "" {
-		return errors.New("Require DBPassWord")
-	}
-	if envs.RootPath == "" {
-		envs.RootPath = "./"
-	}
+
 	return nil
 }
 
@@ -55,6 +69,8 @@ func main() {
 	app.Usage = "for NO-CODE Platform"
 	app.Version = "0.0.1"
 	app.Flags = []cli.Flag{
+		cli.StringFlag{Name: "mode", Value: "", Usage: "generate, add, scan"},
+		cli.StringFlag{Name: "name", Value: "", Usage: "add mame"},
 		cli.StringFlag{Name: "dbHost", Value: "localhost", Usage: "DB Host", EnvVar: "DB_HOST"},
 		cli.IntFlag{Name: "dbPort", Value: 3306, Usage: "DB Port", EnvVar: "DB_PORT"},
 		cli.StringFlag{Name: "dbName", Value: "circle", Usage: "DB Name", EnvVar: "DB_NAME"},
@@ -65,6 +81,8 @@ func main() {
 	}
 	app.Action = func(c *cli.Context) error {
 		envs = &Envs{
+			Mode:       c.String("mode"),
+			Name:       c.String("name"),
 			DBHost:     c.String("dbHost"),
 			DBPort:     c.Int("dbPort"),
 			DBName:     c.String("dbName"),
@@ -74,23 +92,49 @@ func main() {
 			RootPath:   c.String("rootPath"),
 		}
 
-		if envs.CircleID <= 0 {
-			log.Println("circleID가 없으므로 종료")
+		err := envsValid()
+		if err != nil {
+			fmt.Println(err.Error())
 			return nil
 		}
 
-		err := envs.Valid()
-		if err != nil {
-			return err
+		if envs.Mode == "generate" {
+			return runGen()
+		} else if envs.Mode == "add" {
+			return runAdd()
 		}
-
-		return runGen()
+		return nil
 	}
 
 	err := app.Run(os.Args)
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func runAdd() error {
+	cm := &CircleManager{}
+
+	manualUnit := modules.CircleUnit{
+		Name:      envs.Name,
+		URL:       inflection.Plural(envs.Name),
+		MenuName:  envs.Name,
+		MenuGroup: "etc.",
+		IsManual:  true,
+		IsEnable:  true,
+	}
+
+	if err := cm.AppendManual(&manualUnit); err != nil {
+		return err
+	}
+
+	if err := cm.GeneateSourceBySet(&modules.CircleSet{
+		Units: []modules.CircleUnit{manualUnit},
+	}); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func runGen() error {

@@ -4,6 +4,10 @@ dev:
   cmds:
     - go run ./cli.go ./circleManager.go --dbHost 127.0.0.1 --dbPort 3306 --dbName circle --dbUser root --dbPassword jjgo --circleID 1 --rootPath example
 
+add:
+  cmds:
+    - go run ./cli.go ./circleManager.go --mode add --name Test --rootPath .example
+
 test:
   cmds:
     - ^clean

@@ -1,14 +1,18 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/alecthomas/template"
 	"github.com/jinzhu/gorm"
 	"github.com/jungju/circle_manager/modules"
+	"github.com/sirupsen/logrus"
 )
 
 type CircleManager struct {
@@ -96,6 +100,9 @@ func (cm *CircleManager) GeneateSourceBySet(cs *modules.CircleSet) error {
 			}
 		} else {
 			if err := ExecuteTemplate(circleTemplateSet.SourcePath, circleTemplateSet.TemplatePath, cs); err != nil {
+				logrus.WithField("SourcePath", circleTemplateSet.SourcePath).
+					WithField("TemplatePath", circleTemplateSet.TemplatePath).
+					Error()
 				return err
 			}
 		}
@@ -104,13 +111,55 @@ func (cm *CircleManager) GeneateSourceBySet(cs *modules.CircleSet) error {
 	return nil
 }
 
-func getCircleSetByID(db *gorm.DB, id uint) (circleSet *modules.CircleSet, err error) {
-	circleSet = &modules.CircleSet{
-		ID: id,
+func (cm *CircleManager) AppendManual(unit *modules.CircleUnit) error {
+	cm.prepare()
+
+	routerTemplateSet := cm.MapTemplateSets["router"]
+	routerTemplate := `beego.NSNamespace("/{{.URL}}",
+			beego.NSInclude(
+				&controllers.{{.Name}}Controller{},
+			),
+		),
+		`
+	appendManual(routerTemplateSet.TemplatePath, routerTemplate, unit)
+
+	adminTemplateSet := cm.MapTemplateSets["admin"]
+	adminTemplate := `addResourceAndMenu(&models.{{.Name}}{}, "{{.MenuName}}", "{{.MenuGroup}}", anyoneAllow, -1)
+	`
+	appendManual(adminTemplateSet.TemplatePath, adminTemplate, unit)
+
+	return nil
+}
+
+func appendManual(templatefile string, appendText string, unit *modules.CircleUnit) error {
+	t := template.Must(template.New("t1").Parse(appendText))
+
+	var tpl bytes.Buffer
+	if err := t.Execute(&tpl, unit); err != nil {
+		return err
 	}
 
-	err = db.Preload("Units").Preload("Units.Properties").First(circleSet, "id = ?", id).Error
-	return circleSet, err
+	read, err := ioutil.ReadFile(templatefile)
+	if err != nil {
+		return err
+	}
+
+	append := fmt.Sprintf("%s// circle:manual:end", tpl.String())
+
+	newContents := strings.Replace(string(read), "// circle:manual:end", append, -1)
+
+	err = ioutil.WriteFile(templatefile, []byte(newContents), 0)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func setStatus(rawWhere, l, targetLine, newWhere string) string {
+	if strings.Index(l, targetLine) == 0 {
+		return strings.Replace(newWhere, "circle:", "", -1)
+	}
+	return rawWhere
 }
 
 func ExecuteTemplate(dest string, templatePath string, templateObject interface{}) error {
@@ -127,6 +176,20 @@ func ExecuteTemplate(dest string, templatePath string, templateObject interface{
 		return err
 	}
 
-	_, err = exec.Command("gofmt", "-w", dest).Output()
-	return err
+	if _, err = exec.Command("gofmt", "-w", dest).Output(); err != nil {
+		logrus.WithError(err).
+			WithField("dest", dest).
+			WithField("TemplatePath", templatePath).
+			Error("formating중 에러")
+	}
+	return nil
+}
+
+func getCircleSetByID(db *gorm.DB, id uint) (circleSet *modules.CircleSet, err error) {
+	circleSet = &modules.CircleSet{
+		ID: id,
+	}
+
+	err = db.Preload("Units").Preload("Units.Properties").First(circleSet, "id = ?", id).Error
+	return circleSet, err
 }

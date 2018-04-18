@@ -13,13 +13,62 @@ import (
 )
 
 func init() {
+	// circle:system:start
 	ns := beego.NewNamespace("/v1",
+		beego.NSNamespace("/circleSets",
+			beego.NSInclude(
+				&modules.CircleSetController{},
+			),
+		),
+		beego.NSNamespace("/circleUnits",
+			beego.NSInclude(
+				&modules.CircleUnitController{},
+			),
+		),
+		beego.NSNamespace("/circleUnitProperties",
+			beego.NSInclude(
+				&modules.CircleUnitPropertyController{},
+			),
+		),
+		beego.NSNamespace("/webhooks",
+			beego.NSInclude(
+				&controllers.WebhookController{},
+			),
+		),
+		beego.NSNamespace("/notifications",
+			beego.NSInclude(
+				&modules.NotificationController{},
+			),
+		),
+		beego.NSNamespace("/notificationTypes",
+			beego.NSInclude(
+				&modules.NotificationTypeController{},
+			),
+		),
+		// circle:system:end
+
+		// circle:manual:start
+		beego.NSNamespace("/Tests",
+			beego.NSInclude(
+				&controllers.TestController{},
+			),
+		),
+		beego.NSNamespace("/Tests",
+			beego.NSInclude(
+				&controllers.TestController{},
+			),
+		),
+		// circle:manual:end
+
+		// circle:auto:start
 		{{range $i, $unit := .Units}}
 		beego.NSNamespace("/{{.URL}}",
 			beego.NSInclude(
 				&controllers.{{.Name}}Controller{},
 			),
-		),{{end}}
+		),
+		{{end}}
+		// circle:auto:end 
 	)
 	beego.AddNamespace(ns)
 }
