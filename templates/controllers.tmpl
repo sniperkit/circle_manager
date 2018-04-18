@@ -3,11 +3,12 @@ package controllers
 import (
 	"github.com/{{.Import}}/models"
 	"github.com/{{.Import}}/requests"
+	"github.com/jungju/circle_manager/modules"
 )
 
 //  {{.Name}}Controller operations for {{.Name}}
 type {{.Name}}Controller struct {
-	BaseCircleController
+	modules.BaseCircleController
 }
 
 // Post ...
@@ -19,7 +20,7 @@ type {{.Name}}Controller struct {
 // @router / [post]
 // @Security userAPIKey
 func (c *{{.Name}}Controller) Post() {
-	c.post(&requests.Create{{.Name}}{}, &models.{{.Name}}{})
+	c.BasePost(&requests.Create{{.Name}}{}, &models.{{.Name}}{})
 }
 
 // GetOne ...
@@ -31,7 +32,7 @@ func (c *{{.Name}}Controller) Post() {
 // @router /:id [get]
 // @Security userAPIKey
 func (c *{{.Name}}Controller) GetOne() {
-	c.getOne(&models.{{.Name}}{})
+	c.BaseGetOne(&models.{{.Name}}{})
 }
 
 // GetAll ...
@@ -48,7 +49,7 @@ func (c *{{.Name}}Controller) GetOne() {
 // @router / [get]
 // @Security userAPIKey
 func (c *{{.Name}}Controller) GetAll() {
-	c.getAll(&[]models.{{.Name}}{})
+	c.BaseGetAll(&[]models.{{.Name}}{})
 }
 
 // Put ...
@@ -61,7 +62,7 @@ func (c *{{.Name}}Controller) GetAll() {
 // @router /:id [put]
 // @Security userAPIKey
 func (c *{{.Name}}Controller) Put() {
-	c.put(&requests.Update{{.Name}}{}, &models.{{.Name}}{})
+	c.BasePut(&requests.Update{{.Name}}{}, &models.{{.Name}}{})
 }
 
 // Delete ...
@@ -73,5 +74,5 @@ func (c *{{.Name}}Controller) Put() {
 // @router /:id [delete]
 // @Security userAPIKey
 func (c *{{.Name}}Controller) Delete() {
-	c.delete(&models.{{.Name}}{})
+	c.BaseDelete(&models.{{.Name}}{})
 }

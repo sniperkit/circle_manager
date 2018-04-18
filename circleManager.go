@@ -89,6 +89,13 @@ func (cm *CircleManager) GeneateSourceBySet(cs *modules.CircleSet) error {
 	}
 
 	for _, circleTemplateSet := range cm.MapTemplateSets {
+		if _, err := os.Stat(filepath.Join(circleTemplateSet.SourcePath)); os.IsNotExist(err) {
+			return errors.New("Not found" + filepath.Join(circleTemplateSet.SourcePath))
+		}
+		if _, err := os.Stat(filepath.Join(circleTemplateSet.TemplatePath)); os.IsNotExist(err) {
+			return errors.New("Not found" + filepath.Join(circleTemplateSet.SourcePath))
+		}
+
 		if circleTemplateSet.IsMulti {
 			for _, unit := range cs.Units {
 				if unit.IsManual {
