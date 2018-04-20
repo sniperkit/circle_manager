@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/astaxie/beego"
+	"github.com/jinzhu/gorm"
 	"github.com/sirupsen/logrus"
 )
 
@@ -13,6 +14,18 @@ import (
 type BaseController struct {
 	beego.Controller
 	RequestBody RequestBody
+}
+
+// QueryPage ...
+type QueryPage struct {
+	Fields     []string
+	Sortby     []string
+	Order      []string
+	Query      map[string]string
+	Limit      int
+	Offset     int
+	Tags       []uint
+	Properties map[string][]string
 }
 
 // Success ...
@@ -39,7 +52,7 @@ func (c *BaseController) ErrorAbort(code int, err error, withMsg ...interface{})
 	c.CustomAbort(code, "")
 }
 
-func (c *BaseController) GetQueryPage() (*QueryPage, error) {
+func (c *BaseController) GetQueryPage() *QueryPage {
 	queryPage := &QueryPage{
 		Query: make(map[string]string),
 		Limit: 10,
@@ -70,13 +83,13 @@ func (c *BaseController) GetQueryPage() (*QueryPage, error) {
 		for _, cond := range strings.Split(v, ",") {
 			kv := strings.SplitN(cond, ":", 2)
 			if len(kv) != 2 {
-				return nil, ErrInvalidQuery
+				c.ErrorAbort(400, ErrInvalidQuery)
 			}
 			k, v := kv[0], kv[1]
 			queryPage.Query[k] = v
 		}
 	}
-	return queryPage, nil
+	return queryPage
 }
 
 func (c *BaseController) setRequestDataInterface(reqBody interface{}) error {
@@ -141,4 +154,14 @@ func (c *BaseController) GetParamID() uint {
 		c.ErrorAbort(400, err)
 	}
 	return id
+}
+
+func (c *BaseController) CheckRecordNotFoundAndServerError(err error) {
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.ErrorAbort(404, err)
+		} else {
+			c.ErrorAbort(500, err)
+		}
+	}
 }
