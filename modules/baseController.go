@@ -55,20 +55,20 @@ func getUserIDByUserMeta(userMeta *UserMeta) *uint {
 }
 
 // SuccessCreate ...
-func (c *BaseController) SuccessCreate(data interface{}) {
-	evnet(structs.Name(data), "add", getUserIDByUserMeta(c.CurrentUserMeta), data)
-	c.Success(http.StatusCreated, data)
+func (c *BaseController) SuccessCreate(modelItem ModelItem, responseBody ResponseBody) {
+	evnet(structs.Name(modelItem), "add", getUserIDByUserMeta(c.CurrentUserMeta), modelItem)
+	c.Success(http.StatusCreated, responseBody)
 }
 
 // SuccessUpdate ...
-func (c *BaseController) SuccessUpdate(data interface{}) {
-	evnet(structs.Name(data), "update", getUserIDByUserMeta(c.CurrentUserMeta), data)
-	c.Success(http.StatusOK, data)
+func (c *BaseController) SuccessUpdate(modelItem ModelItem, responseBody ResponseBody) {
+	evnet(structs.Name(modelItem), "update", getUserIDByUserMeta(c.CurrentUserMeta), modelItem)
+	c.Success(http.StatusOK, responseBody)
 }
 
 // SuccessDelete ...
-func (c *BaseController) SuccessDelete(data interface{}) {
-	evnet(structs.Name(data), "delete", getUserIDByUserMeta(c.CurrentUserMeta), data)
+func (c *BaseController) SuccessDelete(modelItem ModelItem) {
+	evnet(structs.Name(modelItem), "delete", getUserIDByUserMeta(c.CurrentUserMeta), modelItem)
 	c.Success(http.StatusNoContent, nil)
 }
 
