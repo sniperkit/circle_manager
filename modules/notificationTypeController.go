@@ -9,11 +9,6 @@ import (
 //  NotificationTypeController operations for NotificationType
 type NotificationTypeController struct {
 	BaseUserController
-	RequestCreateItem *CreateNotificationType
-	RequestUpdateItem *UpdateNotificationType
-	ModelItem         *NotificationType
-	ModelItems        *[]NotificationType
-	ResponseItem      *NotificationType
 }
 
 func (c *NotificationTypeController) Prepare() {

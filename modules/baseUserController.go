@@ -30,7 +30,7 @@ type getExistsObjectInUserFunc func(uint) (bool, error)
 
 //BaseController ...
 type BaseUserController struct {
-	BaseController
+	BaseCrudController
 	CurrentUserMeta *UserMeta
 }
 

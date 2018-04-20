@@ -9,11 +9,6 @@ import (
 //  CircleUnitPropertyController operations for CircleUnit
 type CircleUnitPropertyController struct {
 	BaseUserController
-	RequestCreateItem *CreateCircleUnit
-	RequestUpdateItem *UpdateCircleUnit
-	ModelItem         *CircleUnit
-	ModelItems        *[]CircleUnit
-	ResponseItem      *CircleUnit
 }
 
 func (c *CircleUnitPropertyController) Prepare() {

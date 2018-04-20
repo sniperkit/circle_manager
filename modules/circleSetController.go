@@ -9,11 +9,6 @@ import (
 //  CircleSetController operations for CircleSet
 type CircleSetController struct {
 	BaseUserController
-	RequestCreateItem *CreateCircleSet
-	RequestUpdateItem *UpdateCircleSet
-	ModelItem         *CircleSet
-	ModelItems        *[]CircleSet
-	ResponseItem      *CircleSet
 }
 
 func (c *CircleSetController) Prepare() {
