@@ -59,7 +59,7 @@ func (c *BaseCrudController) BaseGetAll() {
 	reqPage := c.GetQueryPage()
 
 	// 2. DB 요청 단계. Error이면 500
-	err := GetItems(&c.ModelItems, reqPage)
+	err := GetItems(c.ModelItems, reqPage)
 	c.CheckRecordNotFoundAndServerError(err)
 
 	// 4. 사용자 응답 데이터 가공 단계
