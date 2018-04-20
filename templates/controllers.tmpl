@@ -1,9 +1,6 @@
 package controllers
 
 import (
-	"net/http"
-
-	"github.com/jinzhu/copier"
 	"github.com/{{.Import}}/models"
 	"github.com/{{.Import}}/requests"
 	"github.com/{{.Import}}/responses"
@@ -13,11 +10,6 @@ import (
 //  {{.Name}}Controller operations for {{.Name}}
 type {{.Name}}Controller struct {
 	modules.BaseUserController
-	RequestCreateItem *requests.Create{{.Name}}
-	RequestUpdateItem *requests.Update{{.Name}}
-	ModelItem         *models.{{.Name}}
-	ModelItems        *[]models.{{.Name}}
-	ResponseItem      *responses.Response{{.Name}}
 }
 
 func (c *{{.Name}}Controller) Prepare() {
@@ -37,20 +29,7 @@ func (c *{{.Name}}Controller) Prepare() {
 // @router / [post]
 // @Security userAPIKey
 func (c *{{.Name}}Controller) Post() {
-	// 1. 사용자 요청에 대한 유효성 처리 단계. Error이면 400
-	c.SetRequestDataAndValid(c.RequestCreateItem)
-
-	// 2. 사용자 요청 데이터에서 DB 데이터로 가공 단계
-	copier.Copy(c.ModelItem, c.RequestCreateItem)
-
-	// 3. DB 입력 단계. Error이면 500
-	err := modules.CreateItem(c.ModelItem)
-	c.CheckRecordNotFoundAndServerError(err)
-
-	// 4. 사용자 응답 데이터 가공 단계
-
-	// 5. 사용자 응답 단계. 성공 응답 201
-	c.Success(http.StatusCreated, c.ModelItem)
+	c.BasePost()
 }
 
 // GetOne ...
@@ -62,17 +41,7 @@ func (c *{{.Name}}Controller) Post() {
 // @router /:id [get]
 // @Security userAPIKey
 func (c *{{.Name}}Controller) GetOne() {
-	// 1. 사용자 요청에 대한 유효성 처리 단계. Error이면 400
-	id := c.GetParamID()
-
-	// 2. DB 요청 단계. Error이면 404, 500
-	err := modules.GetItemByID(id, c.ModelItem)
-	c.CheckRecordNotFoundAndServerError(err)
-
-	// 4. 사용자 응답 데이터 가공 단계
-
-	// 5. 사용자 응답 단계. 성공 응답 200
-	c.Success(http.StatusOK, c.ModelItem)
+	c.BaseGetOne()
 }
 
 // GetAll ...
@@ -89,17 +58,7 @@ func (c *{{.Name}}Controller) GetOne() {
 // @router / [get]
 // @Security userAPIKey
 func (c *{{.Name}}Controller) GetAll() {
-	// 1. 사용자 요청에 대한 유효성 처리 단계. Error이면 400
-	reqPage := c.GetQueryPage()
-
-	// 2. DB 요청 단계. Error이면 500
-	err := modules.GetItems(&c.ModelItems, reqPage)
-	c.CheckRecordNotFoundAndServerError(err)
-
-	// 4. 사용자 응답 데이터 가공 단계
-
-	// 5. 사용자 응답 단계. 성공 응답 200
-	c.Success(http.StatusOK, c.ModelItems)
+	c.BaseGetAll()
 }
 
 // Put ...
@@ -112,23 +71,7 @@ func (c *{{.Name}}Controller) GetAll() {
 // @router /:id [put]
 // @Security userAPIKey
 func (c *{{.Name}}Controller) Put() {
-	// 1. 사용자 요청에 대한 유효성 처리 단계. Error이면 400
-	id := c.GetParamID()
-	c.SetRequestDataAndValid(c.RequestUpdateItem)
-
-	// 1-1. 사용자 요청에 대한 DB 데이터 유효성 관계. Error이면 404, 500
-	err := modules.GetItemByID(id, c.ModelItem)
-	c.CheckRecordNotFoundAndServerError(err)
-
-	// 2. 사용자 요청 데이터에서 DB 데이터로 가공 단계
-	copier.Copy(c.ModelItem, c.RequestUpdateItem)
-
-	// 3. DB 수정 단계. Error이면 500
-	err = modules.UpdateItem(c.ModelItem)
-	c.CheckRecordNotFoundAndServerError(err)
-
-	// 5. 사용자 응답 단계. 성공 응답 200
-	c.Success(http.StatusOK, c.ModelItem)
+	c.BasePut()
 }
 
 // Delete ...
@@ -140,17 +83,5 @@ func (c *{{.Name}}Controller) Put() {
 // @router /:id [delete]
 // @Security userAPIKey
 func (c *{{.Name}}Controller) Delete() {
-	// 1. 사용자 요청에 대한 유효성 처리 단계. Error이면 400
-	id := c.GetParamID()
-
-	// 1-1. 사용자 요청에 대한 DB 데이터 유효성 관계. Error이면 404, 500
-	err := modules.GetItemByID(id, c.ModelItem)
-	c.CheckRecordNotFoundAndServerError(err)
-
-	// 2. DB 삭제 단계. Error이면 500
-	err = modules.DeleteItem(id, c.ModelItem)
-	c.CheckRecordNotFoundAndServerError(err)
-
-	// 3. 사용자 응답 단계. 성공 응답 204
-	c.Success(http.StatusNoContent, nil)
+	c.BaseDelete()
 }
