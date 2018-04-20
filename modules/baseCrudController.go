@@ -62,10 +62,10 @@ func (c *BaseCrudController) BaseGetAll() {
 	err := GetItems(c.ModelItems, reqPage)
 	c.CheckRecordNotFoundAndServerError(err)
 
-	// 4. 사용자 응답 데이터 가공 단계
+	// 3. 사용자 응답 데이터 가공 단계
 	copier.Copy(c.ResponseItem, c.ModelItem)
 
-	// 5. 사용자 응답 단계. 성공 응답 200
+	// 4. 사용자 응답 단계. 성공 응답 200
 	c.Success(http.StatusOK, c.ResponseItem)
 }
 
