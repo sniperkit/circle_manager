@@ -27,8 +27,8 @@ func (c *CircleSetController) Prepare() {
 // Post ...
 // @Title Post
 // @Description create CircleSet
-// @Param	body		body 	CircleSet	true		"body for CircleSet content"
-// @Success 201 {int} CircleSet
+// @Param	body		body 	modules.CircleSet	true		"body for CircleSet content"
+// @Success 201 {int} modules.CircleSet
 // @Failure 403 body is empty
 // @router / [post]
 // @Security userAPIKey
@@ -51,9 +51,9 @@ func (c *CircleSetController) Post() {
 
 // GetOne ...
 // @Title Get One
-// @Description get CircleSet by id
+// @Description get modules.CircleSet by id
 // @Param	id		path 	string	true		"The key for staticblock"
-// @Success 200 {object} CircleSet
+// @Success 200 {object} modules.CircleSet
 // @Failure 403 :id is empty
 // @router /:id [get]
 // @Security userAPIKey
@@ -80,7 +80,7 @@ func (c *CircleSetController) GetOne() {
 // @Param	order	query	string	false	"Order corresponding to each sortby field, if single value, apply to all sortby fields. e.g. desc,asc ..."
 // @Param	limit	query	string	false	"Limit the size of result set. Must be an integer"
 // @Param	offset	query	string	false	"Start position of result set. Must be an integer"
-// @Success 200 {object} []CircleSet
+// @Success 200 {object} []modules.CircleSet
 // @Failure 403
 // @router / [get]
 // @Security userAPIKey
@@ -102,8 +102,8 @@ func (c *CircleSetController) GetAll() {
 // @Title Put
 // @Description update the CircleSet
 // @Param	id		path 	string	true		"The id you want to update"
-// @Param	body		body 	CircleSet	true		"body for CircleSet content"
-// @Success 200 {object} CircleSet
+// @Param	body		body 	modules.CircleSet	true		"body for CircleSet content"
+// @Success 200 {object} modules.CircleSet
 // @Failure 403 :id is not int
 // @router /:id [put]
 // @Security userAPIKey
