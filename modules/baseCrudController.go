@@ -33,9 +33,10 @@ func (c *BaseCrudController) BasePost() {
 	c.CheckRecordNotFoundAndServerError(err)
 
 	// 4. 사용자 응답 데이터 가공 단계
+	copier.Copy(c.ResponseItem, c.ModelItem)
 
 	// 5. 사용자 응답 단계. 성공 응답 201
-	c.Success(http.StatusCreated, c.ModelItem)
+	c.Success(http.StatusCreated, c.ResponseItem)
 }
 
 func (c *BaseCrudController) BaseGetOne() {
@@ -46,10 +47,11 @@ func (c *BaseCrudController) BaseGetOne() {
 	err := GetItemByID(id, c.ModelItem)
 	c.CheckRecordNotFoundAndServerError(err)
 
-	// 4. 사용자 응답 데이터 가공 단계
+	// 3. 사용자 응답 데이터 가공 단계
+	copier.Copy(c.ResponseItem, c.ModelItem)
 
-	// 5. 사용자 응답 단계. 성공 응답 200
-	c.Success(http.StatusOK, c.ModelItem)
+	// 4. 사용자 응답 단계. 성공 응답 200
+	c.Success(http.StatusOK, c.ResponseItem)
 }
 
 func (c *BaseCrudController) BaseGetAll() {
@@ -61,9 +63,10 @@ func (c *BaseCrudController) BaseGetAll() {
 	c.CheckRecordNotFoundAndServerError(err)
 
 	// 4. 사용자 응답 데이터 가공 단계
+	copier.Copy(c.ResponseItem, c.ModelItem)
 
 	// 5. 사용자 응답 단계. 성공 응답 200
-	c.Success(http.StatusOK, c.ModelItems)
+	c.Success(http.StatusOK, c.ResponseItem)
 }
 
 func (c *BaseCrudController) BasePut() {
@@ -82,8 +85,11 @@ func (c *BaseCrudController) BasePut() {
 	err = UpdateItem(c.ModelItem)
 	c.CheckRecordNotFoundAndServerError(err)
 
+	// 4. 사용자 응답 데이터 가공 단계
+	copier.Copy(c.ResponseItem, c.ModelItem)
+
 	// 5. 사용자 응답 단계. 성공 응답 200
-	c.Success(http.StatusOK, c.ModelItem)
+	c.Success(http.StatusOK, c.ResponseItem)
 }
 
 func (c *BaseCrudController) BaseDelete() {
