@@ -36,7 +36,7 @@ func (c *BaseCrudController) BasePost() {
 	copier.Copy(c.ResponseItem, c.ModelItem)
 
 	// 5. 사용자 응답 단계. 성공 응답 201
-	c.Success(http.StatusCreated, c.ResponseItem)
+	c.SuccessCreate(c.ResponseItem)
 }
 
 func (c *BaseCrudController) BaseGetOne() {
@@ -89,7 +89,7 @@ func (c *BaseCrudController) BasePut() {
 	copier.Copy(c.ResponseItem, c.ModelItem)
 
 	// 5. 사용자 응답 단계. 성공 응답 200
-	c.Success(http.StatusOK, c.ResponseItem)
+	c.SuccessUpdate(c.ResponseItem)
 }
 
 func (c *BaseCrudController) BaseDelete() {
@@ -105,5 +105,5 @@ func (c *BaseCrudController) BaseDelete() {
 	c.CheckRecordNotFoundAndServerError(err)
 
 	// 3. 사용자 응답 단계. 성공 응답 204
-	c.Success(http.StatusNoContent, nil)
+	c.SuccessDelete(c.ModelItem)
 }

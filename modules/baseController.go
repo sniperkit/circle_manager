@@ -2,8 +2,12 @@ package modules
 
 import (
 	"encoding/json"
+	"fmt"
+	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/fatih/structs"
 
 	"github.com/astaxie/beego"
 	"github.com/jinzhu/gorm"
@@ -13,7 +17,7 @@ import (
 //BaseController ...
 type BaseController struct {
 	beego.Controller
-	RequestBody RequestBody
+	CurrentUserMeta *UserMeta
 }
 
 // QueryPage ...
@@ -40,6 +44,41 @@ func (c *BaseController) Success(statusCode int, data interface{}) {
 			c.Data["json"] = data
 			c.ServeJSON()
 		}
+	}
+}
+
+func getUserIDByUserMeta(userMeta *UserMeta) *uint {
+	if userMeta == nil {
+		return nil
+	}
+	return &userMeta.UserID
+}
+
+// SuccessCreate ...
+func (c *BaseController) SuccessCreate(data interface{}) {
+	evnet(structs.Name(data), "add", getUserIDByUserMeta(c.CurrentUserMeta), data)
+	c.Success(http.StatusCreated, data)
+}
+
+// SuccessUpdate ...
+func (c *BaseController) SuccessUpdate(data interface{}) {
+	evnet(structs.Name(data), "update", getUserIDByUserMeta(c.CurrentUserMeta), data)
+	c.Success(http.StatusOK, data)
+}
+
+// SuccessDelete ...
+func (c *BaseController) SuccessDelete(data interface{}) {
+	evnet(structs.Name(data), "delete", getUserIDByUserMeta(c.CurrentUserMeta), data)
+	c.Success(http.StatusNoContent, nil)
+}
+
+func evnet(structName string, action string, eventUserID *uint, data interface{}) {
+	if err := AddActionNotification(
+		fmt.Sprintf("%s,%s", structName, action),
+		eventUserID,
+		data,
+	); err != nil {
+		logrus.WithError(err).Error()
 	}
 }
 

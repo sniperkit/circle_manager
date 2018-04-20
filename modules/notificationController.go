@@ -105,7 +105,7 @@ func (c *NotificationController) PostMenualMessage() {
 	c.Success(http.StatusNoContent, nil)
 }
 
-func AddActionNotification(tags string, eventUserID uint, objects ...interface{}) error {
+func AddActionNotification(tags string, eventUserID *uint, objects ...interface{}) error {
 	notificationTypes, err := GetNotificationsTypesByManualSend(false)
 	if err != nil {
 		return err
@@ -117,7 +117,7 @@ func AddActionNotification(tags string, eventUserID uint, objects ...interface{}
 		}
 
 		notification := MakeNotification(&notificationType, nil, objects...)
-		notification.EventUserID = &eventUserID
+		notification.EventUserID = eventUserID
 		notification.NotificationType = notificationType
 		notification.NotificationTypeID = notificationType.ID
 
