@@ -78,6 +78,10 @@ func GetItems(items interface{}, queryPage *QueryPage) error {
 	return gGormDB.Find(items).Error
 }
 
+func GetItemsOnlyUserData(items interface{}, queryPage *QueryPage, userID uint) error {
+	return gGormDB.Where("creator == ?", userID).Find(items).Error
+}
+
 func UpdateItem(item interface{}) error {
 	return gGormDB.Save(item).Error
 }

@@ -74,6 +74,10 @@ err := cm.GeneateSourceBySet(&CircleSet{
 -> generate files ./test ....
 ```
 
+## Todo
+- API 권한
+- 데이터 권한
+
 ## library
 - github.com/astaxie/beego
 - github.com/jinzhu/gorm

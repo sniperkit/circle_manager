@@ -11,6 +11,7 @@ type NotificationType struct {
 	UpdatedAt        time.Time `description:"수정일"`
 	Name             string    `description:"이름"`
 	Description      string    `description:"설명" sql:"type:text"`
+	CreatorID        uint      `description:"작성자"`
 	IsEnable         bool      `description:""`
 	IsManual         bool      `description:""`
 	TargetObject     string    `description:""`
@@ -21,6 +22,10 @@ type NotificationType struct {
 	ListItemTemplate string    `description:"" gorm:"size:2500"`
 	WebhookURLs      string    `description:"" gorm:"size:2500"`
 	ReplaceText      string    ``
+}
+
+func (c *NotificationType) GetCreatorID() uint {
+	return c.CreatorID
 }
 
 func AddNotificationType(notificationType *NotificationType) (id uint, err error) {

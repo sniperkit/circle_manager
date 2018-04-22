@@ -10,14 +10,19 @@ type Notification struct {
 	CreatedAt          time.Time        `description:"등록일"`
 	UpdatedAt          time.Time        `description:"수정일"`
 	Name               string           `description:"이름"`
-	Description        string           `description:"설명" gorm:"size:2500"`
+	Description        string           `description:"설명" sql:"type:text"`
+	CreatorID          uint             `description:"작성자"`
 	EventUserID        *uint            `description:""`
 	NotificationType   NotificationType `description:""`
 	NotificationTypeID uint             `description:""`
 	NotiType           string           `description:""`
 	Title              string           `description:""`
-	Message            string           `description:"" gorm:"size:2500"`
+	Message            string           `description:"" gorm:"type:text"`
 	SentAt             *time.Time       `description:""`
+}
+
+func (c *Notification) GetCreatorID() uint {
+	return c.CreatorID
 }
 
 func AddNotification(notification *Notification) (id uint, err error) {

@@ -11,6 +11,7 @@ type CircleUnitProperty struct {
 	UpdatedAt    time.Time  `description:"수정일"`
 	Name         string     `description:"이름"`
 	Description  string     `description:"설명" sql:"type:text"`
+	CreatorID    uint       `description:"작성자"`
 	CircleUnit   CircleUnit `description:""`
 	CircleUnitID uint       `description:""`
 	Type         string     `description:""`
@@ -18,6 +19,12 @@ type CircleUnitProperty struct {
 	IsEnable     bool       `description:"사용여부"`
 	IsManual     bool       `description:""`
 	IsSystem     bool       `description:""`
+	UseRequest   bool       `description:""`
+	UseResponses bool       `description:""`
+}
+
+func (c *CircleUnitProperty) GetCreatorID() uint {
+	return c.CreatorID
 }
 
 func AddCircleUnitProperty(circleUnitProperty *CircleUnitProperty) (id uint, err error) {

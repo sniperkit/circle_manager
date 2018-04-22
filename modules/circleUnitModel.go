@@ -9,21 +9,39 @@ import (
 
 // gen:qs
 type CircleUnit struct {
-	ID          uint                 `description:""`
-	CreatedAt   time.Time            `description:"등록일"`
-	UpdatedAt   time.Time            `description:"수정일"`
-	Name        string               `description:"이름"`
-	Description string               `description:"설명" sql:"type:text"`
-	CircleSet   CircleSet            `description:""`
-	CircleSetID uint                 `description:""`
-	Properties  []CircleUnitProperty `description:""`
-	Import      string               `description:""`
-	URL         string               `description:""`
-	MenuName    string               `description:""`
-	MenuGroup   string               `description:""`
-	IsEnable    bool                 `description:"사용여부"`
-	IsManual    bool                 `description:""`
-	IsSystem    bool                 `description:""`
+	ID            uint                 `description:""`
+	CreatedAt     time.Time            `description:"등록일"`
+	UpdatedAt     time.Time            `description:"수정일"`
+	Name          string               `description:"이름"`
+	Description   string               `description:"설명" sql:"type:text"`
+	CreatorID     uint                 `description:"작성자"`
+	CircleSet     CircleSet            `description:""`
+	CircleSetID   uint                 `description:""`
+	Properties    []CircleUnitProperty `description:""`
+	Import        string               `description:""`
+	URL           string               `description:""`
+	MenuName      string               `description:""`
+	MenuGroup     string               `description:""`
+	IsEnable      bool                 `description:"사용여부"`
+	IsManual      bool                 `description:""`
+	IsSystem      bool                 `description:""`
+	IsCreateble   bool                 `description:""`
+	CreatebleTags string               `description:""`
+	IsListable    bool                 `description:""`
+	ListableTags  string               `description:""`
+	IsGetable     bool                 `description:""`
+	GetableTags   string               `description:""`
+	IsDeleteble   bool                 `description:""`
+	DeletebleTags string               `description:""`
+	IsUpdateble   bool                 `description:""`
+	UpdatebleTags string               `description:""`
+	OlnyUserData  bool                 `description:""`
+	//AllDataTags   string               `description:""`
+
+}
+
+func (c *CircleUnit) GetCreatorID() uint {
+	return c.CreatorID
 }
 
 func (c CircleUnit) GetVariableName() string {

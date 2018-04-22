@@ -14,6 +14,10 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+var (
+	CurCircleSet *CircleSet
+)
+
 //BaseController ...
 type BaseController struct {
 	beego.Controller

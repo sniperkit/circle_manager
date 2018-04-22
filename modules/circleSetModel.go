@@ -11,6 +11,7 @@ type CircleSet struct {
 	UpdatedAt             time.Time    `description:"수정일"`
 	Name                  string       `description:"이름"`
 	Description           string       `description:"설명" sql:"type:text"`
+	CreatorID             uint         `description:"작성자"`
 	Import                string       `description:""`
 	Units                 []CircleUnit `description:""`
 	IsEnable              bool         `description:"사용여부"`
@@ -22,6 +23,22 @@ type CircleSet struct {
 	AppLicense            string       `description:""`
 	AppSecurityDefinition string       `description:""`
 	RunAppEnvs            string       `description:""`
+}
+
+func (c *CircleSet) GetCreatorID() uint {
+	return c.CreatorID
+}
+
+func (c CircleSet) GetUnit(unitName string) *CircleUnit {
+	for _, unit := range c.Units {
+		if !unit.IsSystem {
+			if unit.Name == unitName {
+				copy := unit
+				return &copy
+			}
+		}
+	}
+	return nil
 }
 
 func (c CircleSet) GetAutoGenUnits() []CircleUnit {
