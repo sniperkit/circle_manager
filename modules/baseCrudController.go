@@ -98,7 +98,7 @@ func (c *BaseCrudController) BaseGetOne() {
 	c.CheckAble("getone")
 
 	// @step3. DB 요청 단계. Error이면 404, 500
-	if c.CustomController.CustomCreateModelItem != nil {
+	if c.CustomController.CustomGetOneModelItem != nil {
 		// 사용자 함수가 있으면 실행
 		err := c.CustomController.CustomGetOneModelItem(c.ModelItem)
 		c.Check404And500(err)
@@ -130,7 +130,7 @@ func (c *BaseCrudController) BaseGetAll() {
 	c.CheckAble("list")
 
 	// @step2. DB 요청 단계. Error이면 500
-	if c.CustomController.CustomCreateModelItem != nil {
+	if c.CustomController.CustomGetAllModelItem != nil {
 		// 사용자 함수가 있으면 실행
 		err := c.CustomController.CustomGetAllModelItem(c.ModelItems)
 		c.Check404And500(err)
@@ -173,7 +173,7 @@ func (c *BaseCrudController) BasePut() {
 	copier.Copy(c.ModelItem, c.RequestUpdateItem)
 
 	// @step6. DB 수정 단계. Error이면 500
-	if c.CustomController.CustomCreateModelItem != nil {
+	if c.CustomController.CustomUpdateModelItem != nil {
 		// 사용자 함수가 있으면 실행
 		err := c.CustomController.CustomUpdateModelItem(c.ModelItem)
 		c.Check404And500(err)
@@ -212,7 +212,7 @@ func (c *BaseCrudController) BaseDelete() {
 	c.CheckUserData(404)
 
 	// @step5. DB 삭제 단계. Error이면 500
-	if c.CustomController.CustomCreateModelItem != nil {
+	if c.CustomController.CustomDeleteModelItem != nil {
 		// 사용자 함수가 있으면 실행
 		err := c.CustomController.CustomDeleteModelItem(c.ModelItem)
 		c.Check404And500(err)
