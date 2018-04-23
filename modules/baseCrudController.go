@@ -24,34 +24,12 @@ type BaseCrudController struct {
 	ResponseItem      ResponseBody
 	ResponseItems     ResponseBodies
 	CurrentCircleUnit *CircleUnit
-	CustomController  *CustomController
 }
 
 func (c *BaseCrudController) Prepare() {
 	if CurCircleSet != nil {
 		c.CurrentCircleUnit = CurCircleSet.GetUnit(structs.Name(c.ModelItem))
 	}
-	if c.CustomController == nil {
-		c.CustomController = &CustomController{}
-	}
-}
-
-type CustomResponseItem func(ModelItem) (interface{}, error)
-type CustomResponseItems func(ModelItems) (interface{}, error)
-type CustomCreateModelItem func(ModelItem) error
-type CustomUpdateModelItem func(ModelItem) error
-type CustomDeleteModelItem func(ModelItem) error
-type CustomGetOneModelItem func(ModelItem) error
-type CustomGetAllModelItem func(ModelItems) error
-
-type CustomController struct {
-	CustomResponseItem    CustomResponseItem
-	CustomResponseItems   CustomResponseItems
-	CustomCreateModelItem CustomCreateModelItem
-	CustomUpdateModelItem CustomUpdateModelItem
-	CustomDeleteModelItem CustomDeleteModelItem
-	CustomGetOneModelItem CustomGetOneModelItem
-	CustomGetAllModelItem CustomGetAllModelItem
 }
 
 func (c *BaseCrudController) BasePost() {
@@ -66,28 +44,14 @@ func (c *BaseCrudController) BasePost() {
 	c.Check404And500(err)
 
 	// @step4. DB 입력 단계. Error이면 500.
-	if c.CustomController.CustomCreateModelItem != nil {
-		// 사용자 함수가 있으면 실행
-		err := c.CustomController.CustomCreateModelItem(c.ModelItem)
-		c.Check404And500(err)
-	} else {
-		err := CreateItem(c.ModelItem)
-		c.Check404And500(err)
-	}
+	err = CreateItem(c.ModelItem)
+	c.Check404And500(err)
 
 	// @step5. 사용자 응답 데이터 가공 및 응답
-	if c.CustomController.CustomResponseItem != nil {
-		// 사용자 함수가 있으면 실행
-		customReponse, err := c.CustomController.CustomResponseItem(c.ModelItem)
-		c.Check404And500(err)
+	err = copier.Copy(c.ResponseItem, c.ModelItem)
+	c.Check404And500(err)
 
-		c.SuccessCreate(c.ModelItem, customReponse)
-	} else {
-		err := copier.Copy(c.ResponseItem, c.ModelItem)
-		c.Check404And500(err)
-
-		c.SuccessCreate(c.ModelItem, c.ResponseItem)
-	}
+	c.SuccessCreate(c.ModelItem, c.ResponseItem)
 }
 
 func (c *BaseCrudController) BaseGetOne() {
@@ -98,31 +62,17 @@ func (c *BaseCrudController) BaseGetOne() {
 	c.CheckAble("getone")
 
 	// @step3. DB 요청 단계. Error이면 404, 500
-	if c.CustomController.CustomGetOneModelItem != nil {
-		// 사용자 함수가 있으면 실행
-		err := c.CustomController.CustomGetOneModelItem(c.ModelItem)
-		c.Check404And500(err)
-	} else {
-		err := GetItemByID(id, c.ModelItem)
-		c.Check404And500(err)
-	}
+	err := GetItemByID(id, c.ModelItem)
+	c.Check404And500(err)
 
 	// @step4. 접근 데이터 체크. 접근 할수 없는 데이터는 404
 	c.CheckUserData(404)
 
 	// @step5. 사용자 응답 데이터 가공 및 응답
-	if c.CustomController.CustomResponseItem != nil {
-		// 사용자 함수가 있으면 실행
-		customReponse, err := c.CustomController.CustomResponseItem(c.ModelItem)
-		c.Check404And500(err)
+	err = copier.Copy(c.ResponseItem, c.ModelItem)
+	c.Check404And500(err)
 
-		c.Success(http.StatusOK, customReponse)
-	} else {
-		err := copier.Copy(c.ResponseItem, c.ModelItem)
-		c.Check404And500(err)
-
-		c.Success(http.StatusOK, c.ResponseItem)
-	}
+	c.Success(http.StatusOK, c.ResponseItem)
 }
 
 func (c *BaseCrudController) BaseGetAll() {
@@ -130,28 +80,14 @@ func (c *BaseCrudController) BaseGetAll() {
 	c.CheckAble("list")
 
 	// @step2. DB 요청 단계. Error이면 500
-	if c.CustomController.CustomGetAllModelItem != nil {
-		// 사용자 함수가 있으면 실행
-		err := c.CustomController.CustomGetAllModelItem(c.ModelItems)
-		c.Check404And500(err)
-	} else {
-		err := c.GetItems()
-		c.Check404And500(err)
-	}
+	err := c.GetItems()
+	c.Check404And500(err)
 
 	// @step3. 사용자 응답 데이터 가공 및 응답
-	if c.CustomController.CustomResponseItem != nil {
-		// 사용자 함수가 있으면 실행
-		customReponses, err := c.CustomController.CustomResponseItems(c.ModelItems)
-		c.Check404And500(err)
+	err = copier.Copy(c.ResponseItems, c.ModelItems)
+	c.Check404And500(err)
 
-		c.Success(http.StatusOK, customReponses)
-	} else {
-		err := copier.Copy(c.ResponseItems, c.ModelItems)
-		c.Check404And500(err)
-
-		c.Success(http.StatusOK, c.ResponseItems)
-	}
+	c.Success(http.StatusOK, c.ResponseItems)
 }
 
 func (c *BaseCrudController) BasePut() {
@@ -173,28 +109,14 @@ func (c *BaseCrudController) BasePut() {
 	copier.Copy(c.ModelItem, c.RequestUpdateItem)
 
 	// @step6. DB 수정 단계. Error이면 500
-	if c.CustomController.CustomUpdateModelItem != nil {
-		// 사용자 함수가 있으면 실행
-		err := c.CustomController.CustomUpdateModelItem(c.ModelItem)
-		c.Check404And500(err)
-	} else {
-		err = UpdateItem(c.ModelItem)
-		c.Check404And500(err)
-	}
+	err = UpdateItem(c.ModelItem)
+	c.Check404And500(err)
 
 	// @step7. 사용자 응답 데이터 가공 및 응답
-	if c.CustomController.CustomResponseItem != nil {
-		// 사용자 함수가 있으면 실행
-		customReponse, err := c.CustomController.CustomResponseItem(c.ModelItem)
-		c.Check404And500(err)
+	err = copier.Copy(c.ResponseItem, c.ModelItem)
+	c.Check404And500(err)
 
-		c.SuccessUpdate(c.ModelItem, customReponse)
-	} else {
-		err := copier.Copy(c.ResponseItem, c.ModelItem)
-		c.Check404And500(err)
-
-		c.SuccessUpdate(c.ModelItem, c.ResponseItem)
-	}
+	c.SuccessUpdate(c.ModelItem, c.ResponseItem)
 }
 
 func (c *BaseCrudController) BaseDelete() {
@@ -212,14 +134,8 @@ func (c *BaseCrudController) BaseDelete() {
 	c.CheckUserData(404)
 
 	// @step5. DB 삭제 단계. Error이면 500
-	if c.CustomController.CustomDeleteModelItem != nil {
-		// 사용자 함수가 있으면 실행
-		err := c.CustomController.CustomDeleteModelItem(c.ModelItem)
-		c.Check404And500(err)
-	} else {
-		err = DeleteItem(id, c.ModelItem)
-		c.Check404And500(err)
-	}
+	err = DeleteItem(id, c.ModelItem)
+	c.Check404And500(err)
 
 	// @step6. 사용자 응답
 	c.SuccessDelete(c.ModelItem)
