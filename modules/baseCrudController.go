@@ -22,183 +22,308 @@ type BaseCrudController struct {
 	ModelItem         ModelItem
 	ModelItems        ModelItems
 	ResponseItem      ResponseBody
+	ResponseItems     ResponseBodies
 	CurrentCircleUnit *CircleUnit
+	CustomController  *CustomController
 }
 
 func (c *BaseCrudController) Prepare() {
 	if CurCircleSet != nil {
 		c.CurrentCircleUnit = CurCircleSet.GetUnit(structs.Name(c.ModelItem))
 	}
+	if c.CustomController == nil {
+		c.CustomController = &CustomController{}
+	}
+}
+
+type CustomResponseItem func(ModelItem) (interface{}, error)
+type CustomResponseItems func(ModelItems) (interface{}, error)
+type CustomCreateModelItem func(ModelItem) error
+type CustomUpdateModelItem func(ModelItem) error
+type CustomDeleteModelItem func(ModelItem) error
+type CustomGetOneModelItem func(ModelItem) error
+type CustomGetAllModelItem func(ModelItems) error
+
+type CustomController struct {
+	CustomResponseItem    CustomResponseItem
+	CustomResponseItems   CustomResponseItems
+	CustomCreateModelItem CustomCreateModelItem
+	CustomUpdateModelItem CustomUpdateModelItem
+	CustomDeleteModelItem CustomDeleteModelItem
+	CustomGetOneModelItem CustomGetOneModelItem
+	CustomGetAllModelItem CustomGetAllModelItem
 }
 
 func (c *BaseCrudController) BasePost() {
-	// 1. 사용자 요청에 대한 유효성 처리 단계. Error이면 400
+	// @step1. 사용자 요청에 대한 유효성 처리 단계. Error이면 400
 	c.SetRequestDataAndValid(c.RequestCreateItem)
 
-	// 2. 사용자 요청 데이터에서 DB 데이터로 가공 단계
-	copier.Copy(c.ModelItem, c.RequestCreateItem)
+	// @step2. API 권한 체크
+	c.CheckAble("create")
 
-	if isEnable := checkAble("create", c.CurrentCircleUnit, c.CurrentUserMeta); !isEnable {
-		c.ErrorAbort(403, nil)
+	// @step3. 사용자 요청 데이터에서 모델 데이터로 가공
+	err := copier.Copy(c.ModelItem, c.RequestCreateItem)
+	c.Check404And500(err)
+
+	// @step4. DB 입력 단계. Error이면 500.
+	if c.CustomController.CustomCreateModelItem != nil {
+		// 사용자 함수가 있으면 실행
+		err := c.CustomController.CustomCreateModelItem(c.ModelItem)
+		c.Check404And500(err)
+	} else {
+		err := CreateItem(c.ModelItem)
+		c.Check404And500(err)
 	}
 
-	// 3. DB 입력 단계. Error이면 500
-	err := CreateItem(c.ModelItem)
-	c.CheckRecordNotFoundAndServerError(err)
+	// @step5. 사용자 응답 데이터 가공 및 응답
+	if c.CustomController.CustomResponseItem != nil {
+		// 사용자 함수가 있으면 실행
+		customReponse, err := c.CustomController.CustomResponseItem(c.ModelItem)
+		c.Check404And500(err)
 
-	// 4. 사용자 응답 데이터 가공 단계
-	copier.Copy(c.ResponseItem, c.ModelItem)
+		c.SuccessCreate(c.ModelItem, customReponse)
+	} else {
+		err := copier.Copy(c.ResponseItem, c.ModelItem)
+		c.Check404And500(err)
 
-	// 5. 사용자 응답 단계. 성공 응답 201
-	c.SuccessCreate(c.ModelItem, c.ResponseItem)
+		c.SuccessCreate(c.ModelItem, c.ResponseItem)
+	}
 }
 
 func (c *BaseCrudController) BaseGetOne() {
-	// 1. 사용자 요청에 대한 유효성 처리 단계. Error이면 400
+	// @step1. 사용자 요청에 대한 유효성 처리 단계. Error이면 400
 	id := c.GetParamID()
 
-	if isEnable := checkAble("getone", c.CurrentCircleUnit, c.CurrentUserMeta); !isEnable {
-		c.ErrorAbort(403, nil)
+	// @step2. API 권한 체크
+	c.CheckAble("getone")
+
+	// @step3. DB 요청 단계. Error이면 404, 500
+	if c.CustomController.CustomCreateModelItem != nil {
+		// 사용자 함수가 있으면 실행
+		err := c.CustomController.CustomGetOneModelItem(c.ModelItem)
+		c.Check404And500(err)
+	} else {
+		err := GetItemByID(id, c.ModelItem)
+		c.Check404And500(err)
 	}
 
-	// 2. DB 요청 단계. Error이면 404, 500
-	err := GetItemByID(id, c.ModelItem)
-	c.CheckRecordNotFoundAndServerError(err)
+	// @step4. 접근 데이터 체크. 접근 할수 없는 데이터는 404
+	c.CheckUserData(404)
 
-	if isUserData := checkUserData(c.CurrentCircleUnit, c.CurrentUserMeta, c.ModelItem); !isUserData {
-		c.ErrorAbort(404, nil)
+	// @step5. 사용자 응답 데이터 가공 및 응답
+	if c.CustomController.CustomResponseItem != nil {
+		// 사용자 함수가 있으면 실행
+		customReponse, err := c.CustomController.CustomResponseItem(c.ModelItem)
+		c.Check404And500(err)
+
+		c.Success(http.StatusOK, customReponse)
+	} else {
+		err := copier.Copy(c.ResponseItem, c.ModelItem)
+		c.Check404And500(err)
+
+		c.Success(http.StatusOK, c.ResponseItem)
 	}
-
-	// 3. 사용자 응답 데이터 가공 단계
-	copier.Copy(c.ResponseItem, c.ModelItem)
-
-	// 4. 사용자 응답 단계. 성공 응답 200
-	c.Success(http.StatusOK, c.ResponseItem)
 }
 
 func (c *BaseCrudController) BaseGetAll() {
-	// 1. 사용자 요청에 대한 유효성 처리 단계. Error이면 400
-	reqPage := c.GetQueryPage()
+	// @step1. API 권한 체크
+	c.CheckAble("list")
 
-	if isEnable := checkAble("list", c.CurrentCircleUnit, c.CurrentUserMeta); !isEnable {
-		c.ErrorAbort(403, nil)
+	// @step2. DB 요청 단계. Error이면 500
+	if c.CustomController.CustomCreateModelItem != nil {
+		// 사용자 함수가 있으면 실행
+		err := c.CustomController.CustomGetAllModelItem(c.ModelItems)
+		c.Check404And500(err)
+	} else {
+		err := c.GetItems()
+		c.Check404And500(err)
 	}
 
-	// 2. DB 요청 단계. Error이면 500
-	err := getItems(c.CurrentCircleUnit, c.CurrentUserMeta, c.ModelItems, reqPage)
-	c.CheckRecordNotFoundAndServerError(err)
+	// @step3. 사용자 응답 데이터 가공 및 응답
+	if c.CustomController.CustomResponseItem != nil {
+		// 사용자 함수가 있으면 실행
+		customReponses, err := c.CustomController.CustomResponseItems(c.ModelItems)
+		c.Check404And500(err)
 
-	// 3. 사용자 응답 데이터 가공 단계
-	copier.Copy(c.ResponseItem, c.ModelItem)
+		c.Success(http.StatusOK, customReponses)
+	} else {
+		err := copier.Copy(c.ResponseItems, c.ModelItems)
+		c.Check404And500(err)
 
-	// 4. 사용자 응답 단계. 성공 응답 200
-	c.Success(http.StatusOK, c.ResponseItem)
+		c.Success(http.StatusOK, c.ResponseItems)
+	}
 }
 
 func (c *BaseCrudController) BasePut() {
-	// 1. 사용자 요청에 대한 유효성 처리 단계. Error이면 400
+	// @step1. 사용자 요청에 대한 유효성 처리 단계. Error이면 400
 	id := c.GetParamID()
 	c.SetRequestDataAndValid(c.RequestUpdateItem)
 
-	if isEnable := checkAble("update", c.CurrentCircleUnit, c.CurrentUserMeta); !isEnable {
-		c.ErrorAbort(403, nil)
-	}
+	// @step2. API 권한 체크
+	c.CheckAble("update")
 
-	// 1-1. 사용자 요청에 대한 DB 데이터 유효성 관계. Error이면 404, 500
+	// @step3. 사용자 요청에 대한 DB 데이터 유효성 확인. Error이면 404 or 500
 	err := GetItemByID(id, c.ModelItem)
-	c.CheckRecordNotFoundAndServerError(err)
+	c.Check404And500(err)
 
-	if isUserData := checkUserData(c.CurrentCircleUnit, c.CurrentUserMeta, c.ModelItem); !isUserData {
-		c.ErrorAbort(404, nil)
-	}
+	// @step4. 접근 데이터 체크. 접근 할수 없는 데이터는 404
+	c.CheckUserData(404)
 
-	// 2. 사용자 요청 데이터에서 DB 데이터로 가공 단계
+	// @step5. 사용자 요청 데이터에서 DB 데이터로 가공 단계
 	copier.Copy(c.ModelItem, c.RequestUpdateItem)
 
-	// 3. DB 수정 단계. Error이면 500
-	err = UpdateItem(c.ModelItem)
-	c.CheckRecordNotFoundAndServerError(err)
+	// @step6. DB 수정 단계. Error이면 500
+	if c.CustomController.CustomCreateModelItem != nil {
+		// 사용자 함수가 있으면 실행
+		err := c.CustomController.CustomUpdateModelItem(c.ModelItem)
+		c.Check404And500(err)
+	} else {
+		err = UpdateItem(c.ModelItem)
+		c.Check404And500(err)
+	}
 
-	// 4. 사용자 응답 데이터 가공 단계
-	copier.Copy(c.ResponseItem, c.ModelItem)
+	// @step7. 사용자 응답 데이터 가공 및 응답
+	if c.CustomController.CustomResponseItem != nil {
+		// 사용자 함수가 있으면 실행
+		customReponse, err := c.CustomController.CustomResponseItem(c.ModelItem)
+		c.Check404And500(err)
 
-	// 5. 사용자 응답 단계. 성공 응답 200
-	c.SuccessUpdate(c.ModelItem, c.ResponseItem)
+		c.SuccessUpdate(c.ModelItem, customReponse)
+	} else {
+		err := copier.Copy(c.ResponseItem, c.ModelItem)
+		c.Check404And500(err)
+
+		c.SuccessUpdate(c.ModelItem, c.ResponseItem)
+	}
 }
 
 func (c *BaseCrudController) BaseDelete() {
-	// 1. 사용자 요청에 대한 유효성 처리 단계. Error이면 400
+	// @step1. 사용자 요청에 대한 유효성 처리 단계. Error이면 400
 	id := c.GetParamID()
 
-	if isEnable := checkAble("delete", c.CurrentCircleUnit, c.CurrentUserMeta); !isEnable {
-		c.ErrorAbort(403, nil)
-	}
+	// @step2. API 권한 체크
+	c.CheckAble("delete")
 
-	// 1-1. 사용자 요청에 대한 DB 데이터 유효성 관계. Error이면 404, 500
+	// @step3. 사용자 요청에 대한 DB 데이터 유효성 관계. Error이면 404 or 500
 	err := GetItemByID(id, c.ModelItem)
-	c.CheckRecordNotFoundAndServerError(err)
+	c.Check404And500(err)
 
-	if isUserData := checkUserData(c.CurrentCircleUnit, c.CurrentUserMeta, c.ModelItem); !isUserData {
-		c.ErrorAbort(404, nil)
+	// @step4. 접근 데이터 체크. 접근 할수 없는 데이터는 404
+	c.CheckUserData(404)
+
+	// @step5. DB 삭제 단계. Error이면 500
+	if c.CustomController.CustomCreateModelItem != nil {
+		// 사용자 함수가 있으면 실행
+		err := c.CustomController.CustomDeleteModelItem(c.ModelItem)
+		c.Check404And500(err)
+	} else {
+		err = DeleteItem(id, c.ModelItem)
+		c.Check404And500(err)
 	}
 
-	// 2. DB 삭제 단계. Error이면 500
-	err = DeleteItem(id, c.ModelItem)
-	c.CheckRecordNotFoundAndServerError(err)
-
-	// 3. 사용자 응답 단계. 성공 응답 204
+	// @step6. 사용자 응답
 	c.SuccessDelete(c.ModelItem)
 }
 
-func getItems(circleUnit *CircleUnit, userMeta *UserMeta, modelItems ModelItems, reqPage *QueryPage) error {
-	if circleUnit != nil {
-		if circleUnit.OlnyUserData {
+func (c *BaseCrudController) GetItems() error {
+	reqPage := c.GetQueryPage()
+
+	if c.CurrentCircleUnit != nil {
+		if c.CurrentCircleUnit.OlnyUserData {
 			//TODO: 제외되는 UserID 체크(Admin 등)
 			//TODO: userMeta가 없을 떄 처리
-			return GetItemsOnlyUserData(modelItems, reqPage, userMeta.UserID)
+			return GetItemsOnlyUserData(c.ModelItems, reqPage, c.CurrentUserMeta.UserID)
 		}
 	}
-	return GetItems(modelItems, reqPage)
+	return GetItems(c.ModelItems, reqPage)
 }
 
-func checkUserData(circleUnit *CircleUnit, userMeta *UserMeta, getedModel ModelItem) bool {
-	if circleUnit != nil {
-		if circleUnit.OlnyUserData {
-			if value := getedModel.GetCreatorID(); value == userMeta.UserID {
-				return true
+func (c *BaseCrudController) CheckUserData(thenErrorCode int) {
+	if c.CurrentCircleUnit != nil {
+		if c.CurrentCircleUnit.OlnyUserData {
+			if value := c.ModelItem.GetCreatorID(); value != c.CurrentUserMeta.UserID {
+				c.ErrorAbort(thenErrorCode, nil)
 			}
-			return true
 		}
 	}
-	return true
 }
 
-func checkAble(checkType string, circleUnit *CircleUnit, userMeta *UserMeta) bool {
-	if circleUnit != nil {
-		checkAbleProp := func(isEnable bool, tags string) bool {
-			if !isEnable {
+func (c *BaseCrudController) CheckAble(checkType string) {
+	if c.CurrentCircleUnit != nil {
+		checkAbleProp := func(userIDs, userTypeIDs, userStatusIDs string) bool {
+			if c.CurrentUserMeta == nil && userIDs != "" && userTypeIDs != "" && userStatusIDs != "" {
 				return false
-			} else if tags != "" {
-				if userMeta == nil {
-					return false
-				} else {
-					//TODO: 태그 처리
-				}
 			}
-			return true
+			if userIDs != "" {
+				//TODO:
+			} else if userTypeIDs != "" {
+				//TODO:
+			} else if userStatusIDs != "" {
+				//TODO:
+			}
+			return false
 		}
 		switch checkType {
 		case "create":
-			checkAbleProp(circleUnit.IsCreateble, circleUnit.CreatebleTags)
+			if !c.CurrentCircleUnit.IsCreateble {
+				c.ErrorAbort(404, nil)
+			} else if checkAbleProp(c.CurrentCircleUnit.CreatebleUserExcludeIDs,
+				c.CurrentCircleUnit.CreatebleUserExcludeTypeIDs,
+				c.CurrentCircleUnit.CreatebleUserExcludeStatusIDs) {
+				c.ErrorAbort(404, nil)
+			} else if checkAbleProp(c.CurrentCircleUnit.CreatebleUserIDs,
+				c.CurrentCircleUnit.CreatebleUserTypeIDs,
+				c.CurrentCircleUnit.CreatebleUserStatusIDs) {
+				return
+			}
 		case "update":
-			checkAbleProp(circleUnit.IsUpdateble, circleUnit.UpdatebleTags)
+			if !c.CurrentCircleUnit.IsUpdateble {
+				c.ErrorAbort(404, nil)
+			} else if checkAbleProp(c.CurrentCircleUnit.UpdatableUserExcludeIDs,
+				c.CurrentCircleUnit.UpdatableUserExcludeTypeIDs,
+				c.CurrentCircleUnit.UpdatableUserExcludeStatusIDs) {
+				c.ErrorAbort(404, nil)
+			} else if checkAbleProp(c.CurrentCircleUnit.UpdatableUserIDs,
+				c.CurrentCircleUnit.UpdatableUserTypeIDs,
+				c.CurrentCircleUnit.UpdatableUserStatusIDs) {
+				return
+			}
 		case "list":
-			checkAbleProp(circleUnit.IsListable, circleUnit.ListableTags)
+			if !c.CurrentCircleUnit.IsGetAllable {
+				c.ErrorAbort(404, nil)
+			} else if checkAbleProp(c.CurrentCircleUnit.GetAllableUserExcludeIDs,
+				c.CurrentCircleUnit.GetAllableUserExcludeTypeIDs,
+				c.CurrentCircleUnit.GetAllableUserExcludeStatusIDs) {
+				c.ErrorAbort(404, nil)
+			} else if checkAbleProp(c.CurrentCircleUnit.GetAllableUserIDs,
+				c.CurrentCircleUnit.GetAllableUserTypeIDs,
+				c.CurrentCircleUnit.GetAllableUserStatusIDs) {
+				return
+			}
 		case "getone":
-			checkAbleProp(circleUnit.IsGetable, circleUnit.GetableTags)
+			if !c.CurrentCircleUnit.IsGetOneable {
+				c.ErrorAbort(404, nil)
+			} else if checkAbleProp(c.CurrentCircleUnit.GetOneableUserExcludeIDs,
+				c.CurrentCircleUnit.GetOneableUserExcludeTypeIDs,
+				c.CurrentCircleUnit.GetOneableUserExcludeStatusIDs) {
+				c.ErrorAbort(404, nil)
+			} else if checkAbleProp(c.CurrentCircleUnit.GetOneableUserIDs,
+				c.CurrentCircleUnit.GetOneableUserTypeIDs,
+				c.CurrentCircleUnit.GetOneableUserStatusIDs) {
+				return
+			}
 		case "delete":
-			checkAbleProp(circleUnit.IsDeleteble, circleUnit.DeletebleTags)
+			if !c.CurrentCircleUnit.IsDeleteble {
+				c.ErrorAbort(404, nil)
+			} else if checkAbleProp(c.CurrentCircleUnit.DeletableUserExcludeIDs,
+				c.CurrentCircleUnit.DeletableUserExcludeTypeIDs,
+				c.CurrentCircleUnit.DeletableUserExcludeStatusIDs) {
+				c.ErrorAbort(404, nil)
+			} else if checkAbleProp(c.CurrentCircleUnit.DeletableUserIDs,
+				c.CurrentCircleUnit.DeletableUserTypeIDs,
+				c.CurrentCircleUnit.DeletableUserStatusIDs) {
+				return
+			}
 		}
 	}
-	return true
 }

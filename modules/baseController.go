@@ -199,7 +199,7 @@ func (c *BaseController) GetParamID() uint {
 	return id
 }
 
-func (c *BaseController) CheckRecordNotFoundAndServerError(err error) {
+func (c *BaseController) Check404And500(err error) {
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			c.ErrorAbort(404, err)
