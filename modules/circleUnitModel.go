@@ -69,6 +69,10 @@ func (c *CircleUnit) GetCreatorID() uint {
 	return c.CreatorID
 }
 
+func (m *CircleUnit) SetCreatorID(creatorID uint) {
+	m.CreatorID = creatorID
+}
+
 func (c CircleUnit) GetVariableName() string {
 	return lowerFirst(c.Name)
 }

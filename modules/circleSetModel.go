@@ -29,6 +29,10 @@ func (c *CircleSet) GetCreatorID() uint {
 	return c.CreatorID
 }
 
+func (m *CircleSet) SetCreatorID(creatorID uint) {
+	m.CreatorID = creatorID
+}
+
 func (c CircleSet) GetUnit(unitName string) *CircleUnit {
 	for _, unit := range c.Units {
 		if !unit.IsSystem {
