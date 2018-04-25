@@ -9,9 +9,9 @@ import (
 )
 
 var (
-	UserTokenHeaderName = ""
-	SecretKeys          = ""
-	SystemToken         = ""
+	_UserTokenHeaderName = ""
+	_SecretKeys          = ""
+	_SystemToken         = ""
 )
 
 type UserMeta struct {
@@ -50,8 +50,10 @@ func (c *BaseUserController) Prepare() {
 }
 
 func (c *BaseUserController) GetCurrentUserMeta() (*UserMeta, error) {
-	tokenString := c.Ctx.Request.Header.Get(UserTokenHeaderName)
-	if tokenString == SystemToken {
+	tokenString := c.Ctx.Request.Header.Get(_UserTokenHeaderName)
+	logrus.Debug("전달 받은 토큰", tokenString)
+	if tokenString == _SystemToken {
+		logrus.Debug("전달 받은 토큰 : System Token")
 		return &UserMeta{
 			UserID: 1,
 			Token:  tokenString,
@@ -64,7 +66,6 @@ func GetCurrentUserMeta(tokenString string) (*UserMeta, error) {
 	if tokenString == "" {
 		return nil, ErrUnauthorized
 	}
-	logrus.Debug("전달 받은 토큰", tokenString)
 
 	token, err := parseToken(tokenString)
 	if err != nil {
@@ -81,7 +82,7 @@ func parseToken(tokenString string) (*jwt.Token, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 		}
-		return []byte(SecretKeys), nil
+		return []byte(_SecretKeys), nil
 	})
 	if err != nil {
 		return nil, err

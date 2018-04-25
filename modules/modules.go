@@ -18,7 +18,11 @@ var (
 	ErrUnknown             = errors.New("Unknown")
 )
 
-func Initzation(db *gorm.DB) error {
+func Initzation(db *gorm.DB, systemToken string, secretKeys string, userTokenHeaderName string) error {
+	_SystemToken = systemToken
+	_SecretKeys = secretKeys
+	_UserTokenHeaderName = userTokenHeaderName
+
 	gGormDB = db
 	if err := gGormDB.AutoMigrate(
 		&Notification{},
