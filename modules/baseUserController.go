@@ -45,6 +45,8 @@ func (c *BaseUserController) Prepare() {
 	//TODO: User 권한 맵. 403.
 
 	//TODO: User 승인 여부 맵. 403.
+
+	c.BaseCrudController.Prepare()
 }
 
 func (c *BaseUserController) GetCurrentUserMeta() (*UserMeta, error) {

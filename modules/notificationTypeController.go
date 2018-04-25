@@ -11,6 +11,8 @@ func (c *NotificationTypeController) Prepare() {
 	c.ModelItem = &NotificationType{}
 	c.ModelItems = &[]NotificationType{}
 	c.ResponseItem = &NotificationType{}
+
+	c.BaseUserController.Prepare()
 }
 
 // Post ...

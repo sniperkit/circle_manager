@@ -11,6 +11,8 @@ func (c *CircleUnitController) Prepare() {
 	c.ModelItem = &CircleUnit{}
 	c.ModelItems = &[]CircleUnit{}
 	c.ResponseItem = &CircleUnit{}
+
+	c.BaseUserController.Prepare()
 }
 
 // Post ...

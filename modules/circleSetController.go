@@ -11,6 +11,8 @@ func (c *CircleSetController) Prepare() {
 	c.ModelItem = &CircleSet{}
 	c.ModelItems = &[]CircleSet{}
 	c.ResponseItem = &CircleSet{}
+
+	c.BaseUserController.Prepare()
 }
 
 // Post ...
