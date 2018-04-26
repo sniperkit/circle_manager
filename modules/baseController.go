@@ -82,14 +82,14 @@ func evnet(structName string, action string, eventUserID *uint, data interface{}
 		eventUserID,
 		data,
 	); err != nil {
-		logrus.WithError(err).Error()
+		fmt.Printf("Error : %s\n", err.Error())
 	}
 }
 
 // ErrorAbort ...
 func (c *BaseController) ErrorAbort(code int, err error, withMsg ...interface{}) {
 	if err != nil {
-		logrus.WithError(err).Error()
+		fmt.Printf("Error : %s\n", err.Error())
 		c.CustomAbort(code, err.Error())
 	}
 	c.CustomAbort(code, "")

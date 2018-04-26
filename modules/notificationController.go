@@ -47,8 +47,8 @@ func SendActiveNotifications() error {
 	return nil
 }
 
-// PostMessage ...
-// @Title PostMessage
+// PostMenualMessage ...
+// @Title PostMenualMessage
 // @Description create Notification
 // @Param	body		body 	modules.Notification	true		"body for Notification content"
 // @Success 201 {int} modules.Notification
