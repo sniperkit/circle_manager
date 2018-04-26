@@ -5,6 +5,8 @@ import (
 	"time"
 	"unicode"
 	"unicode/utf8"
+
+	"github.com/jinzhu/inflection"
 )
 
 // gen:qs
@@ -75,6 +77,10 @@ func (m *CircleUnit) SetCreatorID(creatorID uint) {
 
 func (c CircleUnit) GetVariableName() string {
 	return lowerFirst(c.Name)
+}
+
+func (c CircleUnit) GetURL() string {
+	return MakeFirstLowerCase(inflection.Plural(c.Name))
 }
 
 func lowerFirst(s string) string {

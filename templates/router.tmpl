@@ -52,7 +52,7 @@ func init() {
 
 		// circle:auto:start
 		{{range $i, $unit := .GetAutoGenUnits}}
-		beego.NSNamespace("/{{.URL}}",
+		beego.NSNamespace("/{{.GetURL}}",
 			beego.NSInclude(
 				&controllers.{{.Name}}Controller{},
 			),

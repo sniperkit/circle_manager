@@ -164,7 +164,7 @@ func runDelete() error {
 
 	manualUnit := modules.CircleUnit{
 		Name:      envs.Name,
-		URL:       inflection.Plural(envs.Name),
+		URL:       modules.MakeFirstLowerCase(inflection.Plural(envs.Name)),
 		MenuName:  envs.Name,
 		MenuGroup: "etc.",
 		IsManual:  true,
@@ -187,7 +187,7 @@ func runAdd() error {
 
 	manualUnit := modules.CircleUnit{
 		Name:      envs.Name,
-		URL:       inflection.Plural(envs.Name),
+		URL:       modules.MakeFirstLowerCase(inflection.Plural(envs.Name)),
 		MenuName:  envs.Name,
 		MenuGroup: "etc.",
 		IsManual:  true,
