@@ -85,6 +85,9 @@ func EventThenUpdate(modelItem ModelItem, oldModelItem ModelItem, currentUserID 
 func makeMapUpdateProperties(modelItem ModelItem, oldModelItem ModelItem) map[string]UpdateProperty {
 	mapUpdateProperties := map[string]UpdateProperty{}
 
+	if modelItem == nil || oldModelItem == nil {
+		return mapUpdateProperties
+	}
 	mapModelItem := structs.Map(modelItem)
 	mapOldModelItem := structs.Map(oldModelItem)
 
