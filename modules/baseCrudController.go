@@ -2,6 +2,7 @@ package modules
 
 import (
 	"net/http"
+	"reflect"
 
 	"github.com/fatih/structs"
 
@@ -103,11 +104,16 @@ func (c *BaseCrudController) BasePut() {
 	err := GetItemByID(id, c.ModelItem)
 	c.Check404And500(err)
 
+	oldModelItemSturct := reflect.New(reflect.TypeOf(c.ModelItem)).Elem().Interface().(ModelItem)
+	err = copier.Copy(oldModelItemSturct, c.ModelItem)
+	c.Check404And500(err)
+
 	// @step4. 접근 데이터 체크. 접근 할수 없는 데이터는 404
 	c.CheckUserData(404)
 
 	// @step5. 사용자 요청 데이터에서 DB 데이터로 가공 단계
-	copier.Copy(c.ModelItem, c.RequestUpdateItem)
+	err = copier.Copy(c.ModelItem, c.RequestUpdateItem)
+	c.Check404And500(err)
 
 	// @step6. DB 수정 단계. Error이면 500
 	err = UpdateItem(c.ModelItem)
@@ -117,7 +123,7 @@ func (c *BaseCrudController) BasePut() {
 	err = copier.Copy(c.ResponseItem, c.ModelItem)
 	c.Check404And500(err)
 
-	c.SuccessUpdate(c.ModelItem, c.ResponseItem)
+	c.SuccessUpdate(c.ModelItem, oldModelItemSturct, c.ResponseItem)
 }
 
 func (c *BaseCrudController) BaseDelete() {

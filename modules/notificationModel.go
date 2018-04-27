@@ -25,6 +25,10 @@ func (c *Notification) GetCreatorID() uint {
 	return c.CreatorID
 }
 
+func (m *Notification) SetCreatorID(creatorID uint) {
+	m.CreatorID = creatorID
+}
+
 func AddNotification(notification *Notification) (id uint, err error) {
 	err = notification.Create(gGormDB)
 	id = notification.ID

@@ -105,7 +105,7 @@ func (c *NotificationController) PostMenualMessage() {
 	c.Success(http.StatusNoContent, nil)
 }
 
-func AddActionNotification(tags string, eventUserID *uint, objects ...interface{}) error {
+func AddActionNotification(tags string, eventUserID *uint, mapUpdateProperties map[string]UpdateProperty, objects ...interface{}) error {
 	notificationTypes, err := GetNotificationsTypesByManualSend(false)
 	if err != nil {
 		return err
@@ -113,6 +113,10 @@ func AddActionNotification(tags string, eventUserID *uint, objects ...interface{
 
 	for _, notificationType := range notificationTypes {
 		if !isExistsTag(tags, notificationType.Tags) {
+			continue
+		}
+
+		if !checkDiff(mapUpdateProperties, notificationType) {
 			continue
 		}
 
@@ -130,6 +134,12 @@ func AddActionNotification(tags string, eventUserID *uint, objects ...interface{
 	return nil
 }
 
+type UpdateProperty struct {
+	Key      string
+	OldValue string
+	NewValue string
+}
+
 func isExistsTag(reqTags string, notiTypeTags string) bool {
 	mapTag := map[string]bool{}
 	for _, tag := range strings.Split(reqTags, ",") {
@@ -145,6 +155,34 @@ func isExistsTag(reqTags string, notiTypeTags string) bool {
 		if _, ok := mapNotiTypeTags[tag]; !ok {
 			return false
 		}
+	}
+	return true
+}
+
+func checkDiff(mapUpdateProperties map[string]UpdateProperty, notificationType NotificationType) bool {
+	if notificationType.DiffMode {
+		if len(mapUpdateProperties) <= 0 {
+			return false
+		}
+
+		updateProperty, ok := mapUpdateProperties[notificationType.DiffKey]
+		if !ok {
+			return false
+		}
+
+		if notificationType.DiffNewValue != "" {
+			if notificationType.DiffNewValue != "" && notificationType.DiffNewValue != updateProperty.NewValue {
+				return false
+			}
+		}
+
+		if notificationType.DiffOldValue != "" {
+			if notificationType.DiffOldValue != "" && notificationType.DiffOldValue != updateProperty.OldValue {
+				return false
+			}
+		}
+
+		return updateProperty.NewValue != updateProperty.OldValue
 	}
 	return true
 }

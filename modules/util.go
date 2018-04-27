@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"reflect"
 	"strings"
 	"time"
 )
@@ -78,8 +79,21 @@ func convInterface(raw interface{}) string {
 			return fmt.Sprintf("%d.%d.%d", raw.Year(), raw.Month(), raw.Day())
 		}
 		return fmt.Sprintf("%d.%d.%d %d시", raw.Year(), raw.Month(), raw.Day(), raw.Hour())
+	case *time.Time:
+		if raw != nil {
+			if raw.Hour() == 0 {
+				return fmt.Sprintf("%d.%d.%d", raw.Year(), raw.Month(), raw.Day())
+			}
+			return fmt.Sprintf("%d.%d.%d %d시", raw.Year(), raw.Month(), raw.Day(), raw.Hour())
+		}
+		return ""
 	case uint:
 		return fmt.Sprintf("%d", raw)
+	case *uint:
+		if raw != nil {
+			return fmt.Sprintf("%d", *raw)
+		}
+		return "0"
 	case string:
 		return fmt.Sprintf("%s", raw)
 	case []byte:
@@ -88,7 +102,7 @@ func convInterface(raw interface{}) string {
 		return fmt.Sprintf("%d", raw)
 	}
 
-	fmt.Printf("Unknown type:%s", raw)
+	fmt.Printf("Unknown type: %s. values: %s\n", reflect.New(reflect.TypeOf(raw)), raw)
 
 	return ""
 }

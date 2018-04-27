@@ -60,27 +60,55 @@ func getUserIDByUserMeta(userMeta *UserMeta) *uint {
 
 // SuccessCreate ...
 func (c *BaseController) SuccessCreate(modelItem ModelItem, responseBody ResponseBody) {
-	evnet(structs.Name(modelItem), "add", getUserIDByUserMeta(c.CurrentUserMeta), modelItem)
+	evnet(structs.Name(modelItem), "add", getUserIDByUserMeta(c.CurrentUserMeta), nil, modelItem)
 	c.Success(http.StatusCreated, responseBody)
 }
 
 // SuccessUpdate ...
-func (c *BaseController) SuccessUpdate(modelItem ModelItem, responseBody ResponseBody) {
-	evnet(structs.Name(modelItem), "update", getUserIDByUserMeta(c.CurrentUserMeta), modelItem)
+func (c *BaseController) SuccessUpdate(modelItem ModelItem, oldModelItem ModelItem, responseBody ResponseBody) {
+	mapUpdateProperties := makeMapUpdateProperties(modelItem, oldModelItem)
+
+	evnet(structs.Name(modelItem), "update", getUserIDByUserMeta(c.CurrentUserMeta), mapUpdateProperties, modelItem)
 	c.Success(http.StatusOK, responseBody)
+}
+
+func makeMapUpdateProperties(modelItem ModelItem, oldModelItem ModelItem) map[string]UpdateProperty {
+	mapUpdateProperties := map[string]UpdateProperty{}
+
+	mapModelItem := structs.Map(modelItem)
+	mapOldModelItem := structs.Map(oldModelItem)
+
+	for key, value := range mapModelItem {
+		if structs.IsStruct(value) {
+			continue
+		}
+
+		oldValue := ""
+		if tempOldValue, ok := mapOldModelItem[key]; ok {
+			oldValue = convInterface(tempOldValue)
+		}
+
+		mapUpdateProperties[key] = UpdateProperty{
+			Key:      key,
+			NewValue: convInterface(value),
+			OldValue: oldValue,
+		}
+	}
+	return mapUpdateProperties
 }
 
 // SuccessDelete ...
 func (c *BaseController) SuccessDelete(modelItem ModelItem) {
-	evnet(structs.Name(modelItem), "delete", getUserIDByUserMeta(c.CurrentUserMeta), modelItem)
+	evnet(structs.Name(modelItem), "delete", getUserIDByUserMeta(c.CurrentUserMeta), nil, modelItem)
 	c.Success(http.StatusNoContent, nil)
 }
 
-func evnet(structName string, action string, eventUserID *uint, data interface{}) {
+func evnet(structName string, action string, eventUserID *uint, mapUpdateProperties map[string]UpdateProperty, datas ...interface{}) {
 	if err := AddActionNotification(
 		fmt.Sprintf("%s,%s", structName, action),
 		eventUserID,
-		data,
+		mapUpdateProperties,
+		datas...,
 	); err != nil {
 		fmt.Printf("Error : %s\n", err.Error())
 	}

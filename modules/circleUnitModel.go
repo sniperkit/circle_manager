@@ -21,7 +21,7 @@ type CircleUnit struct {
 	CircleSetID                    uint                 `description:""`
 	Properties                     []CircleUnitProperty `description:""`
 	Import                         string               `description:""`
-	URL                            string               `description:""`
+	URL                            string               `description:""` //DEPRECATE
 	MenuName                       string               `description:""`
 	MenuGroup                      string               `description:""`
 	IsEnable                       bool                 `description:"사용여부"`

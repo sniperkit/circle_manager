@@ -21,7 +21,11 @@ type NotificationType struct {
 	MessageTemplate  string    `description:"" gorm:"size:2500"`
 	ListItemTemplate string    `description:"" gorm:"size:2500"`
 	WebhookURLs      string    `description:"" gorm:"size:2500"`
-	ReplaceText      string    ``
+	ReplaceText      string    `description:""`
+	DiffMode         bool      `description:""`
+	DiffKey          string    `description:""`
+	DiffNewValue     string    `description:""`
+	DiffOldValue     string    `description:""`
 }
 
 func (c *NotificationType) GetCreatorID() uint {

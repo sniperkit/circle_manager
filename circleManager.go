@@ -155,7 +155,7 @@ func (cm *CircleManager) AppendManual(unit *modules.CircleUnit) error {
 	}
 
 	routerTemplateSet := cm.MapTemplateSets["router"]
-	routerTemplate := `beego.NSNamespace("/{{.URL}}",
+	routerTemplate := `beego.NSNamespace("/{{.GetURL}}",
 			beego.NSInclude(
 				&controllers.{{.Name}}Controller{},
 			),
@@ -179,7 +179,7 @@ func (cm *CircleManager) DeleteManual(unit *modules.CircleUnit) error {
 	cm.prepare()
 
 	routerTemplateSet := cm.MapTemplateSets["router"]
-	routerTemplate := `beego.NSNamespace("/{{.URL}}",
+	routerTemplate := `beego.NSNamespace("/{{.GetURL}}",
 			beego.NSInclude(
 				&controllers.{{.Name}}Controller{},
 			),
