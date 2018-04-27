@@ -53,7 +53,7 @@ func (c *BaseCrudController) BasePost() {
 	err = copier.Copy(c.ResponseItem, c.ModelItem)
 	c.Check404And500(err)
 
-	EventThenDelete(c.ModelItem, getUserIDByUserMeta(c.CurrentUserMeta))
+	go EventThenDelete(c.ModelItem, getUserIDByUserMeta(c.CurrentUserMeta))
 
 	c.SuccessCreate(c.ResponseItem)
 }
@@ -125,7 +125,7 @@ func (c *BaseCrudController) BasePut() {
 	err = copier.Copy(c.ResponseItem, c.ModelItem)
 	c.Check404And500(err)
 
-	EventThenUpdate(c.ModelItem, oldModelItemSturct, getUserIDByUserMeta(c.CurrentUserMeta))
+	go EventThenUpdate(c.ModelItem, oldModelItemSturct, getUserIDByUserMeta(c.CurrentUserMeta))
 
 	c.SuccessUpdate(c.ResponseItem)
 }
@@ -148,7 +148,7 @@ func (c *BaseCrudController) BaseDelete() {
 	err = DeleteItem(id, c.ModelItem)
 	c.Check404And500(err)
 
-	EventThenDelete(c.ModelItem, getUserIDByUserMeta(c.CurrentUserMeta))
+	go EventThenDelete(c.ModelItem, getUserIDByUserMeta(c.CurrentUserMeta))
 
 	// @step6. 사용자 응답
 	c.SuccessDelete()
