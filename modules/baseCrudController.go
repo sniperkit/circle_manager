@@ -118,7 +118,7 @@ func (c *BaseCrudController) BasePut() {
 	c.Check404And500(err)
 
 	// @step6. DB 수정 단계. Error이면 500
-	err = UpdateItem(c.ModelItem)
+	err = UpdateItem(id, c.ModelItem)
 	c.Check404And500(err)
 
 	// @step7. 사용자 응답 데이터 가공 및 응답

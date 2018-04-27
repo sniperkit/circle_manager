@@ -82,8 +82,8 @@ func GetItemsOnlyUserData(items interface{}, queryPage *QueryPage, userID uint) 
 	return gGormDB.Where("creator == ?", userID).Find(items).Error
 }
 
-func UpdateItem(item interface{}) error {
-	return gGormDB.Save(item).Error
+func UpdateItem(id uint, item interface{}) error {
+	return gGormDB.Where("id = ?", id).Save(item).Error
 }
 
 func DeleteItem(id uint, item interface{}) error {
