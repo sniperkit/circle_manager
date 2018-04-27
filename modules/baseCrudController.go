@@ -53,7 +53,9 @@ func (c *BaseCrudController) BasePost() {
 	err = copier.Copy(c.ResponseItem, c.ModelItem)
 	c.Check404And500(err)
 
-	c.SuccessCreate(c.ModelItem, c.ResponseItem)
+	EventThenDelete(c.ModelItem, getUserIDByUserMeta(c.CurrentUserMeta))
+
+	c.SuccessCreate(c.ResponseItem)
 }
 
 func (c *BaseCrudController) BaseGetOne() {
@@ -123,7 +125,9 @@ func (c *BaseCrudController) BasePut() {
 	err = copier.Copy(c.ResponseItem, c.ModelItem)
 	c.Check404And500(err)
 
-	c.SuccessUpdate(c.ModelItem, oldModelItemSturct, c.ResponseItem)
+	EventThenUpdate(c.ModelItem, oldModelItemSturct, getUserIDByUserMeta(c.CurrentUserMeta))
+
+	c.SuccessUpdate(c.ResponseItem)
 }
 
 func (c *BaseCrudController) BaseDelete() {
@@ -144,8 +148,10 @@ func (c *BaseCrudController) BaseDelete() {
 	err = DeleteItem(id, c.ModelItem)
 	c.Check404And500(err)
 
+	EventThenDelete(c.ModelItem, getUserIDByUserMeta(c.CurrentUserMeta))
+
 	// @step6. 사용자 응답
-	c.SuccessDelete(c.ModelItem)
+	c.SuccessDelete()
 }
 
 func (c *BaseCrudController) GetItems() error {

@@ -59,17 +59,27 @@ func getUserIDByUserMeta(userMeta *UserMeta) *uint {
 }
 
 // SuccessCreate ...
-func (c *BaseController) SuccessCreate(modelItem ModelItem, responseBody ResponseBody) {
-	evnet(structs.Name(modelItem), "add", getUserIDByUserMeta(c.CurrentUserMeta), nil, modelItem)
+func (c *BaseController) SuccessCreate(responseBody ResponseBody) {
 	c.Success(http.StatusCreated, responseBody)
 }
 
 // SuccessUpdate ...
-func (c *BaseController) SuccessUpdate(modelItem ModelItem, oldModelItem ModelItem, responseBody ResponseBody) {
-	mapUpdateProperties := makeMapUpdateProperties(modelItem, oldModelItem)
-
-	evnet(structs.Name(modelItem), "update", getUserIDByUserMeta(c.CurrentUserMeta), mapUpdateProperties, modelItem)
+func (c *BaseController) SuccessUpdate(responseBody ResponseBody) {
 	c.Success(http.StatusOK, responseBody)
+}
+
+// SuccessDelete ...
+func (c *BaseController) SuccessDelete() {
+	c.Success(http.StatusNoContent, nil)
+}
+
+func EventThenCreate(modelItem ModelItem, currentUserID *uint) {
+	evnet(structs.Name(modelItem), "add", currentUserID, nil, modelItem)
+}
+
+func EventThenUpdate(modelItem ModelItem, oldModelItem ModelItem, currentUserID *uint) {
+	mapUpdateProperties := makeMapUpdateProperties(modelItem, oldModelItem)
+	evnet(structs.Name(modelItem), "update", currentUserID, mapUpdateProperties, modelItem)
 }
 
 func makeMapUpdateProperties(modelItem ModelItem, oldModelItem ModelItem) map[string]UpdateProperty {
@@ -97,10 +107,8 @@ func makeMapUpdateProperties(modelItem ModelItem, oldModelItem ModelItem) map[st
 	return mapUpdateProperties
 }
 
-// SuccessDelete ...
-func (c *BaseController) SuccessDelete(modelItem ModelItem) {
-	evnet(structs.Name(modelItem), "delete", getUserIDByUserMeta(c.CurrentUserMeta), nil, modelItem)
-	c.Success(http.StatusNoContent, nil)
+func EventThenDelete(modelItem ModelItem, currentUserID *uint) {
+	evnet(structs.Name(modelItem), "delete", currentUserID, nil, modelItem)
 }
 
 func evnet(structName string, action string, eventUserID *uint, mapUpdateProperties map[string]UpdateProperty, datas ...interface{}) {
