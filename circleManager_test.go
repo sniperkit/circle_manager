@@ -3,7 +3,6 @@ package main
 import (
 	"testing"
 
-	"github.com/jinzhu/inflection"
 	"github.com/jungju/circle_manager/modules"
 	"github.com/stretchr/testify/assert"
 )
@@ -89,7 +88,6 @@ func TestGo(t *testing.T) {
 func makeCircleUnit(name string, menuName string, menuGroup string, properties ...modules.CircleUnitProperty) modules.CircleUnit {
 	return modules.CircleUnit{
 		Name:       name,
-		URL:        inflection.Plural(makeFirstLowerCase(name)),
 		MenuName:   menuName,
 		MenuGroup:  menuGroup,
 		Properties: properties,

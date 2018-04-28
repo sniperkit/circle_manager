@@ -87,7 +87,6 @@ type CreateCircleUnit struct {
 	CircleUnitID   uint
 	ControllerName string
 	Import         string
-	URL            string
 	MenuName       string
 	MenuGroup      string
 	IsEnable       bool
@@ -101,7 +100,6 @@ type UpdateCircleUnit struct {
 	CircleUnitID   uint
 	ControllerName string
 	Import         string
-	URL            string
 	MenuName       string
 	MenuGroup      string
 	IsEnable       bool

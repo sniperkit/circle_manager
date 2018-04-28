@@ -77,6 +77,9 @@ err := cm.GeneateSourceBySet(&CircleSet{
 ## Todo
 - API 권한
 - 데이터 권한
+- 리포팅
+- 백업
+- 소스 분석
 
 ## library
 - github.com/astaxie/beego

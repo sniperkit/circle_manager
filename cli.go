@@ -7,9 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
-	"github.com/jinzhu/inflection"
 	"github.com/jungju/circle_manager/modules"
 	"github.com/jungju/gorm_manager"
 	"github.com/urfave/cli"
@@ -40,7 +38,6 @@ func envsValid() error {
 		if envs.CircleID <= 0 {
 			return errors.New("circleID가 없으므로 종료")
 		}
-
 		if envs.DBHost == "" {
 			return errors.New("Require DBHost")
 		}
@@ -123,13 +120,11 @@ func main() {
 				return err
 			}
 		} else if envs.Mode == "envs" {
-			var err error
-			db, err := initDB()
-			if err != nil {
+			if err := initDB(); err != nil {
 				return err
 			}
 
-			cs, err := getCircleSetByID(db, envs.CircleID)
+			cs, err := modules.GetCircleSetByID(envs.CircleID)
 			if err != nil {
 				return err
 			}
@@ -137,12 +132,14 @@ func main() {
 			if err := setRunAppEnv(cs.RunAppEnvs); err != nil {
 				return err
 			}
+		} else if envs.Mode == "scan" {
+			//TODO: scan
 		}
+
 		return nil
 	}
 
-	err := app.Run(os.Args)
-	if err != nil {
+	if err := app.Run(os.Args); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -161,68 +158,30 @@ func setRunAppEnv(runAppEnvs string) error {
 
 func runDelete() error {
 	cm := &CircleManager{}
+	cm.prepare()
 
-	manualUnit := modules.CircleUnit{
-		Name:      envs.Name,
-		URL:       modules.MakeFirstLowerCase(inflection.Plural(envs.Name)),
-		MenuName:  envs.Name,
-		MenuGroup: "etc.",
-		IsManual:  true,
-		IsEnable:  true,
-	}
-
-	if err := cm.DeleteManual(&manualUnit); err != nil {
-		return err
-	}
-
-	if err := cm.GeneateSourceBySet(&modules.CircleSet{}); err != nil {
-		return err
-	}
-
-	return nil
+	return cm.DeleteManual()
 }
 
 func runAdd() error {
 	cm := &CircleManager{}
+	cm.prepare()
 
-	manualUnit := modules.CircleUnit{
-		Name:      envs.Name,
-		URL:       modules.MakeFirstLowerCase(inflection.Plural(envs.Name)),
-		MenuName:  envs.Name,
-		MenuGroup: "etc.",
-		IsManual:  true,
-		IsEnable:  true,
-	}
-
-	if err := cm.AppendManual(&manualUnit); err != nil {
-		return err
-	}
-
-	if err := cm.GeneateSourceBySet(&modules.CircleSet{
-		Units: []modules.CircleUnit{manualUnit},
-	}); err != nil {
-		return err
-	}
-
-	return nil
+	return cm.AppendManual()
 }
 
 func runGen() error {
-	var err error
-	db, err := initDB()
-	if err != nil {
+	if err := initDB(); err != nil {
 		return err
 	}
 
 	cm := &CircleManager{}
+	cm.prepare()
 
-	if err := cm.GeneateSource(db, envs.CircleID); err != nil {
-		return err
-	}
-	return nil
+	return cm.GeneateSource()
 }
 
-func initDB() (*gorm.DB, error) {
+func initDB() error {
 	var err error
 	dbm, err := gorm_manager.New(&gorm_manager.DBConfig{
 		DBType:             "mysql",
@@ -236,17 +195,8 @@ func initDB() (*gorm.DB, error) {
 		OnLog:              true,
 	})
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	db := dbm.GetDB()
-	if err := db.AutoMigrate(
-		&modules.CircleSet{},
-		&modules.CircleUnit{},
-		&modules.CircleUnitProperty{},
-	).Error; err != nil {
-		return nil, err
-	}
-
-	return db, nil
+	return modules.Initzation(dbm.GetDB(), "", "", "")
 }

@@ -21,7 +21,6 @@ type CircleUnit struct {
 	CircleSetID                    uint                 `description:""`
 	Properties                     []CircleUnitProperty `description:""`
 	Import                         string               `description:""`
-	URL                            string               `description:""` //DEPRECATE
 	MenuName                       string               `description:""`
 	MenuGroup                      string               `description:""`
 	IsEnable                       bool                 `description:"사용여부"`
@@ -63,6 +62,7 @@ type CircleUnit struct {
 	UpdatableUserExcludeTypeIDs    string               `description:""`
 	UpdatableUserExcludeStatusIDs  string               `description:""`
 	OlnyUserData                   bool                 `description:""`
+	EnableBackup                   bool                 `description:""`
 	//AllDataTags   string               `description:""`
 
 }

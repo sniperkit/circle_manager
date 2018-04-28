@@ -11,9 +11,23 @@ import (
 	"strings"
 
 	"github.com/alecthomas/template"
-	"github.com/jinzhu/gorm"
 	"github.com/jungju/circle_manager/modules"
 )
+
+const (
+	adminTemplate = `addResourceAndMenu(&models.{{.Name}}{}, "{{.MenuName}}", "{{.MenuGroup}}", anyoneAllow, -1)
+`
+	routerTemplate = `beego.NSNamespace("/{{.GetURL}}",
+	beego.NSInclude(
+		&controllers.{{.Name}}Controller{},
+	),
+),
+`
+)
+
+type changeTemplateFunc func(string, string) (string, error)
+
+var circleSet *modules.CircleSet
 
 type CircleManager struct {
 	ByType          string
@@ -27,36 +41,24 @@ type CircleTemplateSet struct {
 	IsMulti      bool
 }
 
-func (cm *CircleManager) GetSourcePath(sourceType string) string {
-	if _, ok := cm.MapTemplateSets[sourceType]; !ok {
-		return ""
-	}
-	return cm.MapTemplateSets[sourceType].SourcePath
+func (c CircleTemplateSet) IsExistSourceFile() bool {
+	return existsFile(c.SourcePath)
 }
 
-func (cm *CircleManager) GetTemplatePath(sourceType string) string {
-	if _, ok := cm.MapTemplateSets[sourceType]; !ok {
-		return ""
-	}
-	return cm.MapTemplateSets[sourceType].TemplatePath
+func (c CircleTemplateSet) IsExistTemplateFile() bool {
+	return existsFile(c.TemplatePath)
 }
 
 func (cm *CircleManager) prepare() {
-	sd := func(raw, def string) string {
-		if raw == "" {
-			return def
-		}
-		return raw
-	}
-
 	setTemplateSet := func(sourceType, sourcePath, templatePath string, isMulti bool) {
 		if cm.MapTemplateSets == nil {
 			cm.MapTemplateSets = map[string]*CircleTemplateSet{}
 		}
+
 		cm.MapTemplateSets[sourceType] = &CircleTemplateSet{
 			SourceType:   sourceType,
-			SourcePath:   sd(cm.GetSourcePath(sourceType), filepath.Join(envs.RootPath, sourcePath)),
-			TemplatePath: sd(cm.GetTemplatePath(sourceType), templatePath),
+			SourcePath:   cm.GetSourcePath(sourceType, filepath.Join(envs.RootPath, sourcePath)),
+			TemplatePath: cm.GetTemplatePath(sourceType, templatePath),
 			IsMulti:      isMulti,
 		}
 	}
@@ -69,10 +71,26 @@ func (cm *CircleManager) prepare() {
 	setTemplateSet("responses", "responses", "templates/responses.tmpl", true)
 }
 
-var circleSet *modules.CircleSet
+func (cm *CircleManager) GetSourcePath(sourceType string, def string) string {
+	if raw, ok := cm.MapTemplateSets[sourceType]; ok {
+		if raw.SourcePath != "" {
+			return raw.SourcePath
+		}
+	}
+	return def
+}
 
-func (cm *CircleManager) GeneateSource(db *gorm.DB, circleIDUint uint) error {
-	cs, err := getCircleSetByID(db, circleIDUint)
+func (cm *CircleManager) GetTemplatePath(sourceType string, def string) string {
+	if raw, ok := cm.MapTemplateSets[sourceType]; ok {
+		if raw.TemplatePath != "" {
+			return raw.TemplatePath
+		}
+	}
+	return def
+}
+
+func (cm *CircleManager) GeneateSource() error {
+	cs, err := modules.GetCircleSetByID(envs.CircleID)
 	if err != nil {
 		return err
 	}
@@ -89,25 +107,24 @@ func (cm *CircleManager) GeneateSourceBySet(cs *modules.CircleSet) error {
 	}
 
 	for _, circleTemplateSet := range cm.MapTemplateSets {
-		if circleTemplateSet.SourceType != "models" && envs.OnlyModels {
-			continue
+		check := func(onlyItemStr string, olnyItem bool) bool {
+			return circleTemplateSet.SourceType == onlyItemStr && olnyItem
 		}
-		if circleTemplateSet.SourceType != "controllers" && envs.OnlyControllers {
-			continue
-		}
-		if circleTemplateSet.SourceType != "requests" && envs.OnlyRequests {
-			continue
-		}
-		if circleTemplateSet.SourceType != "responses" && envs.OnlyResponses {
+
+		if check("models", envs.OnlyModels) ||
+			check("controllers", envs.OnlyControllers) ||
+			check("requests", envs.OnlyRequests) ||
+			check("responses", envs.OnlyResponses) {
 			continue
 		}
 
-		if _, err := os.Stat(filepath.Join(circleTemplateSet.SourcePath)); os.IsNotExist(err) {
+		if !circleTemplateSet.IsExistSourceFile() {
 			fmt.Printf("Not found %s\n", filepath.Join(circleTemplateSet.SourcePath))
 			continue
 		}
-		if _, err := os.Stat(filepath.Join(circleTemplateSet.TemplatePath)); os.IsNotExist(err) {
-			fmt.Printf("Not found %s\n", filepath.Join(circleTemplateSet.SourcePath))
+
+		if !circleTemplateSet.IsExistTemplateFile() {
+			fmt.Printf("Not found %s\n", filepath.Join(circleTemplateSet.TemplatePath))
 			continue
 		}
 
@@ -116,7 +133,7 @@ func (cm *CircleManager) GeneateSourceBySet(cs *modules.CircleSet) error {
 				unitSourceFile := filepath.Join(circleTemplateSet.SourcePath, fmt.Sprintf("%s.go", unit.GetVariableName()))
 				fmt.Printf("Start ExecuteTemplate %s\n", unitSourceFile)
 
-				if err := ExecuteTemplate(
+				if err := executeTemplate(
 					unitSourceFile,
 					circleTemplateSet.TemplatePath,
 					unit,
@@ -124,20 +141,15 @@ func (cm *CircleManager) GeneateSourceBySet(cs *modules.CircleSet) error {
 					fmt.Printf("Error : %s\n", err.Error())
 					return err
 				}
+
 				if circleTemplateSet.SourceType == "models" {
-					fmt.Printf("goqueryset 실행 %s\n", fmt.Sprintf("%s.go", unit.GetVariableName()))
-					cmd := exec.Command("goqueryset", "-in", fmt.Sprintf("%s.go", unit.GetVariableName()))
-					cmd.Dir = circleTemplateSet.SourcePath
-					if out, err := cmd.Output(); err != nil {
-						fmt.Printf("Error : %s. %s\n", err.Error(), out)
-					} else {
-						fmt.Printf("goqueryset : %s\n", out)
-					}
+					executeQueryset(circleTemplateSet.SourcePath, unit.GetVariableName())
 				}
 			}
 		} else {
 			fmt.Printf("%s", circleTemplateSet.SourcePath)
-			if err := ExecuteTemplate(circleTemplateSet.SourcePath, circleTemplateSet.TemplatePath, cs); err != nil {
+
+			if err := executeTemplate(circleTemplateSet.SourcePath, circleTemplateSet.TemplatePath, cs); err != nil {
 				fmt.Printf("Error : %s\n", err.Error())
 				return err
 			}
@@ -147,58 +159,63 @@ func (cm *CircleManager) GeneateSourceBySet(cs *modules.CircleSet) error {
 	return nil
 }
 
-func (cm *CircleManager) AppendManual(unit *modules.CircleUnit) error {
-	cm.prepare()
+func executeQueryset(dir string, varName string) {
+	fmt.Printf("goqueryset 실행 %s\n", fmt.Sprintf("%s.go", varName))
+	cmd := exec.Command("goqueryset", "-in", fmt.Sprintf("%s.go", varName))
+	cmd.Dir = dir
+	if out, err := cmd.Output(); err != nil {
+		fmt.Printf("Error : %s. %s\n", err.Error(), out)
+	} else {
+		fmt.Printf("goqueryset : %s\n", out)
+	}
+}
+
+func (cm *CircleManager) AppendManual() error {
+	manualUnit := &modules.CircleUnit{
+		Name:      envs.Name,
+		MenuName:  envs.Name,
+		MenuGroup: "etc.",
+		IsManual:  true,
+		IsEnable:  true,
+	}
 
 	if envs.OnlyModels || envs.OnlyControllers || envs.OnlyRequests || envs.OnlyResponses {
 		return nil
 	}
 
 	routerTemplateSet := cm.MapTemplateSets["router"]
-	routerTemplate := `beego.NSNamespace("/{{.GetURL}}",
-			beego.NSInclude(
-				&controllers.{{.Name}}Controller{},
-			),
-		),
-		`
-	if err := appendManual(routerTemplateSet.TemplatePath, routerTemplate, unit); err != nil {
+	if err := appendManual(routerTemplateSet.TemplatePath, routerTemplate, manualUnit); err != nil {
 		return err
 	}
 
 	adminTemplateSet := cm.MapTemplateSets["admin"]
-	adminTemplate := `addResourceAndMenu(&models.{{.Name}}{}, "{{.MenuName}}", "{{.MenuGroup}}", anyoneAllow, -1)
-	`
-	if err := appendManual(adminTemplateSet.TemplatePath, adminTemplate, unit); err != nil {
+	if err := appendManual(adminTemplateSet.TemplatePath, adminTemplate, manualUnit); err != nil {
 		return err
 	}
 
-	return nil
+	return cm.GeneateSourceBySet(&modules.CircleSet{
+		Units: []modules.CircleUnit{*manualUnit},
+	})
 }
 
-func (cm *CircleManager) DeleteManual(unit *modules.CircleUnit) error {
-	cm.prepare()
+func (cm *CircleManager) DeleteManual() error {
+	manualUnit := &modules.CircleUnit{
+		Name: envs.Name,
+	}
 
 	routerTemplateSet := cm.MapTemplateSets["router"]
-	routerTemplate := `beego.NSNamespace("/{{.GetURL}}",
-			beego.NSInclude(
-				&controllers.{{.Name}}Controller{},
-			),
-		),
-		`
-	if err := deleteManual(routerTemplateSet.TemplatePath, routerTemplate, unit); err != nil {
+	if err := deleteManual(routerTemplateSet.TemplatePath, routerTemplate, manualUnit); err != nil {
 		return err
 	}
 
 	adminTemplateSet := cm.MapTemplateSets["admin"]
-	adminTemplate := `addResourceAndMenu(&models.{{.Name}}{}, "{{.MenuName}}", "{{.MenuGroup}}", anyoneAllow, -1)
-	`
-	if err := deleteManual(adminTemplateSet.TemplatePath, adminTemplate, unit); err != nil {
+	if err := deleteManual(adminTemplateSet.TemplatePath, adminTemplate, manualUnit); err != nil {
 		return err
 	}
 
 	removeFunc := func(dirName string) {
-		os.Remove(filepath.Join(envs.RootPath, dirName, fmt.Sprintf("%s.go", unit.GetVariableName())))
-		fmt.Printf("Deleted %s\n", filepath.Join(envs.RootPath, dirName, fmt.Sprintf("%s.go", unit.GetVariableName())))
+		os.Remove(filepath.Join(envs.RootPath, dirName, fmt.Sprintf("%s.go", manualUnit.GetVariableName())))
+		fmt.Printf("Deleted %s\n", filepath.Join(envs.RootPath, dirName, fmt.Sprintf("%s.go", manualUnit.GetVariableName())))
 	}
 
 	removeFunc("controllers")
@@ -206,36 +223,32 @@ func (cm *CircleManager) DeleteManual(unit *modules.CircleUnit) error {
 	removeFunc("requests")
 	removeFunc("responses")
 
-	fmt.Printf("Deleted %s\n", filepath.Join(envs.RootPath, "models", fmt.Sprintf("autogenerated_%s.go", unit.GetVariableName())))
-	os.Remove(filepath.Join(envs.RootPath, "models", fmt.Sprintf("autogenerated_%s.go", unit.GetVariableName())))
+	fmt.Printf("Deleted %s\n", filepath.Join(envs.RootPath, "models", fmt.Sprintf("autogenerated_%s.go", manualUnit.GetVariableName())))
+	os.Remove(filepath.Join(envs.RootPath, "models", fmt.Sprintf("autogenerated_%s.go", manualUnit.GetVariableName())))
 
-	return nil
+	return cm.GeneateSourceBySet(&modules.CircleSet{})
 }
 
 func deleteManual(templatefile string, appendText string, unit *modules.CircleUnit) error {
-	t := template.Must(template.New("t1").Parse(appendText))
-
-	var tpl bytes.Buffer
-	if err := t.Execute(&tpl, unit); err != nil {
-		return err
-	}
-
-	read, err := ioutil.ReadFile(templatefile)
-	if err != nil {
-		return err
-	}
-
-	newContents := strings.Replace(string(read), tpl.String(), "", -1)
-
-	err = ioutil.WriteFile(templatefile, []byte(newContents), 0)
-	if err != nil {
-		return err
-	}
-	return nil
+	return saveTemplate(templatefile, appendText, unit, func(read string, tpl string) (string, error) {
+		return strings.Replace(string(read), tpl, "", -1), nil
+	})
 }
 
 func appendManual(templatefile string, appendText string, unit *modules.CircleUnit) error {
-	t := template.Must(template.New("t1").Parse(appendText))
+	return saveTemplate(templatefile, appendText, unit, func(read string, tpl string) (string, error) {
+		append := fmt.Sprintf("%s// circle:manual:end", tpl)
+
+		if strings.Index(string(read), tpl) >= 0 {
+			return "", errors.New("이미 추가된 수동 소스 입니다.")
+		}
+
+		return strings.Replace(string(read), "// circle:manual:end", append, -1), nil
+	})
+}
+
+func saveTemplate(templatefile string, appendText string, unit *modules.CircleUnit, ctFunc changeTemplateFunc) error {
+	t := template.Must(template.ParseFiles(appendText))
 
 	var tpl bytes.Buffer
 	if err := t.Execute(&tpl, unit); err != nil {
@@ -247,29 +260,15 @@ func appendManual(templatefile string, appendText string, unit *modules.CircleUn
 		return err
 	}
 
-	append := fmt.Sprintf("%s// circle:manual:end", tpl.String())
-
-	if strings.Index(string(read), tpl.String()) >= 0 {
-		return errors.New("이미 추가된 수동 소스 입니다.")
-	}
-
-	newContents := strings.Replace(string(read), "// circle:manual:end", append, -1)
-
-	err = ioutil.WriteFile(templatefile, []byte(newContents), 0)
+	output, err := ctFunc(string(read), tpl.String())
 	if err != nil {
 		return err
 	}
-	return nil
+
+	return ioutil.WriteFile(templatefile, []byte(output), 0)
 }
 
-func setStatus(rawWhere, l, targetLine, newWhere string) string {
-	if strings.Index(l, targetLine) == 0 {
-		return strings.Replace(newWhere, "circle:", "", -1)
-	}
-	return rawWhere
-}
-
-func ExecuteTemplate(dest string, templatePath string, templateObject interface{}) error {
+func executeTemplate(dest string, templatePath string, templateObject interface{}) error {
 	os.Remove(dest)
 
 	f, err := os.OpenFile(dest, os.O_CREATE|os.O_WRONLY, 0777)
@@ -292,11 +291,9 @@ func ExecuteTemplate(dest string, templatePath string, templateObject interface{
 	return nil
 }
 
-func getCircleSetByID(db *gorm.DB, id uint) (circleSet *modules.CircleSet, err error) {
-	circleSet = &modules.CircleSet{
-		ID: id,
+func existsFile(filepath string) bool {
+	if _, err := os.Stat(filepath); os.IsNotExist(err) {
+		return false
 	}
-
-	err = db.Preload("Units").Preload("Units.Properties").First(circleSet, "id = ?", id).Error
-	return circleSet, err
+	return true
 }
