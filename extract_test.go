@@ -78,31 +78,66 @@ func TestSacnLineForAdmin(t *testing.T) {
 	assert.False(t, cs.Units[0].IsManual)
 }
 
-func TestSacnLineForModel(t *testing.T) {
-	flagRead := &FlagRead{}
-	cu := &modules.CircleUnit{
-		Name: "Test1",
-	}
-
-	currentWhere := ""
-	scanLineForModel(flagRead, cu, &currentWhere, `type Test1 struct {`)
-	assert.Equal(t, currentWhere, "in_model")
-
-	scanLineForModel(flagRead, cu, &currentWhere, `}`)
-	assert.Equal(t, currentWhere, "end_model")
-
-	currentWhere = "in_model"
-	scanLineForModel(flagRead, cu, &currentWhere, "ID      uint       `description:\"등록일\"` ")
-	assert.Equal(t, len(cu.Properties), 1)
-	assert.Equal(t, cu.Properties[0].Name, "ID")
-	assert.Equal(t, cu.Properties[0].Description, "등록일")
-	assert.Equal(t, cu.Properties[0].Type, "uint")
-	assert.True(t, cu.Properties[0].IsSystem)
-
-	scanLineForModel(flagRead, cu, &currentWhere, "Prop1      string       `description:\"가나다라마바사 !~!! 1  !!\"` ")
-	assert.Equal(t, len(cu.Properties), 2)
-	assert.Equal(t, cu.Properties[1].Name, "Prop1")
-	assert.Equal(t, cu.Properties[1].Description, "가나다라마바사 !~!! 1  !!")
-	assert.Equal(t, cu.Properties[1].Type, "string")
-	assert.False(t, cu.Properties[1].IsSystem)
+func TestSacnSourceForModel(t *testing.T) {
+	cs, err := scanSource("models", ".example/models")
+	assert.Nil(t, err)
+	assert.NotZero(t, len(cs.Units))
 }
+
+func TestSacnSourceForController(t *testing.T) {
+	// cu, err := scanSource("controllers", ".example/controllers")
+	// assert.Nil(t, err)
+	// assert.NotZero(t, len(cu.Properties))
+}
+
+func TestSacnSourceForRequests(t *testing.T) {
+	cs, err := scanSource("requests", ".example/requests")
+	assert.Nil(t, err)
+	assert.NotZero(t, len(cs.Units))
+}
+
+func TestSacnSourceForResponses(t *testing.T) {
+	cs, err := scanSource("responses", ".example/responses")
+	assert.Nil(t, err)
+	assert.NotZero(t, len(cs.Units))
+}
+
+func TestSourceMerge(t *testing.T) {
+	envs = &Envs{
+		RootPath: ".example",
+	}
+	cm := &CircleManager{}
+	cm.prepare()
+
+	err := cm.ImportCircle()
+	assert.Nil(t, err)
+}
+
+// func TestSacnLineForModel(t *testing.T) {
+// 	flagRead := &FlagRead{}
+// 	cu := &modules.CircleUnit{
+// 		Name: "Test1",
+// 	}
+
+// 	currentWhere := ""
+// 	scanLineForModel(flagRead, cu, &currentWhere, `type Test1 struct {`)
+// 	assert.Equal(t, currentWhere, "in_model")
+
+// 	scanLineForModel(flagRead, cu, &currentWhere, `}`)
+// 	assert.Equal(t, currentWhere, "end_model")
+
+// 	currentWhere = "in_model"
+// 	scanLineForModel(flagRead, cu, &currentWhere, "ID      uint       `description:\"등록일\"` ")
+// 	assert.Equal(t, len(cu.Properties), 1)
+// 	assert.Equal(t, cu.Properties[0].Name, "ID")
+// 	assert.Equal(t, cu.Properties[0].Description, "등록일")
+// 	assert.Equal(t, cu.Properties[0].Type, "uint")
+// 	assert.True(t, cu.Properties[0].IsSystem)
+
+// 	scanLineForModel(flagRead, cu, &currentWhere, "Prop1      string       `description:\"가나다라마바사 !~!! 1  !!\"` ")
+// 	assert.Equal(t, len(cu.Properties), 2)
+// 	assert.Equal(t, cu.Properties[1].Name, "Prop1")
+// 	assert.Equal(t, cu.Properties[1].Description, "가나다라마바사 !~!! 1  !!")
+// 	assert.Equal(t, cu.Properties[1].Type, "string")
+// 	assert.False(t, cu.Properties[1].IsSystem)
+// }

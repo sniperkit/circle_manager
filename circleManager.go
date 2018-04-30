@@ -185,7 +185,7 @@ func (cm *CircleManager) AppendManual() error {
 	}
 
 	return cm.GenerateSource(&modules.CircleSet{
-		Units: []modules.CircleUnit{*manualUnit},
+		Units: []*modules.CircleUnit{manualUnit},
 	})
 }
 

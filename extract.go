@@ -3,11 +3,17 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"go/ast"
+	"go/doc"
+	"go/parser"
+	"go/token"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 
+	"github.com/davecgh/go-spew/spew"
+
+	"github.com/fatih/structtag"
 	"github.com/jungju/circle_manager/modules"
 )
 
@@ -22,6 +28,172 @@ type FlagRead struct {
 }
 
 func (cm *CircleManager) ImportCircle() error {
+	adminCircleSet, err := cm.ImportCircleAdmin()
+	if err != nil {
+		return err
+	}
+	routerCircleSet, err := cm.ImportCircleRouter()
+	if err != nil {
+		return err
+	}
+
+	if err := mergeFormAdmin(routerCircleSet, adminCircleSet); err != nil {
+		return err
+	}
+
+	controllersCircleSet, err := scanSource("controllers", cm.MapTemplateSets["controllers"].SourcePath)
+	if err != nil {
+		return err
+	}
+
+	modelsCircleSet, err := scanSource("models", cm.MapTemplateSets["models"].SourcePath)
+	if err != nil {
+		return err
+	}
+
+	requestsCircleSet, err := scanSource("requests", cm.MapTemplateSets["requests"].SourcePath)
+	if err != nil {
+		return err
+	}
+
+	responsesCircleSet, err := scanSource("responses", cm.MapTemplateSets["responses"].SourcePath)
+	if err != nil {
+		return err
+	}
+
+	if err := mergeFormModelsAndRequestsAndResponses(routerCircleSet, controllersCircleSet, modelsCircleSet, requestsCircleSet, responsesCircleSet); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func mergeFormAdmin(routerCircleSet *modules.CircleSet, adminCircleSet *modules.CircleSet) error {
+	checkUnits := map[string][]bool{}
+
+	mapRouterCircleSet := map[string]*modules.CircleUnit{}
+	for _, unit := range routerCircleSet.Units {
+		copyUnit := unit
+		checkUnits[unit.Name] = []bool{false, false}
+		mapRouterCircleSet[unit.Name] = copyUnit
+	}
+	mapAdminCircleSet := map[string]*modules.CircleUnit{}
+	for _, unit := range adminCircleSet.Units {
+		copyUnit := unit
+		if _, ok := checkUnits[unit.Name]; !ok {
+			checkUnits[unit.Name] = []bool{false, false}
+		}
+		checkUnits[unit.Name][1] = true
+		mapAdminCircleSet[unit.Name] = copyUnit
+	}
+
+	for checkUnitName, checks := range checkUnits {
+		if checks[0] && !checks[1] {
+			//라우터는 있고 Admin은 없다
+		} else if !checks[0] && checks[1] {
+			//라우터는 없고 Admin은 있다.
+			routerCircleSet.Units = append(routerCircleSet.Units, mapAdminCircleSet[checkUnitName])
+		}
+	}
+	return nil
+}
+
+func mergeFormModelsAndRequestsAndResponses(
+	routerCircleSet *modules.CircleSet,
+	controllersCircleSet *modules.CircleSet,
+	modelsCircleSet *modules.CircleSet,
+	requestsCircleSet *modules.CircleSet,
+	responsesCircleSet *modules.CircleSet,
+) error {
+	mapRouterCircleSet := map[string]*modules.CircleUnit{}
+	for _, unit := range routerCircleSet.Units {
+		mapRouterCircleSet[unit.Name] = unit
+	}
+
+	for _, unit := range controllersCircleSet.Units {
+		if _, ok := mapRouterCircleSet[unit.Name]; ok {
+			// TODO:
+		} else {
+			// TODO:
+			cu := &modules.CircleUnit{
+				Name: unit.Name,
+			}
+			mapRouterCircleSet[unit.Name] = cu
+			routerCircleSet.Units = append(routerCircleSet.Units, cu)
+		}
+	}
+
+	for _, unit := range modelsCircleSet.Units {
+		if _, ok := mapRouterCircleSet[unit.Name]; ok {
+			// TODO:
+		} else {
+			// TODO:
+			cu := &modules.CircleUnit{
+				Name: unit.Name,
+			}
+			mapRouterCircleSet[unit.Name] = cu
+			routerCircleSet.Units = append(routerCircleSet.Units, cu)
+		}
+
+		cu := mapRouterCircleSet[unit.Name]
+		cu.Properties = append(mapRouterCircleSet[unit.Name].Properties, unit.Properties...)
+	}
+
+	for _, unit := range requestsCircleSet.Units {
+		if _, ok := mapRouterCircleSet[unit.Name]; ok {
+			// TODO:
+		} else {
+			// TODO:
+			cu := &modules.CircleUnit{
+				Name: unit.Name,
+			}
+			mapRouterCircleSet[unit.Name] = cu
+			routerCircleSet.Units = append(routerCircleSet.Units, cu)
+		}
+
+		//TODO: 속성 합치기
+	}
+
+	for _, unit := range responsesCircleSet.Units {
+		if _, ok := mapRouterCircleSet[unit.Name]; ok {
+			// TODO:
+		} else {
+			// TODO:
+			cu := &modules.CircleUnit{
+				Name: unit.Name,
+			}
+			mapRouterCircleSet[unit.Name] = cu
+			routerCircleSet.Units = append(routerCircleSet.Units, cu)
+		}
+
+		//TODO: 속성 합치기
+	}
+
+	return nil
+}
+
+func (cm *CircleManager) ImportCircleAdmin() (*modules.CircleSet, error) {
+	flagRead := &FlagRead{}
+	cs := &modules.CircleSet{}
+
+	inFile, _ := os.Open(cm.MapTemplateSets["admin"].SourcePath)
+	defer inFile.Close()
+	scanner := bufio.NewScanner(inFile)
+	scanner.Split(bufio.ScanLines)
+
+	currentWhere := "meta"
+	for scanner.Scan() {
+		l := scanner.Text()
+		l = strings.TrimSpace(l)
+		curWhere(&currentWhere, l)
+
+		scanLineForAdmin(flagRead, cs, &currentWhere, l)
+	}
+
+	return cs, nil
+}
+
+func (cm *CircleManager) ImportCircleRouter() (*modules.CircleSet, error) {
 	flagRead := &FlagRead{}
 	cs := &modules.CircleSet{}
 
@@ -39,34 +211,7 @@ func (cm *CircleManager) ImportCircle() error {
 		scanLineForRouter(flagRead, cs, &currentWhere, l)
 	}
 
-	return nil
-}
-
-func (cm *CircleManager) ImportCircleUnit(name string) error {
-	flagRead := &FlagRead{}
-	cu := &modules.CircleUnit{
-		Name: name,
-	}
-
-	inFile, _ := os.Open(
-		filepath.Join(
-			cm.MapTemplateSets["models"].SourcePath,
-			fmt.Sprintf("%s.go", name),
-		),
-	)
-	defer inFile.Close()
-	scanner := bufio.NewScanner(inFile)
-	scanner.Split(bufio.ScanLines)
-
-	currentWhere := ""
-	for scanner.Scan() {
-		l := scanner.Text()
-		l = strings.TrimSpace(l)
-
-		scanLineForModel(flagRead, cu, &currentWhere, l)
-	}
-
-	return nil
+	return cs, nil
 }
 
 func scanLineForRouter(flagRead *FlagRead, cs *modules.CircleSet, currentWhere *string, l string) {
@@ -86,117 +231,11 @@ func scanLineForRouter(flagRead *FlagRead, cs *modules.CircleSet, currentWhere *
 		if name == "" {
 			return
 		}
-		cs.Units = append(cs.Units, modules.CircleUnit{
+		cs.Units = append(cs.Units, &modules.CircleUnit{
 			Name:     name,
 			IsSystem: *currentWhere == "system",
 			IsManual: *currentWhere == "manual",
 		})
-	}
-}
-
-func scanLineForController(flagRead *FlagRead, cu *modules.CircleUnit, currentWhere *string, l string) {
-	if *currentWhere == "end_api" && strings.Index(l, fmt.Sprintf("type %s struct {", cu.Name)) >= 0 {
-		*currentWhere = "in_api"
-		return
-	}
-
-	if *currentWhere == "in_api" && strings.Index(l, "}") >= 0 {
-		*currentWhere = "end_api"
-		return
-	}
-
-	if *currentWhere != "end_api" {
-		return
-	}
-
-	tags := ""
-	re := regexp.MustCompile("\\`(.*)`")
-	if match := re.FindStringSubmatch(l); len(match) >= 1 {
-		tags = match[1]
-	}
-
-	sl := strings.Replace(l, "  ", " ", -1)
-	sl = strings.Replace(sl, "  ", " ", -1)
-	sl = strings.Replace(sl, "  ", " ", -1)
-	slArr := strings.Split(sl, " ")
-
-	if len(slArr) >= 2 {
-		isSystem := false
-		switch slArr[0] {
-		case "ID", "CreatedAt", "UpdatedAt", "Name", "Description":
-			isSystem = true
-		}
-		description := ""
-		if len(slArr) >= 3 {
-			description = getWord(tags, "description:\"", "")
-			description = removeRigth(description, "\"")
-		}
-		cu.Properties = append(cu.Properties, modules.CircleUnitProperty{
-			Name:        slArr[0],
-			Description: description,
-			//CircleUnit                     CircleUnit
-			//CircleUnitID                   uint
-			Type: slArr[1],
-			//Nullable                       bool
-			IsEnable: true,
-			IsManual: true,
-			IsSystem: isSystem,
-		})
-	} else {
-		fmt.Println("알수없는 형식 : ", sl)
-	}
-}
-
-func scanLineForModel(flagRead *FlagRead, cu *modules.CircleUnit, currentWhere *string, l string) {
-	if *currentWhere == "end_model" && strings.Index(l, fmt.Sprintf("type %s struct {", cu.Name)) >= 0 {
-		*currentWhere = "in_model"
-		return
-	}
-
-	if *currentWhere == "in_model" && strings.Index(l, "}") >= 0 {
-		*currentWhere = "end_model"
-		return
-	}
-
-	if *currentWhere != "in_model" {
-		return
-	}
-
-	tags := ""
-	re := regexp.MustCompile("\\`(.*)`")
-	if match := re.FindStringSubmatch(l); len(match) >= 1 {
-		tags = match[1]
-	}
-
-	sl := strings.Replace(l, "  ", " ", -1)
-	sl = strings.Replace(sl, "  ", " ", -1)
-	sl = strings.Replace(sl, "  ", " ", -1)
-	slArr := strings.Split(sl, " ")
-
-	if len(slArr) >= 2 {
-		isSystem := false
-		switch slArr[0] {
-		case "ID", "CreatedAt", "UpdatedAt", "Name", "Description":
-			isSystem = true
-		}
-		description := ""
-		if len(slArr) >= 3 {
-			description = getWord(tags, "description:\"", "")
-			description = removeRigth(description, "\"")
-		}
-		cu.Properties = append(cu.Properties, modules.CircleUnitProperty{
-			Name:        slArr[0],
-			Description: description,
-			//CircleUnit                     CircleUnit
-			//CircleUnitID                   uint
-			Type: slArr[1],
-			//Nullable                       bool
-			IsEnable: true,
-			IsManual: true,
-			IsSystem: isSystem,
-		})
-	} else {
-		fmt.Println("알수없는 형식 : ", sl)
 	}
 }
 
@@ -207,7 +246,7 @@ func scanLineForAdmin(flagRead *FlagRead, cs *modules.CircleSet, currentWhere *s
 		if name == "" {
 			return
 		}
-		cs.Units = append(cs.Units, modules.CircleUnit{
+		cs.Units = append(cs.Units, &modules.CircleUnit{
 			Name:      name,
 			MenuGroup: getWord(l, "\", \"", "\", anyoneAllow, -1)"),
 			MenuName:  getWord(l, "{}, \"", "\", \""),
@@ -215,6 +254,112 @@ func scanLineForAdmin(flagRead *FlagRead, cs *modules.CircleSet, currentWhere *s
 			IsManual:  *currentWhere == "manual",
 		})
 	}
+}
+
+func scanSource(sourceType string, sourceDirPath string) (*modules.CircleSet, error) {
+	cs := &modules.CircleSet{}
+
+	if err := filepath.Walk(sourceDirPath, func(path string, info os.FileInfo, err error) error {
+		fset := token.NewFileSet()
+		d, err := parser.ParseDir(fset, path, nil, parser.ParseComments)
+		if err != nil {
+			fmt.Println(err)
+			// First Error만 발생하고 진행됨
+			// return err
+		}
+
+		for _, f := range d {
+			p := doc.New(f, "./", 0)
+
+			cu := &modules.CircleUnit{}
+
+			if sourceType == "models" ||
+				sourceType == "requests" ||
+				sourceType == "responses" {
+				if err := scanSourceForModel(cu, p); err != nil {
+					return err
+				}
+			} else if sourceType == "controllers" {
+				if err := scanSourceForControllers(cu, p); err != nil {
+					return err
+				}
+			}
+
+			cs.Units = append(cs.Units, cu)
+		}
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+	return cs, nil
+}
+
+func scanSourceForControllers(cu *modules.CircleUnit, p *doc.Package) error {
+	for _, t := range p.Types {
+		// TODO:
+		//spew.Dump(t.Doc)
+		spew.Dump(t.Methods[0].Orig)
+		fmt.Println(t.Methods[0].Level)
+		fmt.Println(t.Methods[0].Recv)
+		fmt.Println(t.Methods[0].Name)
+	}
+	return nil
+}
+
+func scanSourceForModel(cu *modules.CircleUnit, p *doc.Package) error {
+	for _, t := range p.Types {
+		structDecl := t.Decl.Specs[0].(*ast.TypeSpec).Type.(*ast.StructType)
+		fields := structDecl.Fields.List
+		for _, field := range fields {
+			isSystem := false
+			unitName := field.Names[0].Name
+			switch unitName {
+			case "ID", "CreatedAt", "UpdatedAt", "Name", "Description":
+				isSystem = true
+			}
+
+			description := ""
+			if field.Tag != nil {
+				olnyTags := strings.Replace(field.Tag.Value, "`", "", -1)
+				tags, err := structtag.Parse(olnyTags)
+				if err != nil {
+					return err
+				}
+
+				if descriptionTag, err := tags.Get("description"); err == nil {
+					description = descriptionTag.Name
+				} else {
+					fmt.Println("설명이 없습니다.")
+				}
+			}
+
+			typeName := ""
+			isNull := false
+			if _, ok := field.Type.(*ast.Ident); ok {
+				typeName = field.Type.(*ast.Ident).Name
+			} else if _, ok := field.Type.(*ast.SelectorExpr); ok {
+				typeX := field.Type.(*ast.SelectorExpr).X.(*ast.Ident).Name
+				typeSel := field.Type.(*ast.SelectorExpr).Sel.Name
+				typeName = fmt.Sprintf("%s.%s", typeX, typeSel)
+			} else if _, ok := field.Type.(*ast.StarExpr); ok {
+				typeX := field.Type.(*ast.StarExpr).X.(*ast.SelectorExpr).X.(*ast.Ident).Name
+				typeSel := field.Type.(*ast.StarExpr).X.(*ast.SelectorExpr).Sel.Name
+				typeName = fmt.Sprintf("*%s.%s", typeX, typeSel)
+				isNull = true
+			}
+
+			cu.Properties = append(cu.Properties, modules.CircleUnitProperty{
+				Name:        unitName,
+				Description: description,
+				Type:        typeName,
+				Nullable:    isNull,
+				IsEnable:    true,
+				IsManual:    true,
+				IsSystem:    isSystem,
+			})
+		}
+	}
+	return nil
 }
 
 func curWhere(currentWhere *string, l string) {
@@ -262,3 +407,84 @@ func removeRigth(s, indexChar string) string {
 	}
 	return s
 }
+
+// func (cm *CircleManager) ImportCircleUnit(name string) error {
+// 	flagRead := &FlagRead{}
+// 	cu := &modules.CircleUnit{
+// 		Name: name,
+// 	}
+
+// 	inFile, _ := os.Open(
+// 		filepath.Join(
+// 			cm.MapTemplateSets["models"].SourcePath,
+// 			fmt.Sprintf("%s.go", name),
+// 		),
+// 	)
+// 	defer inFile.Close()
+// 	scanner := bufio.NewScanner(inFile)
+// 	scanner.Split(bufio.ScanLines)
+
+// 	currentWhere := ""
+// 	for scanner.Scan() {
+// 		l := scanner.Text()
+// 		l = strings.TrimSpace(l)
+
+// 		// TODO:
+// 		scanLineForModel(flagRead, cu, &currentWhere, l)
+// 	}
+
+// 	return nil
+// }
+
+//func scanLineForModel(flagRead *FlagRead, cu *modules.CircleUnit, currentWhere *string, l string) {
+// 	if *currentWhere == "end_model" && strings.Index(l, fmt.Sprintf("type %s struct {", cu.Name)) >= 0 {
+// 		*currentWhere = "in_model"
+// 		return
+// 	}
+
+// 	if *currentWhere == "in_model" && strings.Index(l, "}") >= 0 {
+// 		*currentWhere = "end_model"
+// 		return
+// 	}
+
+// 	if *currentWhere != "in_model" {
+// 		return
+// 	}
+
+// 	tags := ""
+// 	re := regexp.MustCompile("\\`(.*)`")
+// 	if match := re.FindStringSubmatch(l); len(match) >= 1 {
+// 		tags = match[1]
+// 	}
+
+// 	sl := strings.Replace(l, "  ", " ", -1)
+// 	sl = strings.Replace(sl, "  ", " ", -1)
+// 	sl = strings.Replace(sl, "  ", " ", -1)
+// 	slArr := strings.Split(sl, " ")
+
+// 	if len(slArr) >= 2 {
+// 		isSystem := false
+// 		switch slArr[0] {
+// 		case "ID", "CreatedAt", "UpdatedAt", "Name", "Description":
+// 			isSystem = true
+// 		}
+// 		description := ""
+// 		if len(slArr) >= 3 {
+// 			description = getWord(tags, "description:\"", "")
+// 			description = removeRigth(description, "\"")
+// 		}
+// 		cu.Properties = append(cu.Properties, modules.CircleUnitProperty{
+// 			Name:        slArr[0],
+// 			Description: description,
+// 			//CircleUnit                     CircleUnit
+// 			//CircleUnitID                   uint
+// 			Type: slArr[1],
+// 			//Nullable                       bool
+// 			IsEnable: true,
+// 			IsManual: true,
+// 			IsSystem: isSystem,
+// 		})
+// 	} else {
+// 		fmt.Println("알수없는 형식 : ", sl)
+// 	}
+//}

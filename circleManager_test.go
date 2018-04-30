@@ -24,7 +24,7 @@ func TestGo(t *testing.T) {
 		AppLicense:            "MIT",
 		AppSecurityDefinition: `"userAPIKey apiKey X-USER-AUTH-TOKEN header "I love auto-generated docs"`,
 
-		Units: []modules.CircleUnit{
+		Units: []*modules.CircleUnit{
 			makeCircleUnit(
 				"GithubCommit", "Commits", "이벤트관리",
 				makeCircleUnitProperty("RepoName", "string"),
@@ -85,8 +85,8 @@ func TestGo(t *testing.T) {
 	}
 }
 
-func makeCircleUnit(name string, menuName string, menuGroup string, properties ...modules.CircleUnitProperty) modules.CircleUnit {
-	return modules.CircleUnit{
+func makeCircleUnit(name string, menuName string, menuGroup string, properties ...modules.CircleUnitProperty) *modules.CircleUnit {
+	return &modules.CircleUnit{
 		Name:       name,
 		MenuName:   menuName,
 		MenuGroup:  menuGroup,
