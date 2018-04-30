@@ -8,7 +8,7 @@
 cm := &CircleManager{}
 	basePath = "test"
 
-err := cm.GeneateSourceBySet(&CircleSet{
+err := cm.GenerateSourceBySet(&CircleSet{
 	Name: "Office1",
 	Units: []CircleUnit{
 		makeCircleUnit(

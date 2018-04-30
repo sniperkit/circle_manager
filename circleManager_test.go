@@ -13,7 +13,7 @@ func TestGo(t *testing.T) {
 		RootPath: ".example",
 	}
 
-	err := cm.GeneateSourceBySet(&modules.CircleSet{
+	err := cm.GenerateSource(&modules.CircleSet{
 		Name:                  "Office1",
 		Import:                "jungju/circle",
 		AppVersion:            "10.1.1",

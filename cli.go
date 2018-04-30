@@ -115,25 +115,11 @@ func main() {
 		} else if envs.Mode == "delete" {
 			return runDelete()
 		} else if envs.Mode == "safe" {
-			cm := &CircleManager{}
-			if err := cm.GeneateSourceBySet(&modules.CircleSet{}); err != nil {
-				return err
-			}
+			return runSafemode()
 		} else if envs.Mode == "envs" {
-			if err := initDB(); err != nil {
-				return err
-			}
-
-			cs, err := modules.GetCircleSetByID(envs.CircleID)
-			if err != nil {
-				return err
-			}
-
-			if err := setRunAppEnv(cs.RunAppEnvs); err != nil {
-				return err
-			}
-		} else if envs.Mode == "scan" {
-			//TODO: scan
+			return runSetEnv()
+		} else if envs.Mode == "import" {
+			return runImport()
 		}
 
 		return nil
@@ -144,14 +130,19 @@ func main() {
 	}
 }
 
-func setRunAppEnv(runAppEnvs string) error {
-	for _, envStr := range strings.Split(runAppEnvs, " ") {
-		envKeyValue := strings.Split(envStr, "=")
-		if len(envKeyValue) == 2 {
-			if envKeyValue[0] != "" && envKeyValue[1] != "" {
-				os.Setenv(envKeyValue[0], envKeyValue[1])
-			}
-		}
+func runImport() error {
+	cm := &CircleManager{}
+	cm.prepare()
+
+	cm.ImportCircle()
+
+	return nil
+}
+
+func runSafemode() error {
+	cm := &CircleManager{}
+	if err := cm.GenerateSource(&modules.CircleSet{}); err != nil {
+		return err
 	}
 	return nil
 }
@@ -178,7 +169,25 @@ func runGen() error {
 	cm := &CircleManager{}
 	cm.prepare()
 
-	return cm.GeneateSource()
+	cs, err := modules.GetCircleSetByID(envs.CircleID)
+	if err != nil {
+		return err
+	}
+
+	return cm.GenerateSource(cs)
+}
+
+func runSetEnv() error {
+	if err := initDB(); err != nil {
+		return err
+	}
+
+	cs, err := modules.GetCircleSetByID(envs.CircleID)
+	if err != nil {
+		return err
+	}
+
+	return setRunAppEnv(cs.RunAppEnvs)
 }
 
 func initDB() error {
@@ -199,4 +208,16 @@ func initDB() error {
 	}
 
 	return modules.Initzation(dbm.GetDB(), "", "", "")
+}
+
+func setRunAppEnv(runAppEnvs string) error {
+	for _, envStr := range strings.Split(runAppEnvs, " ") {
+		envKeyValue := strings.Split(envStr, "=")
+		if len(envKeyValue) == 2 {
+			if envKeyValue[0] != "" && envKeyValue[1] != "" {
+				os.Setenv(envKeyValue[0], envKeyValue[1])
+			}
+		}
+	}
+	return nil
 }
