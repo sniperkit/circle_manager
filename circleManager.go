@@ -127,6 +127,7 @@ func (cm *CircleManager) GenerateSource(cs *modules.CircleSet) error {
 				if !unit.EnableAdminSource && circleTemplateSet.SourceType == "admin" ||
 					!unit.EnableControllerSource && circleTemplateSet.SourceType == "controllers" ||
 					!unit.EnableModelSource && circleTemplateSet.SourceType == "models" {
+					fmt.Println("Skip source : ", unit.Name)
 					continue
 				}
 				if unit.IsManual && unit.IsSystem {
@@ -154,6 +155,7 @@ func (cm *CircleManager) GenerateSource(cs *modules.CircleSet) error {
 			newCS.Units = []*modules.CircleUnit{}
 			for _, unit := range cs.Units {
 				if !unit.EnableControllerSource && circleTemplateSet.SourceType == "controllers" {
+					fmt.Println("Skip controller : ", unit.Name)
 					continue
 				}
 				newCS.Units = append(newCS.Units, unit)
