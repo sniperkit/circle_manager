@@ -2,6 +2,8 @@ package modules
 
 import (
 	"time"
+
+	"github.com/jinzhu/gorm"
 )
 
 // gen:qs
@@ -66,6 +68,22 @@ func GetCircleSetByID(id uint) (circleSet *CircleSet, err error) {
 		ID: id,
 	}
 	err = NewCircleSetQuerySet(gGormDB).One(circleSet)
+	return
+}
+
+func GetCircleSetByIDForGen(id uint) (circleSet *CircleSet, err error) {
+	circleSet = &CircleSet{
+		ID: id,
+	}
+
+	preloadDB := gGormDB.Preload("Units", func(db *gorm.DB) *gorm.DB {
+		return db.Where("is_enable", true)
+	})
+
+	preloadDB = gGormDB.Preload("Units").Preload("Units.Properties")
+
+	err = NewCircleSetQuerySet(preloadDB).
+		One(circleSet)
 	return
 }
 

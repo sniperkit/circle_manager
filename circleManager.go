@@ -122,6 +122,9 @@ func (cm *CircleManager) GenerateSource(cs *modules.CircleSet) error {
 
 		if circleTemplateSet.IsMulti {
 			for _, unit := range cs.Units {
+				if unit.IsManual && unit.IsSystem {
+					continue
+				}
 				unitSourceFile := filepath.Join(circleTemplateSet.SourcePath, fmt.Sprintf("%s.go", unit.GetVariableName()))
 				fmt.Printf("Start ExecuteTemplate %s\n", unitSourceFile)
 

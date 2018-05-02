@@ -176,7 +176,7 @@ func runGen() error {
 	cm := &CircleManager{}
 	cm.prepare()
 
-	cs, err := modules.GetCircleSetByID(envs.CircleID)
+	cs, err := modules.GetCircleSetByIDForGen(envs.CircleID)
 	if err != nil {
 		return err
 	}
@@ -189,7 +189,7 @@ func runSetEnv() error {
 		return err
 	}
 
-	cs, err := modules.GetCircleSetByID(envs.CircleID)
+	cs, err := modules.GetCircleSetByIDForGen(envs.CircleID)
 	if err != nil {
 		return err
 	}
