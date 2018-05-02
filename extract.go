@@ -27,64 +27,106 @@ type FlagRead struct {
 	RouterReadedAppSecurityDefinition bool
 }
 
-func (cm *CircleManager) ImportCircle() error {
+func (cm *CircleManager) ImportCircle() (*modules.CircleSet, error) {
+	fmt.Println(cm.MapTemplateSets["router"].SourcePath)
+	fmt.Println(cm.MapTemplateSets["admin"].SourcePath)
+	fmt.Println(cm.MapTemplateSets["controllers"].SourcePath)
+	fmt.Println(cm.MapTemplateSets["models"].SourcePath)
+	fmt.Println(cm.MapTemplateSets["requests"].SourcePath)
+	fmt.Println(cm.MapTemplateSets["responses"].SourcePath)
+
 	adminCircleSet, err := cm.ImportCircleAdmin()
 	if err != nil {
-		return err
-	}
-	routerCircleSet, err := cm.ImportCircleRouter()
-	if err != nil {
-		return err
+		return nil, err
 	}
 
-	if err := mergeFormAdmin(routerCircleSet, adminCircleSet); err != nil {
-		return err
+	routerCircleSet, err := cm.ImportCircleRouter()
+	if err != nil {
+		return nil, err
+	}
+
+	if err := mergeFromAdmin(routerCircleSet, adminCircleSet); err != nil {
+		return nil, err
 	}
 
 	controllersCircleSet, err := scanSource("controllers", cm.MapTemplateSets["controllers"].SourcePath)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	modelsCircleSet, err := scanSource("models", cm.MapTemplateSets["models"].SourcePath)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	requestsCircleSet, err := scanSource("requests", cm.MapTemplateSets["requests"].SourcePath)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	responsesCircleSet, err := scanSource("responses", cm.MapTemplateSets["responses"].SourcePath)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	if err := mergeFormModelsAndRequestsAndResponses(routerCircleSet, controllersCircleSet, modelsCircleSet, requestsCircleSet, responsesCircleSet); err != nil {
-		return err
+	if err := mergeFromModelsAndRequestsAndResponses(routerCircleSet, controllersCircleSet, modelsCircleSet, requestsCircleSet, responsesCircleSet); err != nil {
+		return nil, err
 	}
 
-	return nil
+	return routerCircleSet, nil
 }
 
-func mergeFormAdmin(routerCircleSet *modules.CircleSet, adminCircleSet *modules.CircleSet) error {
+func (cm *CircleManager) SaveManualCircleSetToDB(manualCS *modules.CircleSet) error {
+	var dbCircleSet *modules.CircleSet
+	if manualCS.ID > 0 {
+		var err error
+		dbCircleSet, err = modules.GetCircleSetByID(manualCS.ID)
+		if err != nil {
+			return err
+		}
+	}
+
+	if dbCircleSet == nil {
+		dbCircleSet = &modules.CircleSet{}
+	}
+
+	mapDBCircleSet := map[string]*modules.CircleUnit{}
+	for _, unit := range dbCircleSet.Units {
+		mapDBCircleSet[unit.Name] = unit
+	}
+
+	for _, unit := range manualCS.Units {
+		if dbUnit, ok := mapDBCircleSet[unit.Name]; ok {
+			dbUnit.IsManual = true
+		} else {
+			dbCircleSet.Units = append(dbCircleSet.Units, unit)
+		}
+	}
+
+	if manualCS.ID <= 0 {
+		_, err := modules.AddCircleSet(dbCircleSet)
+		return err
+	}
+	return modules.UpdateCircleSetByID(dbCircleSet)
+}
+
+func mergeFromAdmin(routerCircleSet *modules.CircleSet, adminCircleSet *modules.CircleSet) error {
 	checkUnits := map[string][]bool{}
 
 	mapRouterCircleSet := map[string]*modules.CircleUnit{}
 	for _, unit := range routerCircleSet.Units {
-		copyUnit := unit
-		checkUnits[unit.Name] = []bool{false, false}
-		mapRouterCircleSet[unit.Name] = copyUnit
+		checkUnits[unit.Name] = []bool{true, false}
+		mapRouterCircleSet[unit.Name] = unit
 	}
+
 	mapAdminCircleSet := map[string]*modules.CircleUnit{}
 	for _, unit := range adminCircleSet.Units {
-		copyUnit := unit
 		if _, ok := checkUnits[unit.Name]; !ok {
-			checkUnits[unit.Name] = []bool{false, false}
+			checkUnits[unit.Name] = []bool{false, true}
+		} else {
+			checkUnits[unit.Name][1] = true
 		}
-		checkUnits[unit.Name][1] = true
-		mapAdminCircleSet[unit.Name] = copyUnit
+		mapAdminCircleSet[unit.Name] = unit
 	}
 
 	for checkUnitName, checks := range checkUnits {
@@ -98,7 +140,7 @@ func mergeFormAdmin(routerCircleSet *modules.CircleSet, adminCircleSet *modules.
 	return nil
 }
 
-func mergeFormModelsAndRequestsAndResponses(
+func mergeFromModelsAndRequestsAndResponses(
 	routerCircleSet *modules.CircleSet,
 	controllersCircleSet *modules.CircleSet,
 	modelsCircleSet *modules.CircleSet,
@@ -124,19 +166,14 @@ func mergeFormModelsAndRequestsAndResponses(
 	}
 
 	for _, unit := range modelsCircleSet.Units {
-		if _, ok := mapRouterCircleSet[unit.Name]; ok {
-			// TODO:
+		if cu, ok := mapRouterCircleSet[unit.Name]; ok {
+			cu = mapRouterCircleSet[unit.Name]
+			cu.Properties = append(mapRouterCircleSet[unit.Name].Properties, unit.Properties...)
 		} else {
 			// TODO:
-			cu := &modules.CircleUnit{
-				Name: unit.Name,
-			}
-			mapRouterCircleSet[unit.Name] = cu
-			routerCircleSet.Units = append(routerCircleSet.Units, cu)
+			mapRouterCircleSet[unit.Name] = unit
+			routerCircleSet.Units = append(routerCircleSet.Units, unit)
 		}
-
-		cu := mapRouterCircleSet[unit.Name]
-		cu.Properties = append(mapRouterCircleSet[unit.Name].Properties, unit.Properties...)
 	}
 
 	for _, unit := range requestsCircleSet.Units {
@@ -147,7 +184,6 @@ func mergeFormModelsAndRequestsAndResponses(
 			cu := &modules.CircleUnit{
 				Name: unit.Name,
 			}
-			mapRouterCircleSet[unit.Name] = cu
 			routerCircleSet.Units = append(routerCircleSet.Units, cu)
 		}
 
@@ -162,7 +198,6 @@ func mergeFormModelsAndRequestsAndResponses(
 			cu := &modules.CircleUnit{
 				Name: unit.Name,
 			}
-			mapRouterCircleSet[unit.Name] = cu
 			routerCircleSet.Units = append(routerCircleSet.Units, cu)
 		}
 
@@ -226,8 +261,14 @@ func scanLineForRouter(flagRead *FlagRead, cs *modules.CircleSet, currentWhere *
 	}
 
 	switch *currentWhere {
-	case "system", "manual", "auto":
-		name := getWord(l, "&modules.", "Controller{},")
+	case "manual", "auto":
+		name := ""
+		if strings.Index(l, "&modules.") >= 0 {
+			name = getWord(l, "&modules.", "Controller{},")
+		} else if strings.Index(l, "&controllers.") >= 0 {
+			name = getWord(l, "&controllers.", "Controller{},")
+		}
+
 		if name == "" {
 			return
 		}
@@ -271,21 +312,22 @@ func scanSource(sourceType string, sourceDirPath string) (*modules.CircleSet, er
 		for _, f := range d {
 			p := doc.New(f, "./", 0)
 
-			cu := &modules.CircleUnit{}
-
-			if sourceType == "models" ||
-				sourceType == "requests" ||
-				sourceType == "responses" {
-				if err := scanSourceForModel(cu, p); err != nil {
-					return err
+			// TODO
+			// if sourceType == "models" ||
+			// 	sourceType == "requests" ||
+			// 	sourceType == "responses" {
+			// 	if err := scanSourceForModel(cu, p); err != nil {
+			// 		continue
+			// 	}
+			if sourceType == "models" {
+				if err := scanSourceForModel(cs, p); err != nil {
+					continue
 				}
 			} else if sourceType == "controllers" {
-				if err := scanSourceForControllers(cu, p); err != nil {
-					return err
+				if err := scanSourceForControllers(cs, p); err != nil {
+					continue
 				}
 			}
-
-			cs.Units = append(cs.Units, cu)
 		}
 		return nil
 	}); err != nil {
@@ -294,22 +336,32 @@ func scanSource(sourceType string, sourceDirPath string) (*modules.CircleSet, er
 	return cs, nil
 }
 
-func scanSourceForControllers(cu *modules.CircleUnit, p *doc.Package) error {
+func scanSourceForControllers(cs *modules.CircleSet, p *doc.Package) error {
 	for _, t := range p.Types {
+		name := strings.Replace(t.Name, "Controller", "", 1)
+		cu := &modules.CircleUnit{
+			Name: name,
+		}
 		// TODO:
-		//spew.Dump(t.Doc)
-		spew.Dump(t.Methods[0].Orig)
-		fmt.Println(t.Methods[0].Level)
-		fmt.Println(t.Methods[0].Recv)
-		fmt.Println(t.Methods[0].Name)
+		// spew.Dump(t.Doc)
+		// spew.Dump(t.Methods[0].Orig)
+		// fmt.Println(t.Methods[0].Level)
+		// fmt.Println(t.Methods[0].Recv)
+		// fmt.Println(t.Methods[0].Name)
+
+		cs.Units = append(cs.Units, cu)
 	}
 	return nil
 }
 
-func scanSourceForModel(cu *modules.CircleUnit, p *doc.Package) error {
+func scanSourceForModel(cs *modules.CircleSet, p *doc.Package) error {
 	for _, t := range p.Types {
 		structDecl := t.Decl.Specs[0].(*ast.TypeSpec).Type.(*ast.StructType)
 		fields := structDecl.Fields.List
+		cu := &modules.CircleUnit{
+			Name: t.Name,
+		}
+
 		for _, field := range fields {
 			isSystem := false
 			unitName := field.Names[0].Name
@@ -346,6 +398,8 @@ func scanSourceForModel(cu *modules.CircleUnit, p *doc.Package) error {
 				typeSel := field.Type.(*ast.StarExpr).X.(*ast.SelectorExpr).Sel.Name
 				typeName = fmt.Sprintf("*%s.%s", typeX, typeSel)
 				isNull = true
+			} else {
+				spew.Dump(field.Type)
 			}
 
 			cu.Properties = append(cu.Properties, modules.CircleUnitProperty{
@@ -358,6 +412,7 @@ func scanSourceForModel(cu *modules.CircleUnit, p *doc.Package) error {
 				IsSystem:    isSystem,
 			})
 		}
+		cs.Units = append(cs.Units, cu)
 	}
 	return nil
 }

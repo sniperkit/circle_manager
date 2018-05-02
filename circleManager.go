@@ -27,6 +27,7 @@ const (
 
 type changeTemplateFunc func(string, string) (string, error)
 
+//TODO: 삭제하기
 var circleSet *modules.CircleSet
 
 type CircleManager struct {

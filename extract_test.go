@@ -109,8 +109,10 @@ func TestSourceMerge(t *testing.T) {
 	cm := &CircleManager{}
 	cm.prepare()
 
-	err := cm.ImportCircle()
+	_, err := cm.ImportCircle()
 	assert.Nil(t, err)
+
+	//spew.Dump(cs)
 }
 
 // func TestSacnLineForModel(t *testing.T) {

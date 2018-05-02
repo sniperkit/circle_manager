@@ -12,6 +12,10 @@ delete:
   cmds:
     - go run ./cli.go ./circleManager.go --mode delete --name Test --rootPath .example
 
+import:
+  cmds:
+    - go run ./cli.go ./circleManager.go ./extract.go --dbHost 127.0.0.1 --dbPort 3306 --dbName circle --dbUser root --dbPassword olim --mode import --rootPath .example
+
 test:
   cmds:
     - ^clean

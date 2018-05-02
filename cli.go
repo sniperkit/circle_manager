@@ -34,8 +34,8 @@ type Envs struct {
 }
 
 func envsValid() error {
-	if envs.Mode == "generate" || envs.Mode == "envs" {
-		if envs.CircleID <= 0 {
+	if envs.Mode == "generate" || envs.Mode == "envs" || envs.Mode == "import" {
+		if envs.CircleID <= 0 && envs.Mode != "import" {
 			return errors.New("circleID가 없으므로 종료")
 		}
 		if envs.DBHost == "" {
@@ -78,7 +78,7 @@ func main() {
 		cli.StringFlag{Name: "dbName", Value: "circle", Usage: "DB Name", EnvVar: "DB_NAME"},
 		cli.StringFlag{Name: "dbUser", Value: "root", Usage: "DB User", EnvVar: "DB_USER"},
 		cli.StringFlag{Name: "dbPassword", Value: "password", Usage: "DB Password", EnvVar: "DB_PASSWORD"},
-		cli.UintFlag{Name: "circleID", Value: 1, Usage: "CircleID", EnvVar: "CIRCLE_ID"},
+		cli.UintFlag{Name: "circleID", Value: 0, Usage: "CircleID", EnvVar: "CIRCLE_ID"},
 		cli.StringFlag{Name: "rootPath", Value: "./", Usage: "RootPath", EnvVar: "ROOT_PATH"},
 		cli.BoolFlag{Name: "onlyControllers", Usage: "RootPaths"},
 		cli.BoolFlag{Name: "onlyModels", Usage: "onlyModels"},
@@ -102,10 +102,9 @@ func main() {
 			OnlyResponses:   c.Bool("onlyResponses"),
 		}
 
-		err := envsValid()
-		if err != nil {
+		if err := envsValid(); err != nil {
 			fmt.Println(err.Error())
-			return nil
+			return err
 		}
 
 		if envs.Mode == "generate" {
@@ -131,12 +130,20 @@ func main() {
 }
 
 func runImport() error {
+	if err := initDB(); err != nil {
+		return err
+	}
+
 	cm := &CircleManager{}
 	cm.prepare()
 
-	cm.ImportCircle()
+	cs, err := cm.ImportCircle()
+	if err != nil {
+		return err
+	}
+	cs.ID = envs.CircleID
 
-	return nil
+	return cm.SaveManualCircleSetToDB(cs)
 }
 
 func runSafemode() error {
