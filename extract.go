@@ -135,6 +135,8 @@ func mergeFromAdmin(routerCircleSet *modules.CircleSet, adminCircleSet *modules.
 		} else if !checks[0] && checks[1] {
 			//라우터는 없고 Admin은 있다.
 			routerCircleSet.Units = append(routerCircleSet.Units, mapAdminCircleSet[checkUnitName])
+		} else if checks[0] && checks[1] {
+			mapRouterCircleSet[checkUnitName].EnableAdminSource = true
 		}
 	}
 	return nil
@@ -153,8 +155,8 @@ func mergeFromModelsAndRequestsAndResponses(
 	}
 
 	for _, unit := range controllersCircleSet.Units {
-		if _, ok := mapRouterCircleSet[unit.Name]; ok {
-			// TODO:
+		if cu, ok := mapRouterCircleSet[unit.Name]; ok {
+			cu.EnableControllerSource = true
 		} else {
 			// TODO:
 			cu := &modules.CircleUnit{
@@ -167,7 +169,7 @@ func mergeFromModelsAndRequestsAndResponses(
 
 	for _, unit := range modelsCircleSet.Units {
 		if cu, ok := mapRouterCircleSet[unit.Name]; ok {
-			cu = mapRouterCircleSet[unit.Name]
+			cu.EnableModelSource = true
 			cu.Properties = append(mapRouterCircleSet[unit.Name].Properties, unit.Properties...)
 		} else {
 			// TODO:
