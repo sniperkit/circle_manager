@@ -71,13 +71,29 @@ func GetCircleSetByID(id uint) (circleSet *CircleSet, err error) {
 	return
 }
 
+func GetCircleSetByIDOnlyManual(id uint) (circleSet *CircleSet, err error) {
+	circleSet = &CircleSet{
+		ID: id,
+	}
+
+	preloadDB := gGormDB.Preload("Units", func(db *gorm.DB) *gorm.DB {
+		return db.Where("is_enable = ? && is_manual = 1", true)
+	})
+
+	preloadDB = gGormDB.Preload("Units").Preload("Units.Properties")
+
+	err = NewCircleSetQuerySet(preloadDB).
+		One(circleSet)
+	return
+}
+
 func GetCircleSetByIDForGen(id uint) (circleSet *CircleSet, err error) {
 	circleSet = &CircleSet{
 		ID: id,
 	}
 
 	preloadDB := gGormDB.Preload("Units", func(db *gorm.DB) *gorm.DB {
-		return db.Where("is_enable", true)
+		return db.Where("is_enable = ? && is_manual = 0", true)
 	})
 
 	preloadDB = gGormDB.Preload("Units").Preload("Units.Properties")

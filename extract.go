@@ -80,7 +80,7 @@ func (cm *CircleManager) SaveManualCircleSetToDB(manualCS *modules.CircleSet) er
 	var dbCircleSet *modules.CircleSet
 	if manualCS.ID > 0 {
 		var err error
-		dbCircleSet, err = modules.GetCircleSetByIDForGen(manualCS.ID)
+		dbCircleSet, err = modules.GetCircleSetByIDOnlyManual(manualCS.ID)
 		if err != nil {
 			return err
 		}
