@@ -154,7 +154,7 @@ func (cm *CircleManager) GenerateSource(cs *modules.CircleSet) error {
 			copier.Copy(newCS, cs)
 			newCS.Units = []*modules.CircleUnit{}
 			for _, unit := range cs.Units {
-				if !unit.EnableControllerSource && circleTemplateSet.SourceType == "controllers" {
+				if !unit.EnableControllerSource && circleTemplateSet.SourceType == "router" {
 					fmt.Println("Skip controller : ", unit.Name)
 					continue
 				}
