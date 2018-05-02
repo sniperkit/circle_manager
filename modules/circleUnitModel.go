@@ -63,6 +63,9 @@ type CircleUnit struct {
 	UpdatableUserExcludeStatusIDs  string               `description:""`
 	OlnyUserData                   bool                 `description:""`
 	EnableBackup                   bool                 `description:""`
+	EnableControllerSource         bool                 `description:""`
+	EnableModelSource              bool                 `description:""`
+	EnableAdminSource              bool                 `description:""`
 	//AllDataTags   string               `description:""`
 
 }

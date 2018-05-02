@@ -288,11 +288,12 @@ func scanLineForAdmin(flagRead *FlagRead, cs *modules.CircleSet, currentWhere *s
 			return
 		}
 		cs.Units = append(cs.Units, &modules.CircleUnit{
-			Name:      name,
-			MenuGroup: getWord(l, "\", \"", "\", anyoneAllow, -1)"),
-			MenuName:  getWord(l, "{}, \"", "\", \""),
-			IsSystem:  *currentWhere == "system",
-			IsManual:  *currentWhere == "manual",
+			Name:              name,
+			MenuGroup:         getWord(l, "\", \"", "\", anyoneAllow, -1)"),
+			MenuName:          getWord(l, "{}, \"", "\", \""),
+			IsSystem:          *currentWhere == "system",
+			IsManual:          *currentWhere == "manual",
+			EnableAdminSource: true,
 		})
 	}
 }
@@ -344,6 +345,7 @@ func scanSourceForControllers(cs *modules.CircleSet, p *doc.Package) error {
 		name := strings.Replace(t.Name, "Controller", "", 1)
 		cu := &modules.CircleUnit{
 			Name: name,
+			EnableControllerSource: true,
 		}
 		// TODO:
 		// spew.Dump(t.Doc)
@@ -365,7 +367,8 @@ func scanSourceForModel(cs *modules.CircleSet, p *doc.Package) error {
 		structDecl := t.Decl.Specs[0].(*ast.TypeSpec).Type.(*ast.StructType)
 		fields := structDecl.Fields.List
 		cu := &modules.CircleUnit{
-			Name: t.Name,
+			Name:              t.Name,
+			EnableModelSource: true,
 		}
 
 		fmt.Println("Scan type...")

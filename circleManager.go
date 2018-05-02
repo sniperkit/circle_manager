@@ -122,6 +122,11 @@ func (cm *CircleManager) GenerateSource(cs *modules.CircleSet) error {
 
 		if circleTemplateSet.IsMulti {
 			for _, unit := range cs.Units {
+				if !unit.EnableAdminSource && circleTemplateSet.SourceType == "admin" ||
+					!unit.EnableControllerSource && circleTemplateSet.SourceType == "controllers" ||
+					!unit.EnableModelSource && circleTemplateSet.SourceType == "models" {
+					continue
+				}
 				if unit.IsManual && unit.IsSystem {
 					continue
 				}
