@@ -10,6 +10,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/jinzhu/copier"
+
 	"github.com/alecthomas/template"
 	"github.com/jungju/circle_manager/modules"
 )
@@ -147,7 +149,16 @@ func (cm *CircleManager) GenerateSource(cs *modules.CircleSet) error {
 				}
 			}
 		} else {
-			if err := executeTemplate(circleTemplateSet.SourcePath, circleTemplateSet.TemplatePath, cs); err != nil {
+			newCS := &modules.CircleSet{}
+			copier.Copy(newCS, cs)
+			newCS.Units = []*modules.CircleUnit{}
+			for _, unit := range cs.Units {
+				if unit.EnableControllerSource && circleTemplateSet.SourceType == "controllers" {
+					continue
+				}
+				newCS.Units = append(newCS.Units, unit)
+			}
+			if err := executeTemplate(circleTemplateSet.SourcePath, circleTemplateSet.TemplatePath, newCS); err != nil {
 				fmt.Printf("Error : %s\n", err.Error())
 				return err
 			}
