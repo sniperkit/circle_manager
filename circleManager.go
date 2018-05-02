@@ -16,13 +16,13 @@ import (
 
 const (
 	adminTemplate = `addResourceAndMenu(&models.{{.Name}}{}, "{{.MenuName}}", "{{.MenuGroup}}", anyoneAllow, -1)
-`
+	`
 	routerTemplate = `beego.NSNamespace("/{{.GetURL}}",
-	beego.NSInclude(
-		&controllers.{{.Name}}Controller{},
-	),
-),
-`
+			beego.NSInclude(
+				&controllers.{{.Name}}Controller{},
+			),
+		),
+		`
 )
 
 type changeTemplateFunc func(string, string) (string, error)
@@ -139,8 +139,6 @@ func (cm *CircleManager) GenerateSource(cs *modules.CircleSet) error {
 				}
 			}
 		} else {
-			fmt.Printf("%s", circleTemplateSet.SourcePath)
-
 			if err := executeTemplate(circleTemplateSet.SourcePath, circleTemplateSet.TemplatePath, cs); err != nil {
 				fmt.Printf("Error : %s\n", err.Error())
 				return err
@@ -191,15 +189,20 @@ func (cm *CircleManager) AppendManual() error {
 }
 
 func (cm *CircleManager) DeleteManual() error {
+	fmt.Println("Delete unit start...")
 	manualUnit := &modules.CircleUnit{
-		Name: envs.Name,
+		Name:      envs.Name,
+		MenuName:  envs.Name,
+		MenuGroup: "etc.",
 	}
 
+	fmt.Println("Delete unit from router.")
 	routerTemplateSet := cm.MapTemplateSets["router"]
 	if err := deleteManual(routerTemplateSet.TemplatePath, routerTemplate, manualUnit); err != nil {
 		return err
 	}
 
+	fmt.Println("Delete unit from admin.")
 	adminTemplateSet := cm.MapTemplateSets["admin"]
 	if err := deleteManual(adminTemplateSet.TemplatePath, adminTemplate, manualUnit); err != nil {
 		return err
@@ -210,6 +213,7 @@ func (cm *CircleManager) DeleteManual() error {
 		fmt.Printf("Deleted %s\n", filepath.Join(envs.RootPath, dirName, fmt.Sprintf("%s.go", manualUnit.GetVariableName())))
 	}
 
+	fmt.Println("Delete file of unit.")
 	removeFunc("controllers")
 	removeFunc("models")
 	removeFunc("requests")
@@ -222,12 +226,15 @@ func (cm *CircleManager) DeleteManual() error {
 }
 
 func deleteManual(templatefile string, appendText string, unit *modules.CircleUnit) error {
+	fmt.Println("Template 파일 Unit 제거중...", unit.Name)
 	return saveTemplate(templatefile, appendText, unit, func(read string, tpl string) (string, error) {
+		fmt.Println(tpl)
 		return strings.Replace(string(read), tpl, "", -1), nil
 	})
 }
 
 func appendManual(templatefile string, appendText string, unit *modules.CircleUnit) error {
+	fmt.Println("Template 파일 Unit 추가중...", unit.Name)
 	return saveTemplate(templatefile, appendText, unit, func(read string, tpl string) (string, error) {
 		append := fmt.Sprintf("%s// circle:manual:end", tpl)
 
@@ -240,7 +247,10 @@ func appendManual(templatefile string, appendText string, unit *modules.CircleUn
 }
 
 func saveTemplate(templatefile string, appendText string, unit *modules.CircleUnit, ctFunc changeTemplateFunc) error {
-	t := template.Must(template.ParseFiles(appendText))
+	t, err := template.New("template").Parse(appendText)
+	if err != nil {
+		return err
+	}
 
 	var tpl bytes.Buffer
 	if err := t.Execute(&tpl, unit); err != nil {
