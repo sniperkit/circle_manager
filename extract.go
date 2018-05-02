@@ -362,11 +362,18 @@ func scanSourceForModel(cs *modules.CircleSet, p *doc.Package) error {
 			Name: t.Name,
 		}
 
+		fmt.Println("Scan type...")
+		fmt.Println("type : ", t)
+		fmt.Println("type.Name : ", t.Name)
+
 		for _, field := range fields {
 			isSystem := false
 			fmt.Println("Scan field...")
 			fmt.Println("field : ", field)
 			fmt.Println("field.Names : ", field.Names)
+			if len(field.Names) <= 0 {
+				continue
+			}
 			unitName := field.Names[0].Name
 			switch unitName {
 			case "ID", "CreatedAt", "UpdatedAt", "Name", "Description":
