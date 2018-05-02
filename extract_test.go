@@ -94,12 +94,28 @@ func TestSacnSourceForRequests(t *testing.T) {
 	cs, err := scanSource("requests", ".example/requests")
 	assert.Nil(t, err)
 	assert.NotZero(t, len(cs.Units))
+	for _, unit := range cs.Units {
+		assert.NotEmpty(t, unit.Name)
+		assert.True(t, unit.EnableRequestSource)
+		assert.False(t, unit.EnableControllerSource)
+		assert.False(t, unit.EnableAdminSource)
+		assert.False(t, unit.EnableModelSource)
+		assert.False(t, unit.EnableResponseSource)
+	}
 }
 
 func TestSacnSourceForResponses(t *testing.T) {
 	cs, err := scanSource("responses", ".example/responses")
 	assert.Nil(t, err)
 	assert.NotZero(t, len(cs.Units))
+	for _, unit := range cs.Units {
+		assert.NotEmpty(t, unit.Name)
+		assert.False(t, unit.EnableRequestSource)
+		assert.False(t, unit.EnableControllerSource)
+		assert.False(t, unit.EnableAdminSource)
+		assert.False(t, unit.EnableModelSource)
+		assert.True(t, unit.EnableResponseSource)
+	}
 }
 
 func TestSourceMerge(t *testing.T) {

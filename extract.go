@@ -167,6 +167,7 @@ func mergeFromModelsAndRequestsAndResponses(
 		}
 	}
 
+	mapProperies := map[string]map[string]*modules.CircleUnitProperty{}
 	for _, unit := range modelsCircleSet.Units {
 		if cu, ok := mapRouterCircleSet[unit.Name]; ok {
 			cu.EnableModelSource = true
@@ -175,6 +176,11 @@ func mergeFromModelsAndRequestsAndResponses(
 			// TODO:
 			mapRouterCircleSet[unit.Name] = unit
 			routerCircleSet.Units = append(routerCircleSet.Units, unit)
+		}
+
+		mapProperies[unit.Name] = map[string]*modules.CircleUnitProperty{}
+		for _, property := range unit.Properties {
+			mapProperies[unit.Name][property.Name] = property
 		}
 	}
 
@@ -189,6 +195,9 @@ func mergeFromModelsAndRequestsAndResponses(
 			routerCircleSet.Units = append(routerCircleSet.Units, cu)
 		}
 
+		for _, property := range unit.Properties {
+			mapProperies[unit.Name][property.Name] = property
+		}
 		//TODO: 속성 합치기
 	}
 
@@ -316,14 +325,10 @@ func scanSource(sourceType string, sourceDirPath string) (*modules.CircleSet, er
 			p := doc.New(f, "./", 0)
 
 			// TODO
-			// if sourceType == "models" ||
-			// 	sourceType == "requests" ||
-			// 	sourceType == "responses" {
-			// 	if err := scanSourceForModel(cu, p); err != nil {
-			// 		continue
-			// 	}
-			if sourceType == "models" {
-				if err := scanSourceForModel(cs, p); err != nil {
+			if sourceType == "models" ||
+				sourceType == "requests" ||
+				sourceType == "responses" {
+				if err := scanSourceModel(sourceType, cs, p); err != nil {
 					continue
 				}
 			} else if sourceType == "controllers" {
@@ -361,16 +366,18 @@ func scanSourceForControllers(cs *modules.CircleSet, p *doc.Package) error {
 	return nil
 }
 
-func scanSourceForModel(cs *modules.CircleSet, p *doc.Package) error {
+func scanSourceModel(sourceType string, cs *modules.CircleSet, p *doc.Package) error {
 	for _, t := range p.Types {
-		if strings.Index(t.Doc, "gen:qs") < 0 {
+		if sourceType == "models" && strings.Index(t.Doc, "gen:qs") < 0 {
 			continue
 		}
 		structDecl := t.Decl.Specs[0].(*ast.TypeSpec).Type.(*ast.StructType)
 		fields := structDecl.Fields.List
 		cu := &modules.CircleUnit{
-			Name:              t.Name,
-			EnableModelSource: true,
+			Name:                 t.Name,
+			EnableModelSource:    sourceType == "models",
+			EnableRequestSource:  sourceType == "requests",
+			EnableResponseSource: sourceType == "responses",
 		}
 
 		fmt.Println("Scan type...")
@@ -423,7 +430,7 @@ func scanSourceForModel(cs *modules.CircleSet, p *doc.Package) error {
 				spew.Dump(field.Type)
 			}
 
-			cu.Properties = append(cu.Properties, modules.CircleUnitProperty{
+			cu.Properties = append(cu.Properties, &modules.CircleUnitProperty{
 				Name:        unitName,
 				Description: description,
 				Type:        typeName,

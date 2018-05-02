@@ -85,7 +85,7 @@ func TestGo(t *testing.T) {
 	}
 }
 
-func makeCircleUnit(name string, menuName string, menuGroup string, properties ...modules.CircleUnitProperty) *modules.CircleUnit {
+func makeCircleUnit(name string, menuName string, menuGroup string, properties ...*modules.CircleUnitProperty) *modules.CircleUnit {
 	return &modules.CircleUnit{
 		Name:       name,
 		MenuName:   menuName,
@@ -94,8 +94,8 @@ func makeCircleUnit(name string, menuName string, menuGroup string, properties .
 	}
 }
 
-func makeCircleUnitProperty(name string, typeName string) modules.CircleUnitProperty {
-	return modules.CircleUnitProperty{
+func makeCircleUnitProperty(name string, typeName string) *modules.CircleUnitProperty {
+	return &modules.CircleUnitProperty{
 		Name: name,
 		Type: typeName,
 	}
