@@ -364,6 +364,8 @@ func scanSourceForModel(cs *modules.CircleSet, p *doc.Package) error {
 
 		for _, field := range fields {
 			isSystem := false
+			fmt.Println("Scan field...")
+			fmt.Println("field : ", field)
 			fmt.Println("field.Names : ", field.Names)
 			unitName := field.Names[0].Name
 			switch unitName {
