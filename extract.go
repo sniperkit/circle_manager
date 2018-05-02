@@ -356,6 +356,9 @@ func scanSourceForControllers(cs *modules.CircleSet, p *doc.Package) error {
 
 func scanSourceForModel(cs *modules.CircleSet, p *doc.Package) error {
 	for _, t := range p.Types {
+		if strings.Index(t.Doc, "gen:qs") < 0 {
+			continue
+		}
 		structDecl := t.Decl.Specs[0].(*ast.TypeSpec).Type.(*ast.StructType)
 		fields := structDecl.Fields.List
 		cu := &modules.CircleUnit{
