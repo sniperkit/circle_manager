@@ -338,6 +338,9 @@ func scanSource(sourceType string, sourceDirPath string) (*modules.CircleSet, er
 
 func scanSourceForControllers(cs *modules.CircleSet, p *doc.Package) error {
 	for _, t := range p.Types {
+		if strings.Index(t.Name, "Controller") < 0 {
+			continue
+		}
 		name := strings.Replace(t.Name, "Controller", "", 1)
 		cu := &modules.CircleUnit{
 			Name: name,

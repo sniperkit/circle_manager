@@ -80,6 +80,7 @@ err := cm.GenerateSourceBySet(&CircleSet{
 - 리포팅
 - 백업
 - 소스 분석
+- Controller에서 API 기능 설정
 
 ## library
 - github.com/astaxie/beego
