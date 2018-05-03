@@ -180,9 +180,13 @@ func (c *BaseCrudController) CheckUserData(thenErrorCode int) {
 func (c *BaseCrudController) CheckAble(checkType string) {
 	if c.CurrentCircleUnit != nil {
 		checkAbleProp := func(userIDs, userTypeIDs, userStatusIDs string) bool {
+			if userIDs == "" && userTypeIDs == "" && userStatusIDs == "" {
+				return true
+			}
 			if c.CurrentUserMeta == nil && userIDs != "" && userTypeIDs != "" && userStatusIDs != "" {
 				return false
 			}
+
 			if userIDs != "" {
 				//TODO:
 			} else if userTypeIDs != "" {
