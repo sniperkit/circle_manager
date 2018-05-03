@@ -3,12 +3,12 @@ package requests
 import "time"
 
 type Create{{.Name}} struct {
-  {{range $i, $property := .Properties}}{{.Name}} {{.Type}}
+  {{range $i, $property := .Properties}}{{.Name}} {{.GetTypeInRequests}}
 	{{end}}
 }
 
 type Update{{.Name}} struct {
-  {{range $i, $property := .Properties}}{{.Name}} {{.Type}}
+  {{range $i, $property := .Properties}}{{.Name}} {{.GetTypeInRequests}}
 	{{end}}
 }
 
