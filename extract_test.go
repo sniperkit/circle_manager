@@ -85,9 +85,8 @@ func TestSacnSourceForModel(t *testing.T) {
 }
 
 func TestSacnSourceForController(t *testing.T) {
-	// cu, err := scanSource("controllers", ".example/controllers")
-	// assert.Nil(t, err)
-	// assert.NotZero(t, len(cu.Properties))
+	_, err := scanSource("controllers", ".example/controllers")
+	assert.Nil(t, err)
 }
 
 func TestSacnSourceForRequests(t *testing.T) {

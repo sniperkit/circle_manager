@@ -2,7 +2,7 @@ package responses
 
 import "time"
 
-type ResponseTodo struct {
+type Todo struct {
 	ID          uint
 	CreatedAt   time.Time
 	UpdatedAt   time.Time

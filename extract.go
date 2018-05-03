@@ -349,10 +349,89 @@ func scanSourceForControllers(cs *modules.CircleSet, p *doc.Package) error {
 		if strings.Index(t.Name, "Controller") < 0 {
 			continue
 		}
+
+		isCreateble := false
+		isUpdateble := false
+		isDeleteble := false
+		isGetAllable := false
+		isGetOneable := false
+
+		for _, method := range t.Methods {
+			requestCreateBodyName := ""
+			requestUpdateBodyName := ""
+			responseBodyName := ""
+			routerURL := ""
+			routerMethod := ""
+			requestBodyName := ""
+
+			if method.Name == "Post" {
+				isCreateble = true
+			} else if method.Name != "Put" {
+				isUpdateble = true
+			} else if method.Name != "GetOne" {
+				isGetOneable = true
+			} else if method.Name != "GetAll" {
+				isGetAllable = true
+			} else if method.Name != "Delete" {
+				isDeleteble = true
+			} else {
+				//TODO: 다른 메소드 지원은 나중에
+				continue
+			}
+
+			for _, docLine := range strings.Split(method.Doc, "\n") {
+				if strings.Index(docLine, "@Param") == 0 {
+					tempDocLine := strings.Replace(docLine, "\t", " ", -1)
+					tempDocLine = strings.Replace(tempDocLine, "  ", " ", -1)
+					tempDocLine = strings.Replace(tempDocLine, "  ", " ", -1)
+					tempDocLineArray := strings.Split(tempDocLine, " ")
+					fmt.Println(tempDocLineArray)
+					if tempDocLineArray[1] == "body" {
+						requestBodyName = tempDocLineArray[3]
+					}
+				} else if strings.Index(docLine, "@Success") == 0 {
+					tempDocLine := strings.Replace(docLine, "\t", " ", -1)
+					tempDocLine = strings.Replace(tempDocLine, "  ", " ", -1)
+					tempDocLine = strings.Replace(tempDocLine, "  ", " ", -1)
+					tempDocLineArray := strings.Split(tempDocLine, " ")
+					if tempDocLineArray[1] == "204" {
+						continue
+					}
+					responseBodyName = tempDocLineArray[2]
+				} else if strings.Index(docLine, "@router") == 0 {
+					tempDocLine := strings.Replace(docLine, "\t", " ", -1)
+					tempDocLine = strings.Replace(tempDocLine, "  ", " ", -1)
+					tempDocLine = strings.Replace(tempDocLine, "  ", " ", -1)
+					tempDocLine = strings.Replace(tempDocLine, "]", " ", -1)
+					tempDocLine = strings.Replace(tempDocLine, "[", " ", -1)
+					tempDocLineArray := strings.Split(tempDocLine, " ")
+					routerURL = tempDocLineArray[1]
+					routerMethod = tempDocLineArray[2]
+				}
+
+				if routerMethod == "post" {
+					requestCreateBodyName = requestBodyName
+				} else if routerMethod == "put" {
+					requestUpdateBodyName = requestBodyName
+				}
+				fmt.Println(requestCreateBodyName)
+				fmt.Println(requestUpdateBodyName)
+				fmt.Println(responseBodyName)
+				fmt.Println(routerURL)
+				fmt.Println(routerMethod)
+				fmt.Println(requestBodyName)
+				fmt.Println()
+			}
+		}
 		name := strings.Replace(t.Name, "Controller", "", 1)
 		cu := &modules.CircleUnit{
 			Name: name,
 			EnableControllerSource: true,
+			IsCreateble:            isCreateble,
+			IsUpdateble:            isUpdateble,
+			IsGetAllable:           isGetAllable,
+			IsGetOneable:           isGetOneable,
+			IsDeleteble:            isDeleteble,
 		}
 		// TODO:
 		// spew.Dump(t.Doc)
@@ -490,84 +569,3 @@ func removeRigth(s, indexChar string) string {
 	}
 	return s
 }
-
-// func (cm *CircleManager) ImportCircleUnit(name string) error {
-// 	flagRead := &FlagRead{}
-// 	cu := &modules.CircleUnit{
-// 		Name: name,
-// 	}
-
-// 	inFile, _ := os.Open(
-// 		filepath.Join(
-// 			cm.MapTemplateSets["models"].SourcePath,
-// 			fmt.Sprintf("%s.go", name),
-// 		),
-// 	)
-// 	defer inFile.Close()
-// 	scanner := bufio.NewScanner(inFile)
-// 	scanner.Split(bufio.ScanLines)
-
-// 	currentWhere := ""
-// 	for scanner.Scan() {
-// 		l := scanner.Text()
-// 		l = strings.TrimSpace(l)
-
-// 		// TODO:
-// 		scanLineForModel(flagRead, cu, &currentWhere, l)
-// 	}
-
-// 	return nil
-// }
-
-//func scanLineForModel(flagRead *FlagRead, cu *modules.CircleUnit, currentWhere *string, l string) {
-// 	if *currentWhere == "end_model" && strings.Index(l, fmt.Sprintf("type %s struct {", cu.Name)) >= 0 {
-// 		*currentWhere = "in_model"
-// 		return
-// 	}
-
-// 	if *currentWhere == "in_model" && strings.Index(l, "}") >= 0 {
-// 		*currentWhere = "end_model"
-// 		return
-// 	}
-
-// 	if *currentWhere != "in_model" {
-// 		return
-// 	}
-
-// 	tags := ""
-// 	re := regexp.MustCompile("\\`(.*)`")
-// 	if match := re.FindStringSubmatch(l); len(match) >= 1 {
-// 		tags = match[1]
-// 	}
-
-// 	sl := strings.Replace(l, "  ", " ", -1)
-// 	sl = strings.Replace(sl, "  ", " ", -1)
-// 	sl = strings.Replace(sl, "  ", " ", -1)
-// 	slArr := strings.Split(sl, " ")
-
-// 	if len(slArr) >= 2 {
-// 		isSystem := false
-// 		switch slArr[0] {
-// 		case "ID", "CreatedAt", "UpdatedAt", "Name", "Description":
-// 			isSystem = true
-// 		}
-// 		description := ""
-// 		if len(slArr) >= 3 {
-// 			description = getWord(tags, "description:\"", "")
-// 			description = removeRigth(description, "\"")
-// 		}
-// 		cu.Properties = append(cu.Properties, modules.CircleUnitProperty{
-// 			Name:        slArr[0],
-// 			Description: description,
-// 			//CircleUnit                     CircleUnit
-// 			//CircleUnitID                   uint
-// 			Type: slArr[1],
-// 			//Nullable                       bool
-// 			IsEnable: true,
-// 			IsManual: true,
-// 			IsSystem: isSystem,
-// 		})
-// 	} else {
-// 		fmt.Println("알수없는 형식 : ", sl)
-// 	}
-//}

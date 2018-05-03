@@ -69,7 +69,6 @@ type CircleUnit struct {
 	EnableRequestSource            bool                  `description:""`
 	EnableResponseSource           bool                  `description:""`
 	//AllDataTags   string               `description:""`
-
 }
 
 func (c *CircleUnit) GetCreatorID() uint {

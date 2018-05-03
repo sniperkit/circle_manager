@@ -54,9 +54,6 @@ type CircleUnitProperty struct {
 	UpdatableUserExcludeIDs        string     `description:""`
 	UpdatableUserExcludeTypeIDs    string     `description:""`
 	UpdatableUserExcludeStatusIDs  string     `description:""`
-	UsePostRequestBody             bool       `description:""`
-	UsePutRequestBody              bool       `description:""`
-	UseResponseBody                bool       `description:""`
 }
 
 func (c *CircleUnitProperty) GetCreatorID() uint {

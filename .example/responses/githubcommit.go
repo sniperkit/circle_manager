@@ -2,7 +2,7 @@ package responses
 
 import "time"
 
-type ResponseGithubCommit struct {
+type GithubCommit struct {
 	ID          uint
 	CreatedAt   time.Time
 	UpdatedAt   time.Time

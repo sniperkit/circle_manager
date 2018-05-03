@@ -2,7 +2,7 @@ package responses
 
 import "time"
 
-type ResponseProject struct {
+type Project struct {
 	ID          uint
 	CreatedAt   time.Time
 	UpdatedAt   time.Time

@@ -52,54 +52,6 @@ func init() {
 
 		// circle:auto:start
 
-		beego.NSNamespace("/githubCommits",
-			beego.NSInclude(
-				&controllers.GithubCommitController{},
-			),
-		),
-
-		beego.NSNamespace("/githubReleases",
-			beego.NSInclude(
-				&controllers.GithubReleaseController{},
-			),
-		),
-
-		beego.NSNamespace("/events",
-			beego.NSInclude(
-				&controllers.EventController{},
-			),
-		),
-
-		beego.NSNamespace("/employees",
-			beego.NSInclude(
-				&controllers.EmployeeController{},
-			),
-		),
-
-		beego.NSNamespace("/keyEvents",
-			beego.NSInclude(
-				&controllers.KeyEventController{},
-			),
-		),
-
-		beego.NSNamespace("/projects",
-			beego.NSInclude(
-				&controllers.ProjectController{},
-			),
-		),
-
-		beego.NSNamespace("/todos",
-			beego.NSInclude(
-				&controllers.TodoController{},
-			),
-		),
-
-		beego.NSNamespace("/teams",
-			beego.NSInclude(
-				&controllers.TeamController{},
-			),
-		),
-
 		// circle:auto:end
 	)
 	beego.AddNamespace(ns)

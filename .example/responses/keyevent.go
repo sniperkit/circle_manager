@@ -2,7 +2,7 @@ package responses
 
 import "time"
 
-type ResponseKeyEvent struct {
+type KeyEvent struct {
 	ID          uint
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
