@@ -138,6 +138,17 @@ func (cm *CircleManager) GenerateSource(cs *modules.CircleSet) error {
 				unitSourceFile := filepath.Join(circleTemplateSet.SourcePath, fmt.Sprintf("%s.go", unit.GetVariableName()))
 				fmt.Printf("Start ExecuteTemplate %s\n", unitSourceFile)
 
+				newCU := &modules.CircleUnit{}
+				copier.Copy(newCU, unit)
+				newCU.Properties = []*modules.CircleUnitProperty{}
+				for _, property := range unit.Properties {
+					if (circleTemplateSet.SourceType == "requests" || circleTemplateSet.SourceType == "responses") && strings.Index(property.Name, "models.") == 0 {
+						fmt.Println("Skip Property : ", unit.Name)
+						continue
+					}
+					newCU.Properties = append(newCU.Properties, property)
+				}
+
 				if err := executeTemplate(
 					unitSourceFile,
 					circleTemplateSet.TemplatePath,
