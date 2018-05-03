@@ -249,7 +249,6 @@ func (cm *CircleManager) DeleteManual() error {
 func deleteManual(templatefile string, appendText string, unit *modules.CircleUnit) error {
 	fmt.Println("Template 파일 Unit 제거중...", unit.Name)
 	return saveTemplate(templatefile, appendText, unit, func(read string, tpl string) (string, error) {
-		fmt.Println(tpl)
 		return strings.Replace(string(read), tpl, "", -1), nil
 	})
 }

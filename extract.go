@@ -32,13 +32,6 @@ type FlagRead struct {
 }
 
 func (cm *CircleManager) ImportCircle() (*modules.CircleSet, error) {
-	fmt.Println(cm.MapTemplateSets["router"].SourcePath)
-	fmt.Println(cm.MapTemplateSets["admin"].SourcePath)
-	fmt.Println(cm.MapTemplateSets["controllers"].SourcePath)
-	fmt.Println(cm.MapTemplateSets["models"].SourcePath)
-	fmt.Println(cm.MapTemplateSets["requests"].SourcePath)
-	fmt.Println(cm.MapTemplateSets["responses"].SourcePath)
-
 	adminCircleSet, err := cm.ImportCircleAdmin()
 	if err != nil {
 		return nil, err
@@ -382,12 +375,12 @@ func scanSourceForControllers(cs *modules.CircleSet, p *doc.Package) error {
 		isGetOneable := false
 
 		for _, method := range t.Methods {
-			requestCreateBodyName := ""
-			requestUpdateBodyName := ""
-			responseBodyName := ""
-			routerURL := ""
+			// requestCreateBodyName := ""
+			// requestUpdateBodyName := ""
+			// responseBodyName := ""
+			// routerURL := ""
 			routerMethod := ""
-			requestBodyName := ""
+			//requestBodyName := ""
 
 			if method.Name == "Post" {
 				isCreateble = true
@@ -410,9 +403,8 @@ func scanSourceForControllers(cs *modules.CircleSet, p *doc.Package) error {
 					tempDocLine = strings.Replace(tempDocLine, "  ", " ", -1)
 					tempDocLine = strings.Replace(tempDocLine, "  ", " ", -1)
 					tempDocLineArray := strings.Split(tempDocLine, " ")
-					fmt.Println(tempDocLineArray)
 					if tempDocLineArray[1] == "body" {
-						requestBodyName = tempDocLineArray[3]
+						//equestBodyName = tempDocLineArray[3]
 					}
 				} else if strings.Index(docLine, "@Success") == 0 {
 					tempDocLine := strings.Replace(docLine, "\t", " ", -1)
@@ -422,7 +414,7 @@ func scanSourceForControllers(cs *modules.CircleSet, p *doc.Package) error {
 					if tempDocLineArray[1] == "204" {
 						continue
 					}
-					responseBodyName = tempDocLineArray[2]
+					//responseBodyName = tempDocLineArray[2]
 				} else if strings.Index(docLine, "@router") == 0 {
 					tempDocLine := strings.Replace(docLine, "\t", " ", -1)
 					tempDocLine = strings.Replace(tempDocLine, "  ", " ", -1)
@@ -430,22 +422,15 @@ func scanSourceForControllers(cs *modules.CircleSet, p *doc.Package) error {
 					tempDocLine = strings.Replace(tempDocLine, "]", " ", -1)
 					tempDocLine = strings.Replace(tempDocLine, "[", " ", -1)
 					tempDocLineArray := strings.Split(tempDocLine, " ")
-					routerURL = tempDocLineArray[1]
+					//routerURL = tempDocLineArray[1]
 					routerMethod = tempDocLineArray[2]
 				}
 
 				if routerMethod == "post" {
-					requestCreateBodyName = requestBodyName
+					//requestCreateBodyName = requestBodyName
 				} else if routerMethod == "put" {
-					requestUpdateBodyName = requestBodyName
+					//requestUpdateBodyName = requestBodyName
 				}
-				fmt.Println(requestCreateBodyName)
-				fmt.Println(requestUpdateBodyName)
-				fmt.Println(responseBodyName)
-				fmt.Println(routerURL)
-				fmt.Println(routerMethod)
-				fmt.Println(requestBodyName)
-				fmt.Println()
 			}
 		}
 		name := strings.Replace(t.Name, "Controller", "", 1)
