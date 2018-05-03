@@ -11,6 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/jinzhu/copier"
+
 	"github.com/davecgh/go-spew/spew"
 
 	"github.com/fatih/structtag"
@@ -91,18 +93,21 @@ func (cm *CircleManager) SaveManualCircleSetToDB(manualCS *modules.CircleSet) er
 
 	if dbCircleSet == nil {
 		dbCircleSet = &modules.CircleSet{}
-	}
+		if err := copier.Copy(dbCircleSet, manualCS); err != nil {
+			return err
+		}
+	} else {
+		mapDBCircleSet := map[string]*modules.CircleUnit{}
+		for _, unit := range dbCircleSet.Units {
+			mapDBCircleSet[unit.Name] = unit
+		}
 
-	mapDBCircleSet := map[string]*modules.CircleUnit{}
-	for _, unit := range dbCircleSet.Units {
-		mapDBCircleSet[unit.Name] = unit
-	}
-
-	for _, unit := range manualCS.Units {
-		if dbUnit, ok := mapDBCircleSet[unit.Name]; ok {
-			dbUnit.IsManual = true
-		} else {
-			dbCircleSet.Units = append(dbCircleSet.Units, unit)
+		for _, unit := range manualCS.Units {
+			if dbUnit, ok := mapDBCircleSet[unit.Name]; ok {
+				dbUnit.IsManual = true
+			} else {
+				dbCircleSet.Units = append(dbCircleSet.Units, unit)
+			}
 		}
 	}
 
