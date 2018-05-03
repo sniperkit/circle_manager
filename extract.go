@@ -102,15 +102,13 @@ func (cm *CircleManager) SaveManualCircleSetToDB(manualCS *modules.CircleSet) er
 
 		for _, unit := range manualCS.Units {
 			if dbUnit, ok := mapDBCircleSet[unit.Name]; ok {
-				//TODO: 장애 나서 재시작 할떄 Auto도 Manual로 바뀜
-				dbUnit.IsManual = true
+				dbUnit.IsManual = !unit.IsAutogen
 			} else {
 				dbCircleSet.Units = append(dbCircleSet.Units, unit)
 			}
 		}
 	}
 
-	return nil
 	//TODO: Save로 처리 할것
 	if createDB {
 		fmt.Println("CS 추가")
@@ -304,9 +302,10 @@ func scanLineForRouter(flagRead *FlagRead, cs *modules.CircleSet, currentWhere *
 			return
 		}
 		cs.Units = append(cs.Units, &modules.CircleUnit{
-			Name:     name,
-			IsSystem: *currentWhere == "system",
-			IsManual: *currentWhere == "manual",
+			Name:      name,
+			IsSystem:  *currentWhere == "system",
+			IsManual:  *currentWhere == "manual",
+			IsAutogen: *currentWhere == "auto",
 		})
 	}
 }

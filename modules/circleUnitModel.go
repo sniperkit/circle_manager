@@ -25,6 +25,7 @@ type CircleUnit struct {
 	MenuGroup                      string                `description:""`
 	IsEnable                       bool                  `description:"사용여부"`
 	IsManual                       bool                  `description:""`
+	IsAutogen                      bool                  `description:""`
 	IsSystem                       bool                  `description:""`
 	IsCreateble                    bool                  `description:""`
 	CreatebleUserIDs               string                `description:""`
