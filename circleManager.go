@@ -126,7 +126,9 @@ func (cm *CircleManager) GenerateSource(cs *modules.CircleSet) error {
 			for _, unit := range cs.Units {
 				if !unit.EnableAdminSource && circleTemplateSet.SourceType == "admin" ||
 					!unit.EnableControllerSource && circleTemplateSet.SourceType == "controllers" ||
-					!unit.EnableModelSource && circleTemplateSet.SourceType == "models" {
+					!unit.EnableModelSource && circleTemplateSet.SourceType == "models" ||
+					!unit.EnableRequestSource && circleTemplateSet.SourceType == "requests" ||
+					!unit.EnableResponseSource && circleTemplateSet.SourceType == "responses" {
 					fmt.Println("Skip source : ", circleTemplateSet.SourceType, ".", unit.Name)
 					continue
 				}
