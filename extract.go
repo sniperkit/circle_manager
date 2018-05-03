@@ -88,6 +88,7 @@ func (cm *CircleManager) SaveManualCircleSetToDB(manualCS *modules.CircleSet) er
 			if err != gorm.ErrRecordNotFound {
 				return err
 			}
+			dbCircleSet = nil
 		}
 	}
 
