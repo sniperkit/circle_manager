@@ -178,85 +178,83 @@ func (c *BaseCrudController) CheckUserData(thenErrorCode int) {
 }
 
 func (c *BaseCrudController) CheckAble(checkType string) {
-	if c.CurrentCircleUnit != nil {
-		checkAbleProp := func(userIDs, userTypeIDs, userStatusIDs string) bool {
-			if userIDs == "" && userTypeIDs == "" && userStatusIDs == "" {
-				return true
-			}
-			if c.CurrentUserMeta == nil && userIDs != "" && userTypeIDs != "" && userStatusIDs != "" {
-				return false
-			}
+	// TODO: 지금 사용 안함
+	// if c.CurrentCircleUnit != nil {
+	// 	checkAbleProp := func(userIDs, userTypeIDs, userStatusIDs string) bool {
+	// 		if c.CurrentUserMeta == nil && userIDs != "" && userTypeIDs != "" && userStatusIDs != "" {
+	// 			return false
+	// 		}
 
-			if userIDs != "" {
-				//TODO:
-			} else if userTypeIDs != "" {
-				//TODO:
-			} else if userStatusIDs != "" {
-				//TODO:
-			}
-			return false
-		}
-		switch checkType {
-		case "create":
-			if !c.CurrentCircleUnit.IsCreateble {
-				c.ErrorAbort(404, nil)
-			} else if checkAbleProp(c.CurrentCircleUnit.CreatebleUserExcludeIDs,
-				c.CurrentCircleUnit.CreatebleUserExcludeTypeIDs,
-				c.CurrentCircleUnit.CreatebleUserExcludeStatusIDs) {
-				c.ErrorAbort(404, nil)
-			} else if checkAbleProp(c.CurrentCircleUnit.CreatebleUserIDs,
-				c.CurrentCircleUnit.CreatebleUserTypeIDs,
-				c.CurrentCircleUnit.CreatebleUserStatusIDs) {
-				return
-			}
-		case "update":
-			if !c.CurrentCircleUnit.IsUpdateble {
-				c.ErrorAbort(404, nil)
-			} else if checkAbleProp(c.CurrentCircleUnit.UpdatableUserExcludeIDs,
-				c.CurrentCircleUnit.UpdatableUserExcludeTypeIDs,
-				c.CurrentCircleUnit.UpdatableUserExcludeStatusIDs) {
-				c.ErrorAbort(404, nil)
-			} else if checkAbleProp(c.CurrentCircleUnit.UpdatableUserIDs,
-				c.CurrentCircleUnit.UpdatableUserTypeIDs,
-				c.CurrentCircleUnit.UpdatableUserStatusIDs) {
-				return
-			}
-		case "list":
-			if !c.CurrentCircleUnit.IsGetAllable {
-				c.ErrorAbort(404, nil)
-			} else if checkAbleProp(c.CurrentCircleUnit.GetAllableUserExcludeIDs,
-				c.CurrentCircleUnit.GetAllableUserExcludeTypeIDs,
-				c.CurrentCircleUnit.GetAllableUserExcludeStatusIDs) {
-				c.ErrorAbort(404, nil)
-			} else if checkAbleProp(c.CurrentCircleUnit.GetAllableUserIDs,
-				c.CurrentCircleUnit.GetAllableUserTypeIDs,
-				c.CurrentCircleUnit.GetAllableUserStatusIDs) {
-				return
-			}
-		case "getone":
-			if !c.CurrentCircleUnit.IsGetOneable {
-				c.ErrorAbort(404, nil)
-			} else if checkAbleProp(c.CurrentCircleUnit.GetOneableUserExcludeIDs,
-				c.CurrentCircleUnit.GetOneableUserExcludeTypeIDs,
-				c.CurrentCircleUnit.GetOneableUserExcludeStatusIDs) {
-				c.ErrorAbort(404, nil)
-			} else if checkAbleProp(c.CurrentCircleUnit.GetOneableUserIDs,
-				c.CurrentCircleUnit.GetOneableUserTypeIDs,
-				c.CurrentCircleUnit.GetOneableUserStatusIDs) {
-				return
-			}
-		case "delete":
-			if !c.CurrentCircleUnit.IsDeleteble {
-				c.ErrorAbort(404, nil)
-			} else if checkAbleProp(c.CurrentCircleUnit.DeletableUserExcludeIDs,
-				c.CurrentCircleUnit.DeletableUserExcludeTypeIDs,
-				c.CurrentCircleUnit.DeletableUserExcludeStatusIDs) {
-				c.ErrorAbort(404, nil)
-			} else if checkAbleProp(c.CurrentCircleUnit.DeletableUserIDs,
-				c.CurrentCircleUnit.DeletableUserTypeIDs,
-				c.CurrentCircleUnit.DeletableUserStatusIDs) {
-				return
-			}
-		}
-	}
+	// 		if userIDs != "" {
+	// 			//TODO:
+	// 		} else if userTypeIDs != "" {
+	// 			//TODO:
+	// 		} else if userStatusIDs != "" {
+	// 			//TODO:
+	// 		}
+	// 		return false
+	// 	}
+	// 	switch checkType {
+	// 	case "create":
+	// 		if !c.CurrentCircleUnit.IsCreateble {
+	// 			c.ErrorAbort(404, nil)
+	// 		} else if checkAbleProp(c.CurrentCircleUnit.CreatebleUserExcludeIDs,
+	// 			c.CurrentCircleUnit.CreatebleUserExcludeTypeIDs,
+	// 			c.CurrentCircleUnit.CreatebleUserExcludeStatusIDs) {
+	// 			c.ErrorAbort(404, nil)
+	// 		} else if checkAbleProp(c.CurrentCircleUnit.CreatebleUserIDs,
+	// 			c.CurrentCircleUnit.CreatebleUserTypeIDs,
+	// 			c.CurrentCircleUnit.CreatebleUserStatusIDs) {
+	// 			return
+	// 		}
+	// 	case "update":
+	// 		if !c.CurrentCircleUnit.IsUpdateble {
+	// 			c.ErrorAbort(404, nil)
+	// 		} else if checkAbleProp(c.CurrentCircleUnit.UpdatableUserExcludeIDs,
+	// 			c.CurrentCircleUnit.UpdatableUserExcludeTypeIDs,
+	// 			c.CurrentCircleUnit.UpdatableUserExcludeStatusIDs) {
+	// 			c.ErrorAbort(404, nil)
+	// 		} else if checkAbleProp(c.CurrentCircleUnit.UpdatableUserIDs,
+	// 			c.CurrentCircleUnit.UpdatableUserTypeIDs,
+	// 			c.CurrentCircleUnit.UpdatableUserStatusIDs) {
+	// 			return
+	// 		}
+	// 	case "list":
+	// 		if !c.CurrentCircleUnit.IsGetAllable {
+	// 			c.ErrorAbort(404, nil)
+	// 		} else if checkAbleProp(c.CurrentCircleUnit.GetAllableUserExcludeIDs,
+	// 			c.CurrentCircleUnit.GetAllableUserExcludeTypeIDs,
+	// 			c.CurrentCircleUnit.GetAllableUserExcludeStatusIDs) {
+	// 			c.ErrorAbort(404, nil)
+	// 		} else if checkAbleProp(c.CurrentCircleUnit.GetAllableUserIDs,
+	// 			c.CurrentCircleUnit.GetAllableUserTypeIDs,
+	// 			c.CurrentCircleUnit.GetAllableUserStatusIDs) {
+	// 			return
+	// 		}
+	// 	case "getone":
+	// 		if !c.CurrentCircleUnit.IsGetOneable {
+	// 			c.ErrorAbort(404, nil)
+	// 		} else if checkAbleProp(c.CurrentCircleUnit.GetOneableUserExcludeIDs,
+	// 			c.CurrentCircleUnit.GetOneableUserExcludeTypeIDs,
+	// 			c.CurrentCircleUnit.GetOneableUserExcludeStatusIDs) {
+	// 			c.ErrorAbort(404, nil)
+	// 		} else if checkAbleProp(c.CurrentCircleUnit.GetOneableUserIDs,
+	// 			c.CurrentCircleUnit.GetOneableUserTypeIDs,
+	// 			c.CurrentCircleUnit.GetOneableUserStatusIDs) {
+	// 			return
+	// 		}
+	// 	case "delete":
+	// 		if !c.CurrentCircleUnit.IsDeleteble {
+	// 			c.ErrorAbort(404, nil)
+	// 		} else if checkAbleProp(c.CurrentCircleUnit.DeletableUserExcludeIDs,
+	// 			c.CurrentCircleUnit.DeletableUserExcludeTypeIDs,
+	// 			c.CurrentCircleUnit.DeletableUserExcludeStatusIDs) {
+	// 			c.ErrorAbort(404, nil)
+	// 		} else if checkAbleProp(c.CurrentCircleUnit.DeletableUserIDs,
+	// 			c.CurrentCircleUnit.DeletableUserTypeIDs,
+	// 			c.CurrentCircleUnit.DeletableUserStatusIDs) {
+	// 			return
+	// 		}
+	// 	}
+	// }
 }
