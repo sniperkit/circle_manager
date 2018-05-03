@@ -81,6 +81,7 @@ func (cm *CircleManager) ImportCircle() (*modules.CircleSet, error) {
 
 func (cm *CircleManager) SaveManualCircleSetToDB(manualCS *modules.CircleSet) error {
 	var dbCircleSet *modules.CircleSet
+	createDB := false
 	if manualCS.ID > 0 {
 		var err error
 		dbCircleSet, err = modules.GetCircleSetByIDOnlyManual(manualCS.ID)
@@ -88,6 +89,7 @@ func (cm *CircleManager) SaveManualCircleSetToDB(manualCS *modules.CircleSet) er
 			if err != gorm.ErrRecordNotFound {
 				return err
 			}
+			createDB = true
 			dbCircleSet = nil
 		}
 	}
@@ -112,10 +114,13 @@ func (cm *CircleManager) SaveManualCircleSetToDB(manualCS *modules.CircleSet) er
 		}
 	}
 
-	if manualCS.ID <= 0 {
+	//TODO: Save로 처리 할것
+	if createDB {
+		fmt.Println("CS 추가")
 		_, err := modules.AddCircleSet(dbCircleSet)
 		return err
 	}
+	fmt.Println("CS 수정")
 	return modules.UpdateCircleSetByID(dbCircleSet)
 }
 
