@@ -157,13 +157,14 @@ func (c *BaseCrudController) BaseDelete() {
 func (c *BaseCrudController) GetItems() error {
 	reqPage := c.GetQueryPage()
 
-	if c.CurrentCircleUnit != nil {
-		if c.CurrentCircleUnit.OlnyUserData {
-			//TODO: 제외되는 UserID 체크(Admin 등)
-			//TODO: userMeta가 없을 떄 처리
-			return GetItemsOnlyUserData(c.ModelItems, reqPage, c.CurrentUserMeta.UserID)
-		}
-	}
+	// TODO: 나중에
+	// if c.CurrentCircleUnit != nil {
+	// 	if c.CurrentCircleUnit.OlnyUserData {
+	// 		//TODO: 제외되는 UserID 체크(Admin 등)
+	// 		//TODO: userMeta가 없을 떄 처리
+	// 		return GetItemsOnlyUserData(c.ModelItems, reqPage, c.CurrentUserMeta.UserID)
+	// 	}
+	// }
 	return GetItems(c.ModelItems, reqPage)
 }
 
