@@ -86,7 +86,7 @@ func (cm *CircleManager) SaveManualCircleSetToDB(manualCS *modules.CircleSet) er
 	createDB := false
 	if manualCS.ID > 0 {
 		var err error
-		dbCircleSet, err = modules.GetCircleSetByIDOnlyManual(manualCS.ID)
+		dbCircleSet, err = modules.GetCircleSetByID(manualCS.ID)
 		if err != nil {
 			if err != gorm.ErrRecordNotFound {
 				return err
