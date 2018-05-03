@@ -139,6 +139,7 @@ func runImport() error {
 
 	cs, err := cm.ImportCircle()
 	if err != nil {
+		fmt.Println("임포트중 에러 발생", err.Error())
 		return err
 	}
 	cs.ID = envs.CircleID
