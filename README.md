@@ -10,7 +10,7 @@ cm := &CircleManager{}
 
 err := cm.GenerateSourceBySet(&CircleSet{
 	Name: "Office1",
-	Units: []CircleUnit{
+	Units: []*CircleUnit{
 		makeCircleUnit(
 			"GithubCommit", "Commits", "이벤트관리",
 			makeCircleUnitProperty("RepoName", "string"),
@@ -82,6 +82,7 @@ err := cm.GenerateSourceBySet(&CircleSet{
 - 소스 분석
 - Controller에서 API 기능 설정
 - 개별로 Templates를 수정하는 것보다 그냥 소스에 정해진 주석 위치에서 메뉴얼 작성
+- Request, Response 반영
 
 ## library
 - github.com/astaxie/beego
