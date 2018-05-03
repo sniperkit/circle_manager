@@ -15,6 +15,7 @@ import (
 
 	"github.com/fatih/structtag"
 	"github.com/jungju/circle_manager/modules"
+	"github.com/jungju/gorm"
 )
 
 type FlagRead struct {
@@ -82,7 +83,9 @@ func (cm *CircleManager) SaveManualCircleSetToDB(manualCS *modules.CircleSet) er
 		var err error
 		dbCircleSet, err = modules.GetCircleSetByIDOnlyManual(manualCS.ID)
 		if err != nil {
-			return err
+			if err != gorm.ErrRecordNotFound {
+				return err
+			}
 		}
 	}
 
