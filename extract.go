@@ -450,6 +450,10 @@ func scanSourceModel(sourceType string, cs *modules.CircleSet, p *doc.Package) e
 		if sourceType == "models" && strings.Index(t.Doc, "gen:qs") < 0 {
 			continue
 		}
+		if _, ok := t.Decl.Specs[0].(*ast.TypeSpec).Type.(*ast.StructType); !ok {
+			continue
+		}
+
 		structDecl := t.Decl.Specs[0].(*ast.TypeSpec).Type.(*ast.StructType)
 		fields := structDecl.Fields.List
 		cu := &modules.CircleUnit{
