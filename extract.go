@@ -160,7 +160,12 @@ func mergeFromModelsAndRequestsAndResponses(
 		} else {
 			// TODO:
 			cu := &modules.CircleUnit{
-				Name: unit.Name,
+				Name:         unit.Name,
+				IsCreateble:  unit.IsCreateble,
+				IsUpdateble:  unit.IsUpdateble,
+				IsGetAllable: unit.IsGetAllable,
+				IsGetOneable: unit.IsGetOneable,
+				IsDeleteble:  unit.IsDeleteble,
 			}
 			mapRouterCircleSet[unit.Name] = cu
 			routerCircleSet.Units = append(routerCircleSet.Units, cu)
