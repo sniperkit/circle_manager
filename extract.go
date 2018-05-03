@@ -16,8 +16,9 @@ import (
 	"github.com/davecgh/go-spew/spew"
 
 	"github.com/fatih/structtag"
+
+	"github.com/jinzhu/gorm"
 	"github.com/jungju/circle_manager/modules"
-	"github.com/jungju/gorm"
 )
 
 type FlagRead struct {
@@ -80,6 +81,7 @@ func (cm *CircleManager) ImportCircle() (*modules.CircleSet, error) {
 }
 
 func (cm *CircleManager) SaveManualCircleSetToDB(manualCS *modules.CircleSet) error {
+	fmt.Println("SaveManualCircleSetToDB")
 	var dbCircleSet *modules.CircleSet
 	createDB := false
 	if manualCS.ID > 0 {
@@ -203,40 +205,40 @@ func mergeFromModelsAndRequestsAndResponses(
 		}
 	}
 
-	for _, unit := range requestsCircleSet.Units {
-		if _, ok := mapRouterCircleSet[unit.Name]; ok {
-			// TODO:
-		} else {
-			// TODO:
-			cu := &modules.CircleUnit{
-				Name: unit.Name,
-			}
-			routerCircleSet.Units = append(routerCircleSet.Units, cu)
-		}
+	// for _, unit := range requestsCircleSet.Units {
+	// 	if _, ok := mapRouterCircleSet[unit.Name]; ok {
+	// 		// TODO:
+	// 	} else {
+	// 		// TODO:
+	// 		cu := &modules.CircleUnit{
+	// 			Name: unit.Name,
+	// 		}
+	// 		routerCircleSet.Units = append(routerCircleSet.Units, cu)
+	// 	}
 
-		for _, property := range unit.Properties {
-			if _, ok := mapProperies[unit.Name]; !ok {
-				fmt.Println("속성 추가중에 ", unit.Name, " 없음 발생")
-				continue
-			}
-			mapProperies[unit.Name][property.Name] = property
-		}
-		//TODO: 속성 합치기
-	}
+	// 	for _, property := range unit.Properties {
+	// 		if _, ok := mapProperies[unit.Name]; !ok {
+	// 			fmt.Println("속성 추가중에 ", unit.Name, " 없음 발생")
+	// 			continue
+	// 		}
+	// 		mapProperies[unit.Name][property.Name] = property
+	// 	}
+	// 	//TODO: 속성 합치기
+	// }
 
-	for _, unit := range responsesCircleSet.Units {
-		if _, ok := mapRouterCircleSet[unit.Name]; ok {
-			// TODO:
-		} else {
-			// TODO:
-			cu := &modules.CircleUnit{
-				Name: unit.Name,
-			}
-			routerCircleSet.Units = append(routerCircleSet.Units, cu)
-		}
+	// for _, unit := range responsesCircleSet.Units {
+	// 	if _, ok := mapRouterCircleSet[unit.Name]; ok {
+	// 		// TODO:
+	// 	} else {
+	// 		// TODO:
+	// 		cu := &modules.CircleUnit{
+	// 			Name: unit.Name,
+	// 		}
+	// 		routerCircleSet.Units = append(routerCircleSet.Units, cu)
+	// 	}
 
-		//TODO: 속성 합치기
-	}
+	// 	//TODO: 속성 합치기
+	// }
 
 	return nil
 }
