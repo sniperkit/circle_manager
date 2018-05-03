@@ -102,6 +102,7 @@ func (cm *CircleManager) SaveManualCircleSetToDB(manualCS *modules.CircleSet) er
 
 		for _, unit := range manualCS.Units {
 			if dbUnit, ok := mapDBCircleSet[unit.Name]; ok {
+				//TODO: 장애 나서 재시작 할떄 Auto도 Manual로 바뀜
 				dbUnit.IsManual = true
 			} else {
 				dbCircleSet.Units = append(dbCircleSet.Units, unit)
@@ -109,6 +110,7 @@ func (cm *CircleManager) SaveManualCircleSetToDB(manualCS *modules.CircleSet) er
 		}
 	}
 
+	return nil
 	//TODO: Save로 처리 할것
 	if createDB {
 		fmt.Println("CS 추가")
@@ -474,13 +476,11 @@ func scanSourceModel(sourceType string, cs *modules.CircleSet, p *doc.Package) e
 		}
 
 		fmt.Println("Scan type...")
-		fmt.Println("type : ", t)
 		fmt.Println("type.Name : ", t.Name)
 
 		for _, field := range fields {
 			isSystem := false
 			fmt.Println("Scan field...")
-			fmt.Println("field : ", field)
 			fmt.Println("field.Names : ", field.Names)
 			if len(field.Names) <= 0 {
 				continue

@@ -3,36 +3,45 @@ package controllers
 import (
 	"github.com/jungju/circle/models"
 	"github.com/jungju/circle/requests"
+	"github.com/jungju/circle/responses"
 	"github.com/jungju/circle_manager/modules"
 )
 
 //  TeamController operations for Team
 type TeamController struct {
-	modules.BaseCircleController
+	modules.BaseUserController
+}
+
+func (c *TeamController) Prepare() {
+	c.RequestCreateItem = &requests.CreateTeam{}
+	c.RequestUpdateItem = &requests.UpdateTeam{}
+	c.ModelItem = &models.Team{}
+	c.ModelItems = &[]models.Team{}
+	c.ResponseItem = &responses.Team{}
 }
 
 // Post ...
 // @Title Post
 // @Description create Team
-// @Param	body		body 	requests.CreateTeam	true		"body for Team content"
-// @Success 201 {int} responses.ResponseTeam
+// @Param	body		body 	models.Team	true		"body for Team content"
+// @Success 201 {int} responses.Team
 // @Failure 403 body is empty
 // @router / [post]
 // @Security userAPIKey
 func (c *TeamController) Post() {
-	c.BasePost(&requests.CreateTeam{}, &models.Team{})
+	c.BasePost()
 }
 
 // GetOne ...
 // @Title Get One
 // @Description get Team by id
 // @Param	id		path 	string	true		"The key for staticblock"
-// @Success 200 {object} responses.ResponseTeam
+// @Success 200 {object} responses.Team
 // @Failure 403 :id is empty
 // @router /:id [get]
 // @Security userAPIKey
 func (c *TeamController) GetOne() {
-	c.BaseGetOne(&models.Team{})
+	c.BaseGetOne()
 }
 
 // GetAll ...
@@ -44,25 +53,25 @@ func (c *TeamController) GetOne() {
 // @Param	order	query	string	false	"Order corresponding to each sortby field, if single value, apply to all sortby fields. e.g. desc,asc ..."
 // @Param	limit	query	string	false	"Limit the size of result set. Must be an integer"
 // @Param	offset	query	string	false	"Start position of result set. Must be an integer"
-// @Success 200 {object} []responses.ResponseTeam
+// @Success 200 {object} []responses.Team
 // @Failure 403
 // @router / [get]
 // @Security userAPIKey
 func (c *TeamController) GetAll() {
-	c.BaseGetAll(&[]models.Team{})
+	c.BaseGetAll()
 }
 
 // Put ...
 // @Title Put
 // @Description update the Team
 // @Param	id		path 	string	true		"The id you want to update"
-// @Param	body		body 	requests.UpdateTeam	true		"body for Team content"
-// @Success 200 {object} responses.ResponseTeam
+// @Param	body		body 	models.Team	true		"body for Team content"
+// @Success 200 {object} responses.Team
 // @Failure 403 :id is not int
 // @router /:id [put]
 // @Security userAPIKey
 func (c *TeamController) Put() {
-	c.BasePut(&requests.UpdateTeam{}, &models.Team{})
+	c.BasePut()
 }
 
 // Delete ...
@@ -74,5 +83,5 @@ func (c *TeamController) Put() {
 // @router /:id [delete]
 // @Security userAPIKey
 func (c *TeamController) Delete() {
-	c.BaseDelete(&models.Team{})
+	c.BaseDelete()
 }

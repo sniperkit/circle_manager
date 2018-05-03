@@ -13,6 +13,7 @@ type Todo struct {
 	UpdatedAt   time.Time `description:"수정일"`
 	Name        string    `description:"이름"`
 	Description string    `description:"설명" sql:"type:text"`
+	CreatorID   uint      `description:"작성자"`
 	ListID      string    `description:""`
 	ListName    string    `description:""`
 	Status      string    `description:""`
@@ -24,6 +25,14 @@ type Todo struct {
 
 func init() {
 	registModel(&Todo{})
+}
+
+func (m *Todo) GetCreatorID() uint {
+	return m.CreatorID
+}
+
+func (m *Todo) SetCreatorID(creatorID uint) {
+	m.CreatorID = creatorID
 }
 
 func AddTodo(todo *Todo) (id uint, err error) {

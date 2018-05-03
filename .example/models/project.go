@@ -13,11 +13,20 @@ type Project struct {
 	UpdatedAt   time.Time `description:"수정일"`
 	Name        string    `description:"이름"`
 	Description string    `description:"설명" sql:"type:text"`
+	CreatorID   uint      `description:"작성자"`
 	Status      string    `description:""`
 }
 
 func init() {
 	registModel(&Project{})
+}
+
+func (m *Project) GetCreatorID() uint {
+	return m.CreatorID
+}
+
+func (m *Project) SetCreatorID(creatorID uint) {
+	m.CreatorID = creatorID
 }
 
 func AddProject(project *Project) (id uint, err error) {

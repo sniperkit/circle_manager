@@ -13,10 +13,19 @@ type Team struct {
 	UpdatedAt   time.Time `description:"수정일"`
 	Name        string    `description:"이름"`
 	Description string    `description:"설명" sql:"type:text"`
+	CreatorID   uint      `description:"작성자"`
 }
 
 func init() {
 	registModel(&Team{})
+}
+
+func (m *Team) GetCreatorID() uint {
+	return m.CreatorID
+}
+
+func (m *Team) SetCreatorID(creatorID uint) {
+	m.CreatorID = creatorID
 }
 
 func AddTeam(team *Team) (id uint, err error) {

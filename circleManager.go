@@ -142,8 +142,9 @@ func (cm *CircleManager) GenerateSource(cs *modules.CircleSet) error {
 				copier.Copy(newCU, unit)
 				newCU.Properties = []*modules.CircleUnitProperty{}
 				for _, property := range unit.Properties {
+					fmt.Println(circleTemplateSet.SourceType, "=====", property.Type)
 					if (circleTemplateSet.SourceType == "requests" || circleTemplateSet.SourceType == "responses") && strings.Index(property.Type, "models.") == 0 {
-						fmt.Println("Skip Property : ", unit.Name)
+						fmt.Println("Skip Property : ", property.Name, property.Type)
 						continue
 					}
 					newCU.Properties = append(newCU.Properties, property)
@@ -152,7 +153,7 @@ func (cm *CircleManager) GenerateSource(cs *modules.CircleSet) error {
 				if err := executeTemplate(
 					unitSourceFile,
 					circleTemplateSet.TemplatePath,
-					unit,
+					newCU,
 				); err != nil {
 					fmt.Printf("Error : %s\n", err.Error())
 					return err

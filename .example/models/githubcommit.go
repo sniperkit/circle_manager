@@ -13,6 +13,7 @@ type GithubCommit struct {
 	UpdatedAt   time.Time `description:"수정일"`
 	Name        string    `description:"이름"`
 	Description string    `description:"설명" sql:"type:text"`
+	CreatorID   uint      `description:"작성자"`
 	RepoName    string    `description:""`
 	Comments    string    `description:""`
 	UserName    string    `description:""`
@@ -21,6 +22,14 @@ type GithubCommit struct {
 
 func init() {
 	registModel(&GithubCommit{})
+}
+
+func (m *GithubCommit) GetCreatorID() uint {
+	return m.CreatorID
+}
+
+func (m *GithubCommit) SetCreatorID(creatorID uint) {
+	m.CreatorID = creatorID
 }
 
 func AddGithubCommit(githubCommit *GithubCommit) (id uint, err error) {

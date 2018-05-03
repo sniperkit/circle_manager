@@ -52,6 +52,8 @@ func TestGo(t *testing.T) {
 				makeCircleUnitProperty("Location", "string"),
 				makeCircleUnitProperty("Source", "string"),
 				makeCircleUnitProperty("Attendees", "string"),
+				makeCircleUnitProperty("GithubRelease", "models.GithubRelease"),
+				makeCircleUnitProperty("GithubReleaseID", "uint"),
 			),
 			makeCircleUnit(
 				"Employee", "직원", "이벤트관리",
@@ -87,10 +89,15 @@ func TestGo(t *testing.T) {
 
 func makeCircleUnit(name string, menuName string, menuGroup string, properties ...*modules.CircleUnitProperty) *modules.CircleUnit {
 	return &modules.CircleUnit{
-		Name:       name,
-		MenuName:   menuName,
-		MenuGroup:  menuGroup,
-		Properties: properties,
+		Name:                   name,
+		MenuName:               menuName,
+		MenuGroup:              menuGroup,
+		Properties:             properties,
+		EnableAdminSource:      true,
+		EnableModelSource:      true,
+		EnableControllerSource: true,
+		EnableRequestSource:    true,
+		EnableResponseSource:   true,
 	}
 }
 

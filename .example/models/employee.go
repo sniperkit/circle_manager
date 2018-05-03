@@ -13,11 +13,20 @@ type Employee struct {
 	UpdatedAt   time.Time `description:"수정일"`
 	Name        string    `description:"이름"`
 	Description string    `description:"설명" sql:"type:text"`
+	CreatorID   uint      `description:"작성자"`
 	OriginName  string    `description:""`
 }
 
 func init() {
 	registModel(&Employee{})
+}
+
+func (m *Employee) GetCreatorID() uint {
+	return m.CreatorID
+}
+
+func (m *Employee) SetCreatorID(creatorID uint) {
+	m.CreatorID = creatorID
 }
 
 func AddEmployee(employee *Employee) (id uint, err error) {

@@ -8,25 +8,36 @@ import (
 
 // gen:qs
 type Event struct {
-	ID           uint       `description:""`
-	CreatedAt    time.Time  `description:"등록일"`
-	UpdatedAt    time.Time  `description:"수정일"`
-	Name         string     `description:"이름"`
-	Description  string     `description:"설명" sql:"type:text"`
-	EventCreated time.Time  `description:""`
-	EventEnds    *time.Time `description:""`
-	Summary      string     `description:""`
-	Organizer    string     `description:""`
-	EventUser    string     `description:""`
-	EventBegins  time.Time  `description:""`
-	EventID      string     `description:""`
-	Location     string     `description:""`
-	Source       string     `description:""`
-	Attendees    string     `description:""`
+	ID              uint          `description:""`
+	CreatedAt       time.Time     `description:"등록일"`
+	UpdatedAt       time.Time     `description:"수정일"`
+	Name            string        `description:"이름"`
+	Description     string        `description:"설명" sql:"type:text"`
+	CreatorID       uint          `description:"작성자"`
+	EventCreated    time.Time     `description:""`
+	EventEnds       *time.Time    `description:""`
+	Summary         string        `description:""`
+	Organizer       string        `description:""`
+	EventUser       string        `description:""`
+	EventBegins     time.Time     `description:""`
+	EventID         string        `description:""`
+	Location        string        `description:""`
+	Source          string        `description:""`
+	Attendees       string        `description:""`
+	GithubRelease   GithubRelease `description:""`
+	GithubReleaseID uint          `description:""`
 }
 
 func init() {
 	registModel(&Event{})
+}
+
+func (m *Event) GetCreatorID() uint {
+	return m.CreatorID
+}
+
+func (m *Event) SetCreatorID(creatorID uint) {
+	m.CreatorID = creatorID
 }
 
 func AddEvent(event *Event) (id uint, err error) {
@@ -64,6 +75,8 @@ func UpdateEventByID(event *Event) (err error) {
 		EventDBSchema.Location,
 		EventDBSchema.Source,
 		EventDBSchema.Attendees,
+		EventDBSchema.GithubRelease,
+		EventDBSchema.GithubReleaseID,
 	)
 	return
 }

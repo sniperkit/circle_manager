@@ -13,6 +13,7 @@ type GithubRelease struct {
 	UpdatedAt   time.Time `description:"수정일"`
 	Name        string    `description:"이름"`
 	Description string    `description:"설명" sql:"type:text"`
+	CreatorID   uint      `description:"작성자"`
 	RepoName    string    `description:""`
 	TagName     string    `description:""`
 	UserName    string    `description:""`
@@ -22,6 +23,14 @@ type GithubRelease struct {
 
 func init() {
 	registModel(&GithubRelease{})
+}
+
+func (m *GithubRelease) GetCreatorID() uint {
+	return m.CreatorID
+}
+
+func (m *GithubRelease) SetCreatorID(creatorID uint) {
+	m.CreatorID = creatorID
 }
 
 func AddGithubRelease(githubRelease *GithubRelease) (id uint, err error) {
