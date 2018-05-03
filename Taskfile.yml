@@ -6,11 +6,11 @@ dev:
 
 add:
   cmds:
-    - go run ./cli.go ./circleManager.go --mode add --name Test --rootPath .example
+    - go run ./cli.go ./circleManager.go ./extract.go --mode add --name Test --rootPath .example
 
 delete:
   cmds:
-    - go run ./cli.go ./circleManager.go --mode delete --name Test --rootPath .example
+    - go run ./cli.go ./circleManager.go ./extract.go --mode delete --name Test --rootPath .example
 
 import:
   cmds:

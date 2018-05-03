@@ -1,15 +1,15 @@
-// @APIVersion 10.1.1
-// @Title Circle
-// @Description wow
-// @Contact myapp@myapp.com
-// @TermsOfServiceUrl http://circle.circle
-// @License MIT
-// @SecurityDefinition "userAPIKey apiKey X-USER-AUTH-TOKEN header "I love auto-generated docs"
+// @APIVersion
+// @Title
+// @Description
+// @Contact
+// @TermsOfServiceUrl
+// @License
+// @SecurityDefinition
 package routers
 
 import (
+	"github.com//controllers"
 	"github.com/astaxie/beego"
-	"github.com/jungju/circle/controllers"
 )
 
 func init() {

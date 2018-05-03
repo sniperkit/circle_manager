@@ -127,7 +127,7 @@ func (cm *CircleManager) GenerateSource(cs *modules.CircleSet) error {
 				if !unit.EnableAdminSource && circleTemplateSet.SourceType == "admin" ||
 					!unit.EnableControllerSource && circleTemplateSet.SourceType == "controllers" ||
 					!unit.EnableModelSource && circleTemplateSet.SourceType == "models" {
-					fmt.Println("Skip source : ", unit.Name)
+					fmt.Println("Skip source : ", circleTemplateSet.SourceType, ".", unit.Name)
 					continue
 				}
 				if unit.IsManual && unit.IsSystem {
@@ -183,11 +183,16 @@ func executeQueryset(dir string, varName string) {
 
 func (cm *CircleManager) AppendManual() error {
 	manualUnit := &modules.CircleUnit{
-		Name:      envs.Name,
-		MenuName:  envs.Name,
-		MenuGroup: "etc.",
-		IsManual:  true,
-		IsEnable:  true,
+		Name:                   envs.Name,
+		MenuName:               envs.Name,
+		MenuGroup:              "etc.",
+		IsManual:               true,
+		IsEnable:               true,
+		EnableAdminSource:      true,
+		EnableModelSource:      true,
+		EnableControllerSource: true,
+		EnableRequestSource:    true,
+		EnableResponseSource:   true,
 	}
 
 	if envs.OnlyModels || envs.OnlyControllers || envs.OnlyRequests || envs.OnlyResponses {
