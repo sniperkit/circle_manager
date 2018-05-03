@@ -1,6 +1,7 @@
 package modules
 
 import (
+	"strings"
 	"time"
 )
 
@@ -58,6 +59,10 @@ type CircleUnitProperty struct {
 
 func (c *CircleUnitProperty) GetCreatorID() uint {
 	return c.CreatorID
+}
+
+func (c *CircleUnitProperty) GetTypeInModel() string {
+	return strings.Replace(c.Type, "models.", "", -1)
 }
 
 func AddCircleUnitProperty(circleUnitProperty *CircleUnitProperty) (id uint, err error) {
