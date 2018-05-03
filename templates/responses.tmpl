@@ -8,7 +8,7 @@ type {{.Name}} struct {
 	UpdatedAt   time.Time 
 	Name        string    
 	Description string    
-  {{range $i, $property := .Properties}}{{.Name}} {{.GetTypeInResponses}}
+  {{range $i, $property := .Properties}}{{.Name}} {{.Type}}
 	{{end}}
 }
 

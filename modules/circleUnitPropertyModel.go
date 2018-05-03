@@ -65,14 +65,6 @@ func (c *CircleUnitProperty) GetTypeInModel() string {
 	return strings.Replace(c.Type, "models.", "", -1)
 }
 
-func (c *CircleUnitProperty) GetTypeInRequests() string {
-	return strings.Replace(c.Type, "models.", "requests.", -1)
-}
-
-func (c *CircleUnitProperty) GetTypeInResponses() string {
-	return strings.Replace(c.Type, "models.", "responses.", -1)
-}
-
 func AddCircleUnitProperty(circleUnitProperty *CircleUnitProperty) (id uint, err error) {
 	err = circleUnitProperty.Create(gGormDB)
 	id = circleUnitProperty.ID
