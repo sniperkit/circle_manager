@@ -210,6 +210,10 @@ func mergeFromModelsAndRequestsAndResponses(
 		}
 
 		for _, property := range unit.Properties {
+			if _, ok := mapProperies[unit.Name]; !ok {
+				fmt.Println("속성 추가중에 ", unit.Name, " 없음 발생")
+				continue
+			}
 			mapProperies[unit.Name][property.Name] = property
 		}
 		//TODO: 속성 합치기
