@@ -12,7 +12,7 @@ type Notification struct {
 	Name               string           `description:"이름"`
 	Description        string           `description:"설명" sql:"type:text"`
 	CreatorID          uint             `description:"작성자"`
-	EventUserID        *uint            `description:""`
+	EventUserID        uint             `description:""`
 	NotificationType   NotificationType `description:""`
 	NotificationTypeID uint             `description:""`
 	NotiType           string           `description:""`

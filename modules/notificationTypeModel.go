@@ -70,7 +70,7 @@ func DeleteNotificationType(id uint) (err error) {
 	return
 }
 
-func GetNotificationsTypesByManualSend(isManual bool) (notificationTypes []NotificationType, err error) {
+func GetNotificationsTypes(isManual bool) (notificationTypes []NotificationType, err error) {
 	err = NewNotificationTypeQuerySet(gGormDB).
 		IsManualEq(isManual).
 		IsEnableEq(true).

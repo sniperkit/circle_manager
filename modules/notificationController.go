@@ -32,21 +32,6 @@ func (c *NotificationController) PostMessage() {
 	c.Success(http.StatusNoContent, nil)
 }
 
-func SendActiveNotifications() error {
-	notifications, err := GetNotificationNoSent()
-	if err != nil {
-		return err
-	}
-
-	for _, notification := range notifications {
-		if err := sendNotification(&notification); err != nil {
-			logrus.Error(err)
-			continue
-		}
-	}
-	return nil
-}
-
 // PostMenualMessage ...
 // @Title PostMenualMessage
 // @Description create Notification
@@ -64,7 +49,7 @@ func (c *NotificationController) PostMenualMessage() {
 
 	tags := c.Ctx.Input.Query("tags")
 
-	notificationTypes, err := GetNotificationsTypesByManualSend(true)
+	notificationTypes, err := GetNotificationsTypes(true)
 	if err != nil {
 		c.ErrorAbort(500, err)
 	}
@@ -91,12 +76,7 @@ func (c *NotificationController) PostMenualMessage() {
 		notification.NotificationType = notificationType
 		notification.NotificationTypeID = notificationType.ID
 
-		if err := sendNotification(notification); err != nil {
-			logrus.WithError(err).Error()
-			continue
-		}
-
-		if _, err := AddNotification(notification); err != nil {
+		if err := addNotificationAndSendNotification(notification); err != nil {
 			logrus.WithError(err).Error()
 			continue
 		}
@@ -105,32 +85,44 @@ func (c *NotificationController) PostMenualMessage() {
 	c.Success(http.StatusNoContent, nil)
 }
 
-func AddActionNotification(tags string, eventUserID *uint, mapUpdateProperties map[string]UpdateProperty, objects ...interface{}) error {
-	notificationTypes, err := GetNotificationsTypesByManualSend(false)
+func SendActiveNotifications() error {
+	crudEvents, err := GetAllCrudEventOlnyChekedNotification()
 	if err != nil {
 		return err
 	}
 
-	for _, notificationType := range notificationTypes {
-		if !isExistsTag(tags, notificationType.Tags) {
-			continue
-		}
-
-		if !checkDiff(mapUpdateProperties, notificationType) {
-			continue
-		}
-
-		notification := MakeNotification(&notificationType, nil, objects...)
-		notification.EventUserID = eventUserID
-		notification.NotificationType = notificationType
-		notification.NotificationTypeID = notificationType.ID
-
-		if _, err := AddNotification(notification); err != nil {
-			return err
-		}
-
-		return nil
+	notificationTypes, err := GetNotificationsTypes(false)
+	if err != nil {
+		return err
 	}
+
+	for _, crudEvent := range crudEvents {
+		tags := fmt.Sprintf("%s,%s", crudEvent.TargetObject, crudEvent.Action)
+		mapUpdateProperties := map[string]UpdateProperty{}
+		for _, notificationType := range notificationTypes {
+			if !isExistsTag(tags, notificationType.Tags) {
+				continue
+			}
+
+			if !checkDiff(mapUpdateProperties, notificationType) {
+				continue
+			}
+
+			notification := MakeNotification(&notificationType, nil)
+			notification.EventUserID = crudEvent.CreatorID
+			notification.NotificationType = notificationType
+			notification.NotificationTypeID = notificationType.ID
+
+			if err := addNotificationAndSendNotification(notification); err != nil {
+				logrus.Error(err)
+				continue
+			}
+		}
+		if err := UpdateCrudEventByNotification(crudEvent.ID); err != nil {
+			logrus.Error(err)
+		}
+	}
+
 	return nil
 }
 
@@ -187,7 +179,11 @@ func checkDiff(mapUpdateProperties map[string]UpdateProperty, notificationType N
 	return true
 }
 
-func sendNotification(notification *Notification) error {
+func addNotificationAndSendNotification(notification *Notification) error {
+	if _, err := AddNotification(notification); err != nil {
+		return err
+	}
+
 	if notification.NotificationType.WebhookURLs == "" {
 		return nil
 	}
