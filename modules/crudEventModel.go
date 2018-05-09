@@ -16,10 +16,10 @@ type CrudEvent struct {
 	TargetObject string    `description:"이벤트 대상"`
 	TargetID     uint      `description:"이벤트 대상 ID"`
 	Where        string    `description:"이벤트 발생 위치"`
-	UpdatedData  string    `description:"업데이트 된 대상 Data"`
-	OldData      string    `description:"업데이트 되기 전 대상 Data"`
-	RequestData  string    `description:"요청 Data"`
-	ResponseData string    `description:"출력 Data"`
+	UpdatedData  string    `description:"업데이트 된 대상 Data" sql:"type:text"`
+	OldData      string    `description:"업데이트 되기 전 대상 Data" sql:"type:text"`
+	RequestData  string    `description:"요청 Data" sql:"type:text"`
+	ResponseData string    `description:"출력 Data" sql:"type:text"`
 }
 
 func (c *CrudEvent) GetCreatorID() uint {
