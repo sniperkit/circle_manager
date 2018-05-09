@@ -1,6 +1,8 @@
 package modules
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"reflect"
 
@@ -22,6 +24,7 @@ type BaseCrudController struct {
 	RequestCreateItem RequestBody
 	RequestUpdateItem RequestBody
 	ModelItem         ModelItem
+	OldModelItem      ModelItem
 	ModelItems        ModelItems
 	ResponseItem      ResponseBody
 	ResponseItems     ResponseBodies
@@ -53,9 +56,7 @@ func (c *BaseCrudController) BasePost() {
 	err = copier.Copy(c.ResponseItem, c.ModelItem)
 	c.Check404And500(err)
 
-	go EventThenDelete(c.ModelItem, getUserIDByUserMeta(c.CurrentUserMeta))
-
-	c.SuccessCreate(c.ResponseItem)
+	c.SuccessCreate()
 }
 
 func (c *BaseCrudController) BaseGetOne() {
@@ -106,8 +107,8 @@ func (c *BaseCrudController) BasePut() {
 	err := GetItemByID(id, c.ModelItem)
 	c.Check404And500(err)
 
-	oldModelItemSturct := reflect.New(reflect.TypeOf(c.ModelItem)).Elem().Interface().(ModelItem)
-	err = copier.Copy(oldModelItemSturct, c.ModelItem)
+	c.OldModelItem = reflect.New(reflect.TypeOf(c.ModelItem)).Elem().Interface().(ModelItem)
+	err = copier.Copy(c.OldModelItem, c.ModelItem)
 	c.Check404And500(err)
 
 	// @step4. 접근 데이터 체크. 접근 할수 없는 데이터는 404
@@ -125,9 +126,7 @@ func (c *BaseCrudController) BasePut() {
 	err = copier.Copy(c.ResponseItem, c.ModelItem)
 	c.Check404And500(err)
 
-	go EventThenUpdate(c.ModelItem, oldModelItemSturct, getUserIDByUserMeta(c.CurrentUserMeta))
-
-	c.SuccessUpdate(c.ResponseItem)
+	c.SuccessUpdate()
 }
 
 func (c *BaseCrudController) BaseDelete() {
@@ -147,8 +146,6 @@ func (c *BaseCrudController) BaseDelete() {
 	// @step5. DB 삭제 단계. Error이면 500
 	err = DeleteItem(id, c.ModelItem)
 	c.Check404And500(err)
-
-	go EventThenDelete(c.ModelItem, getUserIDByUserMeta(c.CurrentUserMeta))
 
 	// @step6. 사용자 응답
 	c.SuccessDelete()
@@ -259,3 +256,109 @@ func (c *BaseCrudController) CheckAble(checkType string) {
 	// 	}
 	// }
 }
+
+// SuccessCreate ...
+func (c *BaseCrudController) SuccessCreate() {
+	go c.addEvent("create")
+	c.Success(http.StatusCreated, c.ResponseItem)
+}
+
+// SuccessUpdate ...
+func (c *BaseCrudController) SuccessUpdate() {
+	go c.addEvent("update")
+	c.Success(http.StatusOK, c.ResponseItem)
+}
+
+// SuccessDelete ...
+func (c *BaseCrudController) SuccessDelete() {
+	go c.addEvent("delete")
+	c.Success(http.StatusNoContent, nil)
+}
+
+func (c *BaseCrudController) addEvent(action string) {
+	userID := uint(1)
+	if c.CurrentUserMeta != nil {
+		userID = c.CurrentUserMeta.UserID
+	}
+	requestData := ""
+	if action == "create" {
+		requestData = convJsonData(c.RequestCreateItem)
+	} else if action == "update" {
+		requestData = convJsonData(c.RequestUpdateItem)
+	}
+
+	if _, err := AddCrudEvent(&CrudEvent{
+		Action:       action,
+		TargetID:     1,
+		TargetObject: structs.Name(c.ModelItem),
+		CreatorID:    userID,
+		Where:        "API",
+		UpdatedData:  convJsonData(c.ModelItem),
+		RequestData:  requestData,
+		OldData:      convJsonData(c.OldModelItem),
+		ResponseData: convJsonData(c.ResponseItem),
+	}); err != nil {
+		fmt.Println(err)
+	}
+}
+
+func convJsonData(obj interface{}) string {
+	if obj != nil {
+		if jsonObj, err := json.Marshal(obj); err == nil {
+			return string(jsonObj)
+		}
+	}
+	return ""
+}
+
+// func EventThenCreate(modelItem ModelItem, currentUserID *uint) {
+// 	evnet(structs.Name(modelItem), "add", currentUserID, nil, modelItem)
+// }
+
+// func EventThenUpdate(modelItem ModelItem, oldModelItem ModelItem, currentUserID *uint) {
+// 	mapUpdateProperties := makeMapUpdateProperties(modelItem, oldModelItem)
+// 	evnet(structs.Name(modelItem), "update", currentUserID, mapUpdateProperties, modelItem)
+// }
+
+// func makeMapUpdateProperties(modelItem ModelItem, oldModelItem ModelItem) map[string]UpdateProperty {
+// 	mapUpdateProperties := map[string]UpdateProperty{}
+
+// 	if modelItem == nil || oldModelItem == nil {
+// 		return mapUpdateProperties
+// 	}
+// 	mapModelItem := structs.Map(modelItem)
+// 	mapOldModelItem := structs.Map(oldModelItem)
+
+// 	for key, value := range mapModelItem {
+// 		if structs.IsStruct(value) {
+// 			continue
+// 		}
+
+// 		oldValue := ""
+// 		if tempOldValue, ok := mapOldModelItem[key]; ok {
+// 			oldValue = convInterface(tempOldValue)
+// 		}
+
+// 		mapUpdateProperties[key] = UpdateProperty{
+// 			Key:      key,
+// 			NewValue: convInterface(value),
+// 			OldValue: oldValue,
+// 		}
+// 	}
+// 	return mapUpdateProperties
+// }
+
+// func EventThenDelete(modelItem ModelItem, currentUserID *uint) {
+// 	evnet(structs.Name(modelItem), "delete", currentUserID, nil, modelItem)
+// }
+
+// func evnet(structName string, action string, eventUserID *uint, mapUpdateProperties map[string]UpdateProperty, datas ...interface{}) {
+// 	if err := AddActionNotification(
+// 		fmt.Sprintf("%s,%s", structName, action),
+// 		eventUserID,
+// 		mapUpdateProperties,
+// 		datas...,
+// 	); err != nil {
+// 		fmt.Printf("Error : %s\n", err.Error())
+// 	}
+// }

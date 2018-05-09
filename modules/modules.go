@@ -25,6 +25,7 @@ func Initzation(db *gorm.DB, systemToken string, secretKeys string, userTokenHea
 
 	gGormDB = db
 	if err := gGormDB.AutoMigrate(
+		&CrudEvent{},
 		&Notification{},
 		&NotificationType{},
 
