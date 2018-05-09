@@ -287,9 +287,14 @@ func (c *BaseCrudController) addEvent(action string) {
 		requestData = convJsonData(c.RequestUpdateItem)
 	}
 
+	targetID := uint(0)
+	if field, ok := structs.New(c.ModelItem).FieldOk("ID"); ok {
+		targetID = field.Value().(uint)
+	}
+
 	if _, err := AddCrudEvent(&CrudEvent{
 		Action:       action,
-		TargetID:     1,
+		TargetID:     targetID,
 		TargetObject: structs.Name(c.ModelItem),
 		CreatorID:    userID,
 		Where:        "API",
