@@ -1,0 +1,7 @@
+FROM jungju/beego_dind_base:latest
+
+ENV APP_DIR $GOPATH/src/github.com/jungju/circle_manager/example/beegoapp
+RUN mkdir -p $APP_DIR
+ADD . $APP_DIR
+
+CMD (supervisord -c $APP_DIR/supervisor.conf)

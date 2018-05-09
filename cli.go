@@ -71,7 +71,7 @@ func main() {
 	app.Usage = "for NO-CODE Platform"
 	app.Version = "0.0.1"
 	app.Flags = []cli.Flag{
-		cli.StringFlag{Name: "mode", Value: "", Usage: "generate, add, delete, scan, safe, envs"},
+		cli.StringFlag{Name: "mode", Value: "", Usage: "generate, add, delete, scan, safe, envs, "},
 		cli.StringFlag{Name: "name", Value: "", Usage: "target name, ex)Car, Group, User"},
 		cli.StringFlag{Name: "dbHost", Value: "localhost", Usage: "DB Host", EnvVar: "DB_HOST"},
 		cli.IntFlag{Name: "dbPort", Value: 3306, Usage: "DB Port", EnvVar: "DB_PORT"},
@@ -119,6 +119,18 @@ func main() {
 			return runSetEnv()
 		} else if envs.Mode == "import" {
 			return runImport()
+		} else if envs.Mode == "build" {
+			if err := beegoBuild(); err != nil {
+				return err
+			}
+			url := "jungju/circle_x"
+			if err := dockerBuild(url); err != nil {
+				return err
+			}
+
+			if err := dockerPush(url); err != nil {
+				return err
+			}
 		}
 
 		return nil
@@ -182,7 +194,11 @@ func runGen() error {
 		return err
 	}
 
-	return cm.GenerateSource(cs)
+	if err := cm.GenerateSource(cs); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func runSetEnv() error {

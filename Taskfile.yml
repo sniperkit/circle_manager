@@ -6,15 +6,20 @@ dev:
 
 add:
   cmds:
-    - go run ./cli.go ./circleManager.go ./extract.go --mode add --name Test --rootPath .example
+    - go run ./cli.go ./circleManager.go ./extract.go --mode add --name Test --rootPath example
 
 delete:
   cmds:
-    - go run ./cli.go ./circleManager.go ./extract.go --mode delete --name Test --rootPath .example
+    - go run ./cli.go ./circleManager.go ./extract.go --mode delete --name Test --rootPath example
 
 import:
   cmds:
-    - go run ./cli.go ./circleManager.go ./extract.go --circleID 35 --dbHost 127.0.0.1 --dbPort 3306 --dbName circle --dbUser root --dbPassword olim --mode import --rootPath .example
+    - go run ./cli.go ./circleManager.go ./extract.go --circleID 35 --dbHost 127.0.0.1 --dbPort 3306 --dbName circle --dbUser root --dbPassword olim --mode import --rootPath example
+
+build:
+  cmds:
+    - go run ./cli.go ./circleManager.go ./extract.go ./builder.go ./utils.go --mode build --rootPath example/beegoapp
+
 
 test:
   cmds:

@@ -1,0 +1,23 @@
+[qor-icon-name*="사용자"]>a::before {
+    content: "\e7fd";
+}
+
+[qor-icon-name*="장비"]>a::before {
+    content: "\e333";
+}
+
+[qor-icon-name*="경고"]>a::before {
+    content: "\e925";
+}
+
+[qor-icon-name*="설정"]>a::before {
+    content: "\e869";
+}
+
+[qor-icon-name*="고객"]>a::before {
+    content: "\e91F";
+}
+
+[qor-icon-name*="속성"]>a::before {
+    content: "\e87B";
+}
