@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/fatih/structs"
-	"github.com/jinzhu/copier"
 )
 
 const (
@@ -41,18 +40,6 @@ type _TextFormator struct {
 	OldAndNewTexts            []_OldAndNewText
 	OldAndNewTextKeyValueSets []_OldAndNewTextKeyValueSet
 	AfterOldAndNewTexts       []_OldAndNewText
-}
-
-func MakeNotificationByInterface(output interface{}, notificationType interface{}, rows []map[string]interface{}, objects ...interface{}) (err error) {
-	goreportNotificationType := &NotificationType{}
-	if err = copier.Copy(goreportNotificationType, notificationType); err != nil {
-		return err
-	}
-
-	noti := MakeNotification(goreportNotificationType, rows, objects...)
-	copier.Copy(output, noti)
-
-	return nil
 }
 
 func MakeNotification(notificationType *NotificationType, rows []map[string]interface{}, objects ...interface{}) (notification *Notification) {

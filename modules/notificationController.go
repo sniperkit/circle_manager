@@ -1,11 +1,14 @@
 package modules
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
+	"github.com/fatih/structs"
 	"github.com/jinzhu/copier"
 	"github.com/sirupsen/logrus"
 
@@ -98,7 +101,8 @@ func SendActiveNotifications() error {
 
 	for _, crudEvent := range crudEvents {
 		tags := fmt.Sprintf("%s,%s", crudEvent.TargetObject, crudEvent.Action)
-		mapUpdateProperties := map[string]UpdateProperty{}
+		mapUpdateProperties := makeMapUpdateProperties(crudEvent)
+
 		for _, notificationType := range notificationTypes {
 			if !isExistsTag(tags, notificationType.Tags) {
 				continue
@@ -115,7 +119,6 @@ func SendActiveNotifications() error {
 
 			if err := addNotificationAndSendNotification(notification); err != nil {
 				logrus.Error(err)
-				continue
 			}
 		}
 		if err := UpdateCrudEventByNotification(crudEvent.ID); err != nil {
@@ -180,9 +183,7 @@ func checkDiff(mapUpdateProperties map[string]UpdateProperty, notificationType N
 }
 
 func addNotificationAndSendNotification(notification *Notification) error {
-	if _, err := AddNotification(notification); err != nil {
-		return err
-	}
+	//TODO: Warning! 전송 후 DB에러 시 다시 노티 전송 될 수 있음
 
 	if notification.NotificationType.WebhookURLs == "" {
 		return nil
@@ -204,9 +205,47 @@ func addNotificationAndSendNotification(notification *Notification) error {
 		}
 	}
 
-	if err := UpdateSentNotification(notification.ID); err != nil {
+	now := time.Now()
+	notification.SentAt = &now
+
+	if _, err := AddNotification(notification); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func makeMapUpdateProperties(crudEvent CrudEvent) map[string]UpdateProperty {
+	mapUpdateProperties := map[string]UpdateProperty{}
+
+	if crudEvent.OldData == "" || crudEvent.UpdatedData == "" {
+		return mapUpdateProperties
+	}
+
+	mapUpdateItem := map[string]interface{}{}
+	if err := json.Unmarshal([]byte(crudEvent.UpdatedData), &mapUpdateItem); err != nil {
+		return mapUpdateProperties
+	}
+	mapOldItem := map[string]interface{}{}
+	if err := json.Unmarshal([]byte(crudEvent.OldData), &mapOldItem); err != nil {
+		return mapUpdateProperties
+	}
+
+	for key, value := range mapUpdateItem {
+		if structs.IsStruct(value) {
+			continue
+		}
+
+		oldValue := ""
+		if tempOldValue, ok := mapOldItem[key]; ok {
+			oldValue = convInterface(tempOldValue)
+		}
+
+		mapUpdateProperties[key] = UpdateProperty{
+			Key:      key,
+			NewValue: convInterface(value),
+			OldValue: oldValue,
+		}
+	}
+	return mapUpdateProperties
 }
