@@ -101,7 +101,7 @@ func SendActiveNotifications() error {
 
 	for _, crudEvent := range crudEvents {
 		tags := fmt.Sprintf("%s,%s", crudEvent.TargetObject, crudEvent.Action)
-		mapUpdateProperties := makeMapUpdateProperties(crudEvent)
+		mapUpdateProperties := makeMapUpdateProperties(crudEvent.UpdatedData, crudEvent.OldData)
 
 		for _, notificationType := range notificationTypes {
 			if !isExistsTag(tags, notificationType.Tags) {
@@ -215,19 +215,19 @@ func addNotificationAndSendNotification(notification *Notification) error {
 	return nil
 }
 
-func makeMapUpdateProperties(crudEvent CrudEvent) map[string]UpdateProperty {
+func makeMapUpdateProperties(updatedData, oldData string) map[string]UpdateProperty {
 	mapUpdateProperties := map[string]UpdateProperty{}
 
-	if crudEvent.OldData == "" || crudEvent.UpdatedData == "" {
+	if oldData == "" || updatedData == "" {
 		return mapUpdateProperties
 	}
 
 	mapUpdateItem := map[string]interface{}{}
-	if err := json.Unmarshal([]byte(crudEvent.UpdatedData), &mapUpdateItem); err != nil {
+	if err := json.Unmarshal([]byte(updatedData), &mapUpdateItem); err != nil {
 		return mapUpdateProperties
 	}
 	mapOldItem := map[string]interface{}{}
-	if err := json.Unmarshal([]byte(crudEvent.OldData), &mapOldItem); err != nil {
+	if err := json.Unmarshal([]byte(oldData), &mapOldItem); err != nil {
 		return mapUpdateProperties
 	}
 

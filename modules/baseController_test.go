@@ -10,18 +10,14 @@ import (
 func TestEventUpdate(t *testing.T) {
 
 	mapUpdateProperties := makeMapUpdateProperties(
-		&Notification{
-			Name: "Test!!",
-		},
-		&Notification{
-			Name: "Test!! Change",
-		},
+		`{"Name":"Test!!!"}`,
+		`{"Name":"Test!!! Change"}`,
 	)
 
 	fmt.Println(mapUpdateProperties["Name"])
 
-	assert.Equal(t, "Test!!", mapUpdateProperties["Name"].NewValue)
-	assert.Equal(t, "Test!! Change", mapUpdateProperties["Name"].OldValue)
+	assert.Equal(t, "Test!!!", mapUpdateProperties["Name"].NewValue)
+	assert.Equal(t, "Test!!! Change", mapUpdateProperties["Name"].OldValue)
 }
 
 func TestCheckDiff(t *testing.T) {

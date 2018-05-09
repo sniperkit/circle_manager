@@ -8,23 +8,23 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type NotificationTypeTest struct {
-	TargetObject                    string `description:""`
-	TargetWhere                     string `description:""`
-	PosibleSendSMS                  bool   `description:""`
-	PosibleSendEmail                bool   `description:""`
-	PosibleSendWeb                  bool   `description:""`
-	PosibleSendSlack                bool   `description:""`
-	PosibleSendWebhook              bool   `description:""`
-	UseLink                         bool   `description:""`
-	TitleTemplate                   string `description:""`
-	MessageTemplate                 string `description:""`
-	ListItemTemplate                string `description:""`
-	WebhookURLs                     string `description:""`
-	SlackChannelIDForWebhook        string `description:""`
-	SlackPrivateChannelIDForWebhook string `description:""`
-	ReplaceText                     string `description:""`
-}
+// type NotificationTypeTest struct {
+// 	TargetObject                    string `description:""`
+// 	TargetWhere                     string `description:""`
+// 	PosibleSendSMS                  bool   `description:""`
+// 	PosibleSendEmail                bool   `description:""`
+// 	PosibleSendWeb                  bool   `description:""`
+// 	PosibleSendSlack                bool   `description:""`
+// 	PosibleSendWebhook              bool   `description:""`
+// 	UseLink                         bool   `description:""`
+// 	TitleTemplate                   string `description:""`
+// 	MessageTemplate                 string `description:""`
+// 	ListItemTemplate                string `description:""`
+// 	WebhookURLs                     string `description:""`
+// 	SlackChannelIDForWebhook        string `description:""`
+// 	SlackPrivateChannelIDForWebhook string `description:""`
+// 	ReplaceText                     string `description:""`
+// }
 
 type _object1 struct {
 	Name    string
@@ -57,7 +57,7 @@ func TestMakeNotificationByInterface(t *testing.T) {
 	}
 
 	// Template
-	notiType := &NotificationTypeTest{
+	notiType := &NotificationType{
 		TitleTemplate:    "title {{now_day}} {{now_month}}",
 		MessageTemplate:  "message {{_object1__name}} {{_object2__val}}\n{{list}}",
 		ListItemTemplate: "- {{key}} {{key1}} {{key2}}\n",
@@ -78,10 +78,7 @@ func TestMakeNotificationByInterface(t *testing.T) {
 		Val3: 30,            //Replace text : {{_object2__val3}}
 	}
 
-	notification := &Notification{}
-	if err := MakeNotificationByInterface(notification, notiType, rows, object1, object2); err != nil {
-		t.Fail()
-	}
+	notification := MakeNotification(notiType, rows, object1, object2)
 
 	assert.NotNil(t, notification)
 	assert.Equal(t, fmt.Sprintf("title %d %d", time.Now().Day(), time.Now().Month()), notification.Title)
