@@ -1,6 +1,8 @@
 package modules
 
 import (
+	"encoding/json"
+	"fmt"
 	"time"
 )
 
@@ -31,26 +33,35 @@ func (m *CrudEvent) SetCreatorID(creatorID uint) {
 	m.CreatorID = creatorID
 }
 
+func (m *CrudEvent) GetTags() string {
+	return fmt.Sprintf("%s,%s", m.TargetObject, m.Action)
+}
+
+func (m *CrudEvent) GetMapUpdatedItems() map[string]interface{} {
+	mapUpdateItems := map[string]interface{}{}
+	if m.UpdatedData != "" {
+		if err := json.Unmarshal([]byte(m.UpdatedData), &mapUpdateItems); err != nil {
+			fmt.Println(err)
+		}
+	}
+	return mapUpdateItems
+}
+
 func AddCrudEvent(crudEvent *CrudEvent) (id uint, err error) {
 	err = crudEvent.Create(gGormDB)
 	id = crudEvent.ID
 	return
 }
 
-func GetAllCrudEventOlnyChekedNotification() (crudEvents []CrudEvent, err error) {
+func GetCrudEventaByCheckedNotification(checkedNotification bool) (crudEvents []CrudEvent, err error) {
 	err = NewCrudEventQuerySet(gGormDB).
-		CheckedNotificationEq(false).
+		CheckedNotificationEq(checkedNotification).
 		All(&crudEvents)
 	return
 }
 
-func UpdateCrudEventByNotification(id uint) (err error) {
-	crudEvents := &CrudEvent{
-		ID:                  id,
-		CheckedNotification: true,
-	}
-	err = crudEvents.Update(gGormDB,
-		CrudEventDBSchema.CheckedNotification,
-	)
+func UpdateCheckedNotificationByCrudEventIDs(ids []uint, checkedNotification bool) (err error) {
+	err = NewCrudEventQuerySet(gGormDB).IDIn(0, ids...).
+		GetUpdater().SetCheckedNotification(true).Update()
 	return
 }

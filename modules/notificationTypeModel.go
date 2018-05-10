@@ -1,7 +1,12 @@
 package modules
 
 import (
+	"encoding/json"
+	"fmt"
+	"strings"
 	"time"
+
+	"github.com/fatih/structs"
 )
 
 // gen:qs
@@ -34,6 +39,90 @@ func (c *NotificationType) GetCreatorID() uint {
 
 func (m *NotificationType) SetCreatorID(creatorID uint) {
 	m.CreatorID = creatorID
+}
+
+func (c *NotificationType) IsMatchTags(tags string) bool {
+	mapTag := map[string]bool{}
+	for _, tag := range strings.Split(tags, ",") {
+		mapTag[tag] = true
+	}
+
+	mapNotiTypeTags := map[string]bool{}
+	for _, notiTypeTag := range strings.Split(c.Tags, ",") {
+		mapNotiTypeTags[notiTypeTag] = true
+	}
+
+	for _, tag := range strings.Split(tags, ",") {
+		if _, ok := mapNotiTypeTags[tag]; !ok {
+			return false
+		}
+	}
+	return true
+}
+
+func (m *NotificationType) CheckDiff(crudEvent *CrudEvent) bool {
+	type UpdateProperty struct {
+		Key      string
+		OldValue string
+		NewValue string
+	}
+
+	mapUpdateProperties := map[string]UpdateProperty{}
+
+	// if oldData == "" || updatedData == "" {
+	// 	return mapUpdateProperties
+	// }
+
+	mapUpdateItem := map[string]interface{}{}
+	if err := json.Unmarshal([]byte(crudEvent.UpdatedData), &mapUpdateItem); err != nil {
+		fmt.Println(err)
+		return false
+	}
+	mapOldItem := map[string]interface{}{}
+	if err := json.Unmarshal([]byte(crudEvent.OldData), &mapOldItem); err != nil {
+		fmt.Println(err)
+		return false
+	}
+
+	for key, value := range mapUpdateItem {
+		if structs.IsStruct(value) {
+			continue
+		}
+
+		oldValue := ""
+		if tempOldValue, ok := mapOldItem[key]; ok {
+			oldValue = convInterface(tempOldValue)
+		}
+
+		mapUpdateProperties[key] = UpdateProperty{
+			Key:      key,
+			NewValue: convInterface(value),
+			OldValue: oldValue,
+		}
+	}
+
+	if len(mapUpdateProperties) <= 0 {
+		return false
+	}
+
+	updateProperty, ok := mapUpdateProperties[m.DiffKey]
+	if !ok {
+		return false
+	}
+
+	if m.DiffNewValue != "" {
+		if m.DiffNewValue != "" && m.DiffNewValue != updateProperty.NewValue {
+			return false
+		}
+	}
+
+	if m.DiffOldValue != "" {
+		if m.DiffOldValue != "" && m.DiffOldValue != updateProperty.OldValue {
+			return false
+		}
+	}
+
+	return updateProperty.NewValue != updateProperty.OldValue
 }
 
 func AddNotificationType(notificationType *NotificationType) (id uint, err error) {

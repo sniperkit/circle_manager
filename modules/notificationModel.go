@@ -18,7 +18,6 @@ type Notification struct {
 	NotiType           string           `description:""`
 	Title              string           `description:""`
 	Message            string           `description:"" gorm:"type:text"`
-	SentAt             *time.Time       `description:""`
 }
 
 func (c *Notification) GetCreatorID() uint {
@@ -50,36 +49,10 @@ func GetAllNotification(queryPage *QueryPage) (notifications []Notification, err
 	return
 }
 
-func UpdateNotificationByID(notification *Notification) (err error) {
-	err = notification.Update(gGormDB,
-		NotificationDBSchema.SentAt,
-	)
-	return
-}
-
 func DeleteNotification(id uint) (err error) {
 	notification := &Notification{
 		ID: id,
 	}
 	err = notification.Delete(gGormDB)
 	return
-}
-
-func GetNotificationNoSent() (notifications []Notification, err error) {
-	err = NewNotificationQuerySet(gGormDB).
-		SentAtIsNull().
-		PreloadNotificationType().
-		All(&notifications)
-	return
-}
-
-func UpdateSentNotification(id uint) error {
-	now := time.Now()
-	notification := &Notification{
-		ID:     id,
-		SentAt: &now,
-	}
-	return notification.Update(gGormDB,
-		NotificationDBSchema.SentAt,
-	)
 }

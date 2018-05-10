@@ -47,6 +47,13 @@ var (
 	}
 )
 
+type ParamGetValueByKeyOfTableName struct {
+	TableName string
+	ID        uint
+	Key       string
+	Value     interface{}
+}
+
 func CreateItem(item interface{}) error {
 	err := gGormDB.Create(item).Error
 	if err != nil {
@@ -70,12 +77,14 @@ func GetItemWithFilter(filterName string, filterValue interface{}, item interfac
 	return gGormDB.Where(fmt.Sprintf("%s = ?", filterName), filterValue).First(item).Error
 }
 
-func GetItemsWithFilter(tableName string, filterName string, filterValue interface{}, items interface{}) error {
-	return gGormDB.Where(fmt.Sprintf("%s = ?", filterName), filterValue).Find(items).Error
-}
-
 func GetItems(items interface{}, queryPage *QueryPage) error {
 	return gGormDB.Find(items).Error
+}
+
+func GetValueByKeyOfTableName(param ParamGetValueByKeyOfTableName) (interface{}, error) {
+	var value interface{}
+	err := gGormDB.Table(param.TableName).Select(param.Key).Where("id = ?", param.ID).Row().Scan(&value)
+	return value, err
 }
 
 func GetItemsOnlyUserData(items interface{}, queryPage *QueryPage, userID uint) error {

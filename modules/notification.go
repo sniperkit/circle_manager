@@ -1,178 +1,148 @@
 package modules
 
 import (
+	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
-	"github.com/fatih/structs"
+	"github.com/jinzhu/inflection"
 )
 
 const (
-	_listCountText   = "list_count"
-	_listDefaultText = "{{list}}"
+	_listCountText   = "listCount"
+	_listDefaultText = "listItem"
 	_nowText         = "now"
-	_nowDayText      = "now_day"
-	_nowMonthText    = "now_month"
-	_nowYearText     = "now_year"
+	_nowDayText      = "nowDay"
+	_nowMonthText    = "nowMonth"
+	_nowYearText     = "nowYear"
 )
 
-type _OldAndNewText struct {
-	OldText string
-	NewText string
+type TemplateKeyValueMaker struct {
+	CrudEvent       *CrudEvent
+	MapUpdateItems  map[string]interface{}
+	TemplateStrings []string
+	getValueParams  map[string]ParamGetValueByKeyOfTableName
+	GetedValues     map[string]string
 }
 
-type _KeyValueSet struct {
-	KeyValues []_KeyValue
+func NewTemplateKeyValueMaker(crudEvent *CrudEvent, notificationType *NotificationType) *TemplateKeyValueMaker {
+	return &TemplateKeyValueMaker{
+		CrudEvent:      crudEvent,
+		MapUpdateItems: crudEvent.GetMapUpdatedItems(),
+		TemplateStrings: []string{
+			notificationType.TitleTemplate,
+			notificationType.MessageTemplate,
+		},
+	}
 }
 
-type _KeyValue struct {
-	Key       string
-	Value     string
-	ValueType string
+func (m TemplateKeyValueMaker) GetIDOfTable(subTableName string) (uint, error) {
+	tableKey := "id"
+	if subTableName != m.CrudEvent.TargetObject {
+		tableKey = fmt.Sprintf("%s_id", inflection.Singular(subTableName))
+	}
+
+	fmt.Println("fKey")
+	fmt.Println(tableKey)
+	if subIDInterface, ok := m.MapUpdateItems[tableKey]; ok {
+		if subIDFloat, ok := subIDInterface.(float64); ok {
+			var subUint64 uint = uint(subIDFloat)
+			return subUint64, nil
+		}
+	}
+	return 0, errors.New("Not found column")
 }
 
-type _OldAndNewTextKeyValueSet struct {
-	ListOldAndNewTexts []_OldAndNewText
+func (m TemplateKeyValueMaker) GetValues() {
+	for key, getValueParam := range m.getValueParams {
+		if valueInterface, err := GetValueByKeyOfTableName(getValueParam); err == nil {
+			m.GetedValues[key] = convInterface(valueInterface)
+		} else {
+			fmt.Println(err)
+			continue
+		}
+	}
 }
 
-type _TextFormator struct {
-	OldAndNewTexts            []_OldAndNewText
-	OldAndNewTextKeyValueSets []_OldAndNewTextKeyValueSet
-	AfterOldAndNewTexts       []_OldAndNewText
-}
-
-func MakeNotification(notificationType *NotificationType, rows []map[string]interface{}, objects ...interface{}) (notification *Notification) {
-	formatorListItems := makeFormatorListItems(rows)
-	newTextFormator := newDefaultFomator(formatorListItems, strings.Split(notificationType.ReplaceText, ",")...)
-
-	mapFields := map[string][]*structs.Field{}
-	for _, object := range objects {
-		if object != nil {
-			objectName := structs.Name(object)
-			mapFields[objectName] = structs.Fields(object)
+func (m *TemplateKeyValueMaker) MakeGetValueParams() {
+	matchs := []string{}
+	for _, str := range m.TemplateStrings {
+		re := regexp.MustCompile("\\{\\{\\.(.*?)\\}\\}")
+		allMatch := re.FindAllStringSubmatch(str, -1)
+		for _, match := range allMatch {
+			matchs = append(matchs, match[1:len(match)]...)
 		}
 	}
 
-	for objectName, fields := range mapFields {
-		for _, field := range fields {
-			rawValue := field.Value()
-			newTextFormator.OldAndNewTexts = append(newTextFormator.OldAndNewTexts, _OldAndNewText{
-				OldText: fmt.Sprintf("%s__%s", toDBName(objectName), toDBName(field.Name())),
-				NewText: convInterface(rawValue),
-			})
+	m.getValueParams = map[string]ParamGetValueByKeyOfTableName{}
+	for _, match := range matchs {
+		objectAndKey := strings.Split(match, "__")
+
+		if len(objectAndKey) == 2 {
+			if subID, err := m.GetIDOfTable(objectAndKey[0]); err == nil {
+				m.getValueParams[match] = ParamGetValueByKeyOfTableName{
+					TableName: objectAndKey[0],
+					ID:        subID,
+					Key:       objectAndKey[1],
+				}
+			}
+		} else if len(objectAndKey) == 1 {
+			m.getValueParams[match] = ParamGetValueByKeyOfTableName{
+				TableName: m.CrudEvent.TargetObject,
+				ID:        m.CrudEvent.TargetID,
+				Key:       objectAndKey[0],
+				Value:     m.MapUpdateItems[objectAndKey[0]],
+			}
 		}
+	}
+}
+
+func MakeNotification(notificationType *NotificationType, baseGetedValues KeyValue, listValuesGroup []KeyValue) (notification *Notification) {
+	builtinKeyValues := getBuiltinKeyValues()
+	for key, value := range baseGetedValues {
+		builtinKeyValues[key] = value
+	}
+	creatingTitleText := changTeamplate(notificationType.TitleTemplate, builtinKeyValues)
+	creatingMessageText := changTeamplate(notificationType.MessageTemplate, builtinKeyValues)
+	creatingListTemplate := changTeamplate(notificationType.ListItemTemplate, builtinKeyValues)
+
+	if creatingListTemplate != "" &&
+		len(listValuesGroup) > 0 &&
+		strings.Index(creatingMessageText, _listDefaultText) >= 0 {
+		list := ""
+		for _, listValues := range listValuesGroup {
+			list += changTeamplate(creatingListTemplate, listValues)
+		}
+		creatingMessageText = changTeamplate(creatingMessageText, KeyValue{_listDefaultText: list})
 	}
 
 	return &Notification{
-		Title:   newTextFormator.ConvText(notificationType.TitleTemplate),
-		Message: newTextFormator.ConvTextAndList(notificationType.MessageTemplate, notificationType.ListItemTemplate),
+		Title:              creatingTitleText,
+		Message:            creatingMessageText,
+		NotificationType:   *notificationType,
+		NotificationTypeID: notificationType.ID,
 	}
 }
 
-func makeFormatorListItems(rows []map[string]interface{}) []_KeyValueSet {
-	formatorListItems := []_KeyValueSet{}
-	if rows == nil {
-		return formatorListItems
-	}
-	for _, mRow := range rows {
-		formatorListItem := _KeyValueSet{
-			KeyValues: []_KeyValue{},
-		}
-		for key, value := range mRow {
-			formatorListItem.KeyValues = append(formatorListItem.KeyValues, _KeyValue{
-				Key:   toDBName(key),
-				Value: convInterface(value),
-			})
-		}
-		formatorListItems = append(formatorListItems, formatorListItem)
-	}
-	return formatorListItems
-}
-
-func newDefaultFomator(newKeyValueSets []_KeyValueSet, replaceTexts ...string) *_TextFormator {
-	newOldAndNewTexts := []_OldAndNewText{
-		_OldAndNewText{_nowText, fmt.Sprintf("%s", time.Now())},
-		_OldAndNewText{_nowDayText, fmt.Sprintf("%d", time.Now().Day())},
-		_OldAndNewText{_nowMonthText, fmt.Sprintf("%d", time.Now().Month())},
-		_OldAndNewText{_nowYearText, fmt.Sprintf("%d", time.Now().Year())},
-	}
-
-	afterOldAndNewTexts := []_OldAndNewText{}
-	if replaceTexts != nil {
-		for _, item := range replaceTexts {
-			itemSplit := strings.Split(item, ":")
-			if len(itemSplit) != 2 {
-				continue
-			}
-			afterOldAndNewTexts = append(afterOldAndNewTexts, _OldAndNewText{
-				OldText: itemSplit[0],
-				NewText: itemSplit[1],
-			})
-		}
-	}
-
-	newOldAndNewTexts = append(newOldAndNewTexts, _OldAndNewText{
-		OldText: _listCountText,
-		NewText: fmt.Sprintf("%d", len(newKeyValueSets)),
-	})
-
-	newOldAndNewTextKeyValueSets := []_OldAndNewTextKeyValueSet{}
-	for _, newKeyValueSet := range newKeyValueSets {
-		newOldAndNewTextKeyValueSet := _OldAndNewTextKeyValueSet{
-			ListOldAndNewTexts: newOldAndNewTexts,
-		}
-
-		for _, newKeyValue := range newKeyValueSet.KeyValues {
-			newOldAndNewTextKeyValueSet.ListOldAndNewTexts = append(newOldAndNewTextKeyValueSet.ListOldAndNewTexts, _OldAndNewText{
-				OldText: newKeyValue.Key,
-				NewText: newKeyValue.Value,
-			})
-		}
-
-		newOldAndNewTextKeyValueSets = append(newOldAndNewTextKeyValueSets, newOldAndNewTextKeyValueSet)
-	}
-
-	return &_TextFormator{
-		OldAndNewTexts:            newOldAndNewTexts,
-		OldAndNewTextKeyValueSets: newOldAndNewTextKeyValueSets,
-		AfterOldAndNewTexts:       afterOldAndNewTexts,
+func getBuiltinKeyValues() KeyValue {
+	return KeyValue{
+		_nowText:      fmt.Sprintf("%s", time.Now()),
+		_nowDayText:   fmt.Sprintf("%d", time.Now().Day()),
+		_nowMonthText: fmt.Sprintf("%d", time.Now().Month()),
+		_nowYearText:  fmt.Sprintf("%d", time.Now().Year()),
 	}
 }
 
-func (t *_TextFormator) ConvText(raw string) string {
-	return replaceAll(raw, append(t.OldAndNewTexts, t.AfterOldAndNewTexts...))
-}
+type KeyValue map[string]string
 
-func (t *_TextFormator) ConvTextAndList(raw string, rawKeyValueSet string, listOldTexts ...string) string {
-	raw = replaceAll(raw, t.OldAndNewTexts)
-	newKeyValueSets := ""
+func changTeamplate(teamplate string, keyValue KeyValue) string {
+	ret := teamplate
 
-	for _, newOldAndNewTextKeyValueSet := range t.OldAndNewTextKeyValueSets {
-		newKeyValueSet := replaceAll(rawKeyValueSet, newOldAndNewTextKeyValueSet.ListOldAndNewTexts)
-		newKeyValueSet = replaceAll(newKeyValueSet, t.OldAndNewTexts)
-		newKeyValueSets = newKeyValueSets + newKeyValueSet
+	for key, value := range keyValue {
+		ret = strings.Replace(ret, fmt.Sprintf("{{.%s}}", key), convInterface(value), -1)
 	}
 
-	listOldText := _listDefaultText
-	if len(listOldTexts) >= 1 {
-		listOldText = listOldTexts[0]
-	}
-	output := strings.Replace(raw, listOldText, newKeyValueSets, -1)
-
-	return replaceAllOlnyText(output, t.AfterOldAndNewTexts)
-}
-
-func replaceAll(str string, newOldAndNewTexts []_OldAndNewText) string {
-	for _, newOldAndNewText := range newOldAndNewTexts {
-		str = strings.Replace(str, fmt.Sprintf("{{%s}}", newOldAndNewText.OldText), newOldAndNewText.NewText, -1)
-	}
-	return str
-}
-
-func replaceAllOlnyText(str string, newOldAndNewTexts []_OldAndNewText) string {
-	for _, newOldAndNewText := range newOldAndNewTexts {
-		str = strings.Replace(str, fmt.Sprintf("%s", newOldAndNewText.OldText), newOldAndNewText.NewText, -1)
-	}
-	return str
+	return ret
 }

@@ -1,18 +1,12 @@
 package modules
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
-	"time"
 
-	"github.com/fatih/structs"
-	"github.com/jinzhu/copier"
 	"github.com/sirupsen/logrus"
-
-	"github.com/jungju/goreport"
 )
 
 //  NotificationController operations for Notification
@@ -58,26 +52,28 @@ func (c *NotificationController) PostMenualMessage() {
 	}
 
 	for _, notificationType := range notificationTypes {
-		if !isExistsTag(tags, notificationType.Tags) {
+		if !notificationType.IsMatchTags(tags) {
 			continue
 		}
 
-		gorNotificationType := &goreport.NotificationType{}
-		copier.Copy(gorNotificationType, &notificationType)
-
-		rows := []map[string]interface{}{}
+		listValueGroup := []KeyValue{}
 		if notificationType.TargetObject != "" {
 			var err error
-			rows, err = GetRows(notificationType.TargetObject, notificationType.TargetWhere)
+			rows, err := GetRows(notificationType.TargetObject, notificationType.TargetWhere)
 			if err != nil {
 				logrus.WithError(err).Error()
 				continue
 			}
+			for _, row := range rows {
+				listValues := KeyValue{}
+				for key, value := range row {
+					listValues[fmt.Sprintf("list_%s", key)] = convInterface(value)
+				}
+				listValueGroup = append(listValueGroup, listValues)
+			}
 		}
 
-		notification := MakeNotification(&notificationType, rows)
-		notification.NotificationType = notificationType
-		notification.NotificationTypeID = notificationType.ID
+		notification := MakeNotification(&notificationType, nil, listValueGroup)
 
 		if err := addNotificationAndSendNotification(notification); err != nil {
 			logrus.WithError(err).Error()
@@ -89,7 +85,7 @@ func (c *NotificationController) PostMenualMessage() {
 }
 
 func SendActiveNotifications() error {
-	crudEvents, err := GetAllCrudEventOlnyChekedNotification()
+	crudEvents, err := GetCrudEventaByCheckedNotification(false)
 	if err != nil {
 		return err
 	}
@@ -99,87 +95,42 @@ func SendActiveNotifications() error {
 		return err
 	}
 
+	mapCheckedCrudEvent := []uint{}
 	for _, crudEvent := range crudEvents {
-		tags := fmt.Sprintf("%s,%s", crudEvent.TargetObject, crudEvent.Action)
-		mapUpdateProperties := makeMapUpdateProperties(crudEvent.UpdatedData, crudEvent.OldData)
-
-		for _, notificationType := range notificationTypes {
-			if !isExistsTag(tags, notificationType.Tags) {
-				continue
-			}
-
-			if !checkDiff(mapUpdateProperties, notificationType) {
-				continue
-			}
-
-			notification := MakeNotification(&notificationType, nil)
-			notification.EventUserID = crudEvent.CreatorID
-			notification.NotificationType = notificationType
-			notification.NotificationTypeID = notificationType.ID
-
-			if err := addNotificationAndSendNotification(notification); err != nil {
-				logrus.Error(err)
-			}
+		if err := sendActiveNotificationsEachCrudEvent(&crudEvent, notificationTypes); err == nil {
+			mapCheckedCrudEvent = append(mapCheckedCrudEvent, crudEvent.ID)
 		}
-		if err := UpdateCrudEventByNotification(crudEvent.ID); err != nil {
-			logrus.Error(err)
-		}
+	}
+
+	if err := UpdateCheckedNotificationByCrudEventIDs(mapCheckedCrudEvent, true); err != nil {
+		fmt.Println(err)
 	}
 
 	return nil
 }
 
-type UpdateProperty struct {
-	Key      string
-	OldValue string
-	NewValue string
-}
-
-func isExistsTag(reqTags string, notiTypeTags string) bool {
-	mapTag := map[string]bool{}
-	for _, tag := range strings.Split(reqTags, ",") {
-		mapTag[tag] = true
-	}
-
-	mapNotiTypeTags := map[string]bool{}
-	for _, notiTypeTag := range strings.Split(notiTypeTags, ",") {
-		mapNotiTypeTags[notiTypeTag] = true
-	}
-
-	for _, tag := range strings.Split(reqTags, ",") {
-		if _, ok := mapNotiTypeTags[tag]; !ok {
-			return false
-		}
-	}
-	return true
-}
-
-func checkDiff(mapUpdateProperties map[string]UpdateProperty, notificationType NotificationType) bool {
-	if notificationType.DiffMode {
-		if len(mapUpdateProperties) <= 0 {
-			return false
-		}
-
-		updateProperty, ok := mapUpdateProperties[notificationType.DiffKey]
-		if !ok {
-			return false
-		}
-
-		if notificationType.DiffNewValue != "" {
-			if notificationType.DiffNewValue != "" && notificationType.DiffNewValue != updateProperty.NewValue {
-				return false
+func sendActiveNotificationsEachCrudEvent(crudEvent *CrudEvent, notificationTypes []NotificationType) error {
+	for _, notificationType := range notificationTypes {
+		if !notificationType.IsMatchTags(crudEvent.GetTags()) {
+			continue
+		} else if notificationType.DiffMode {
+			if !notificationType.CheckDiff(crudEvent) {
+				continue
 			}
 		}
 
-		if notificationType.DiffOldValue != "" {
-			if notificationType.DiffOldValue != "" && notificationType.DiffOldValue != updateProperty.OldValue {
-				return false
-			}
-		}
+		templateKeyValueMaker := NewTemplateKeyValueMaker(crudEvent, &notificationType)
+		templateKeyValueMaker.MakeGetValueParams()
+		templateKeyValueMaker.GetValues()
 
-		return updateProperty.NewValue != updateProperty.OldValue
+		notification := MakeNotification(&notificationType, nil, nil)
+		notification.EventUserID = crudEvent.CreatorID
+
+		if err := addNotificationAndSendNotification(notification); err != nil {
+			logrus.Error(err)
+		}
 	}
-	return true
+	return nil
 }
 
 func addNotificationAndSendNotification(notification *Notification) error {
@@ -205,47 +156,9 @@ func addNotificationAndSendNotification(notification *Notification) error {
 		}
 	}
 
-	now := time.Now()
-	notification.SentAt = &now
-
 	if _, err := AddNotification(notification); err != nil {
 		return err
 	}
 
 	return nil
-}
-
-func makeMapUpdateProperties(updatedData, oldData string) map[string]UpdateProperty {
-	mapUpdateProperties := map[string]UpdateProperty{}
-
-	if oldData == "" || updatedData == "" {
-		return mapUpdateProperties
-	}
-
-	mapUpdateItem := map[string]interface{}{}
-	if err := json.Unmarshal([]byte(updatedData), &mapUpdateItem); err != nil {
-		return mapUpdateProperties
-	}
-	mapOldItem := map[string]interface{}{}
-	if err := json.Unmarshal([]byte(oldData), &mapOldItem); err != nil {
-		return mapUpdateProperties
-	}
-
-	for key, value := range mapUpdateItem {
-		if structs.IsStruct(value) {
-			continue
-		}
-
-		oldValue := ""
-		if tempOldValue, ok := mapOldItem[key]; ok {
-			oldValue = convInterface(tempOldValue)
-		}
-
-		mapUpdateProperties[key] = UpdateProperty{
-			Key:      key,
-			NewValue: convInterface(value),
-			OldValue: oldValue,
-		}
-	}
-	return mapUpdateProperties
 }
