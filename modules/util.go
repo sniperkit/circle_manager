@@ -102,6 +102,11 @@ func convInterface(raw interface{}) string {
 		return fmt.Sprintf("%d", raw)
 	case float64:
 		return fmt.Sprintf("%f", raw)
+	case bool:
+		if raw {
+			return "true"
+		}
+		return "false"
 	}
 
 	fmt.Printf("Unknown type: %s. values: %s\n", reflect.New(reflect.TypeOf(raw)), raw)
