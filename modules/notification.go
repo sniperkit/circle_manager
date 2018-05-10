@@ -55,9 +55,13 @@ func (m TemplateKeyValueMaker) GetIDOfTable(subTableName string) (uint, error) {
 	return 0, errors.New("Not found column")
 }
 
-func (m TemplateKeyValueMaker) LoadValues() {
+func (m *TemplateKeyValueMaker) LoadValues() {
 	m.GetedValues = map[string]string{}
 	for key, getValueParam := range m.getValueParams {
+		if getValueParam.Value != nil {
+			m.GetedValues[key] = convInterface(getValueParam.Value)
+			continue
+		}
 		if valueInterface, err := GetValueByKeyOfTableName(getValueParam); err == nil {
 			m.GetedValues[key] = convInterface(valueInterface)
 		} else {
