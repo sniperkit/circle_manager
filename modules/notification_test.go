@@ -27,11 +27,11 @@ func TestTemplateKeyValueMaker(t *testing.T) {
 	crudEvent := &CrudEvent{
 		TargetID:     1111,
 		TargetObject: "products",
-		UpdatedData:  `{"ID":1111,"Name":"GoodName","ContentID":1}`,
+		UpdatedData:  `{"ID":1111,"Name":"GoodName","ContentID":1,"IsCheck":false}`,
 	}
 
 	notificationType := &NotificationType{
-		TitleTemplate:    "title {{.name}} {{.contents__name}}",
+		TitleTemplate:    "title {{.name}} {{.contents__name}} {{.is_check}}",
 		MessageTemplate:  "message {{.contents__version}}",
 		ListItemTemplate: "list {{.name}}",
 	}
@@ -42,7 +42,7 @@ func TestTemplateKeyValueMaker(t *testing.T) {
 	for _, dd := range templateKeyValueMaker.getValueParams {
 		fmt.Println(dd)
 	}
-	assert.Equal(t, 3, len(templateKeyValueMaker.getValueParams))
+	assert.Equal(t, 4, len(templateKeyValueMaker.getValueParams))
 	assert.Equal(t, "GoodName", templateKeyValueMaker.getValueParams["name"].Value)
 	assert.Equal(t, crudEvent.TargetID, templateKeyValueMaker.getValueParams["name"].ID)
 	assert.Equal(t, "name", templateKeyValueMaker.getValueParams["name"].Key)
@@ -57,6 +57,11 @@ func TestTemplateKeyValueMaker(t *testing.T) {
 	assert.Equal(t, uint(1), templateKeyValueMaker.getValueParams["contents__name"].ID)
 	assert.Equal(t, "name", templateKeyValueMaker.getValueParams["contents__name"].Key)
 	assert.Equal(t, "contents", templateKeyValueMaker.getValueParams["contents__name"].TableName)
+
+	assert.Equal(t, false, templateKeyValueMaker.getValueParams["is_check"].Value)
+	assert.Equal(t, crudEvent.TargetID, templateKeyValueMaker.getValueParams["is_check"].ID)
+	assert.Equal(t, "is_check", templateKeyValueMaker.getValueParams["is_check"].Key)
+	assert.Equal(t, crudEvent.TargetObject, templateKeyValueMaker.getValueParams["is_check"].TableName)
 }
 
 func TestMakeNotification(t *testing.T) {
