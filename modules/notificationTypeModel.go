@@ -61,13 +61,15 @@ func (c *NotificationType) IsMatchTags(tags string) bool {
 }
 
 func (m *NotificationType) CheckDiff(crudEvent *CrudEvent) bool {
+	if m.DiffKey == "" {
+		return true
+	}
+
 	type UpdateProperty struct {
 		Key      string
 		OldValue string
 		NewValue string
 	}
-
-	mapUpdateProperties := map[string]UpdateProperty{}
 
 	mapUpdateItem := map[string]interface{}{}
 	if err := json.Unmarshal([]byte(crudEvent.UpdatedData), &mapUpdateItem); err != nil {
@@ -80,20 +82,19 @@ func (m *NotificationType) CheckDiff(crudEvent *CrudEvent) bool {
 		return false
 	}
 
+	mapUpdateProperties := map[string]UpdateProperty{}
 	for key, value := range mapUpdateItem {
-		if structs.IsStruct(value) {
-			continue
-		}
+		if !structs.IsStruct(value) {
+			oldValue := ""
+			if tempOldValue, ok := mapOldItem[key]; ok {
+				oldValue = convInterface(tempOldValue)
+			}
 
-		oldValue := ""
-		if tempOldValue, ok := mapOldItem[key]; ok {
-			oldValue = convInterface(tempOldValue)
-		}
-
-		mapUpdateProperties[key] = UpdateProperty{
-			Key:      toDBName(key),
-			NewValue: convInterface(value),
-			OldValue: oldValue,
+			mapUpdateProperties[key] = UpdateProperty{
+				Key:      toDBName(key),
+				NewValue: convInterface(value),
+				OldValue: oldValue,
+			}
 		}
 	}
 
@@ -101,24 +102,23 @@ func (m *NotificationType) CheckDiff(crudEvent *CrudEvent) bool {
 		return false
 	}
 
-	updateProperty, ok := mapUpdateProperties[m.DiffKey]
-	if !ok {
-		return false
-	}
-
-	if m.DiffNewValue != "" {
-		if m.DiffNewValue != "" && m.DiffNewValue != updateProperty.NewValue {
-			return false
+	if updateProperty, ok := mapUpdateProperties[m.DiffKey]; ok {
+		if m.DiffNewValue != "" {
+			if m.DiffNewValue != "" && m.DiffNewValue != updateProperty.NewValue {
+				return false
+			}
 		}
-	}
 
-	if m.DiffOldValue != "" {
-		if m.DiffOldValue != "" && m.DiffOldValue != updateProperty.OldValue {
-			return false
+		if m.DiffOldValue != "" {
+			if m.DiffOldValue != "" && m.DiffOldValue != updateProperty.OldValue {
+				return false
+			}
 		}
+
+		return updateProperty.NewValue != updateProperty.OldValue
 	}
 
-	return updateProperty.NewValue != updateProperty.OldValue
+	return false
 }
 
 func AddNotificationType(notificationType *NotificationType) (id uint, err error) {

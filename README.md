@@ -83,6 +83,7 @@ err := cm.GenerateSourceBySet(&CircleSet{
 - Controller에서 API 기능 설정
 - 개별로 Templates를 수정하는 것보다 그냥 소스에 정해진 주석 위치에서 메뉴얼 작성
 - Request, Response 반영
+- Log 통합
 
 ## library
 - github.com/astaxie/beego
