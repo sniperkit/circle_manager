@@ -2,6 +2,7 @@ package modules
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -83,8 +84,13 @@ func GetItems(items interface{}, queryPage *QueryPage) error {
 
 func GetValueByKeyOfTableName(param ParamGetValueByKeyOfTableName) (interface{}, error) {
 	var value interface{}
-	err := gGormDB.Table(param.TableName).Select(param.Key).Where("id = ?", param.ID).Row().Scan(&value)
-	return value, err
+	if err := gGormDB.Table(param.TableName).Select(param.Key).Where("id = ?", param.ID).Row().Scan(&value); err != nil {
+		return nil, err
+	}
+	if value != nil {
+		return string(value.([]byte)), nil
+	}
+	return nil, errors.New("GetValueByKeyOfTableName 알수없는 에러")
 }
 
 func GetItemsOnlyUserData(items interface{}, queryPage *QueryPage, userID uint) error {

@@ -69,10 +69,6 @@ func (m *NotificationType) CheckDiff(crudEvent *CrudEvent) bool {
 
 	mapUpdateProperties := map[string]UpdateProperty{}
 
-	// if oldData == "" || updatedData == "" {
-	// 	return mapUpdateProperties
-	// }
-
 	mapUpdateItem := map[string]interface{}{}
 	if err := json.Unmarshal([]byte(crudEvent.UpdatedData), &mapUpdateItem); err != nil {
 		fmt.Println(err)
@@ -95,7 +91,7 @@ func (m *NotificationType) CheckDiff(crudEvent *CrudEvent) bool {
 		}
 
 		mapUpdateProperties[key] = UpdateProperty{
-			Key:      key,
+			Key:      toDBName(key),
 			NewValue: convInterface(value),
 			OldValue: oldValue,
 		}

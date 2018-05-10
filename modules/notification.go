@@ -44,8 +44,6 @@ func (m TemplateKeyValueMaker) GetIDOfTable(subTableName string) (uint, error) {
 		tableKey = fmt.Sprintf("%s_id", inflection.Singular(subTableName))
 	}
 
-	fmt.Println("fKey")
-	fmt.Println(tableKey)
 	if subIDInterface, ok := m.MapUpdateItems[tableKey]; ok {
 		if subIDFloat, ok := subIDInterface.(float64); ok {
 			var subUint64 uint = uint(subIDFloat)
