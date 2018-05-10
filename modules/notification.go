@@ -19,6 +19,8 @@ const (
 	_nowYearText     = "nowYear"
 )
 
+type KeyValue map[string]string
+
 type TemplateKeyValueMaker struct {
 	CrudEvent       *CrudEvent
 	MapUpdateItems  map[string]interface{}
@@ -133,8 +135,6 @@ func getBuiltinKeyValues() KeyValue {
 		_nowYearText:  fmt.Sprintf("%d", time.Now().Year()),
 	}
 }
-
-type KeyValue map[string]string
 
 func changTeamplate(teamplate string, keyValue KeyValue) string {
 	ret := teamplate

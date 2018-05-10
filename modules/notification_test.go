@@ -27,7 +27,7 @@ func TestTemplateKeyValueMaker(t *testing.T) {
 	crudEvent := &CrudEvent{
 		TargetID:     1111,
 		TargetObject: "products",
-		UpdatedData:  `{"id":1111,"name":"GoodName","content_id":1}`,
+		UpdatedData:  `{"ID":1111,"Name":"GoodName","ContentID":1}`,
 	}
 
 	notificationType := &NotificationType{

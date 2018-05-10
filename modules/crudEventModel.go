@@ -44,7 +44,12 @@ func (m *CrudEvent) GetMapUpdatedItems() map[string]interface{} {
 			fmt.Println(err)
 		}
 	}
-	return mapUpdateItems
+
+	retMapUpdateItems := map[string]interface{}{}
+	for key, value := range mapUpdateItems {
+		retMapUpdateItems[toDBName(key)] = value
+	}
+	return retMapUpdateItems
 }
 
 func AddCrudEvent(crudEvent *CrudEvent) (id uint, err error) {
