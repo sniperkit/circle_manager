@@ -86,6 +86,8 @@ func executer(cmdType string, cmdName string, cmdArgs []string, cmdWait bool) (*
 	err = cmd.Start()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Error starting Cmd", err)
+		out, err := cmd.Output()
+		fmt.Fprintln(os.Stderr, "Output:", string(out))
 		return nil, err
 	}
 
