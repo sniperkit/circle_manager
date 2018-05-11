@@ -31,6 +31,7 @@ type Envs struct {
 	OnlyModels      bool
 	OnlyRequests    bool
 	OnlyResponses   bool
+	DockerImageURL  string
 }
 
 func envsValid() error {
@@ -60,6 +61,10 @@ func envsValid() error {
 		if envs.Name == "" {
 			return errors.New("Require Name")
 		}
+	} else if envs.Mode == "build" {
+		if envs.DockerImageURL == "" {
+			return errors.New("Require DockerImageURL")
+		}
 	}
 
 	return nil
@@ -84,6 +89,7 @@ func main() {
 		cli.BoolFlag{Name: "onlyModels", Usage: "onlyModels"},
 		cli.BoolFlag{Name: "onlyRequests", Usage: "onlyRequests"},
 		cli.BoolFlag{Name: "onlyResponses", Usage: "onlyResponses"},
+		cli.StringFlag{Name: "dockerImageURL", Value: "", Usage: "jungju/circle", EnvVar: "DOCKER_IMAGE_URL"},
 	}
 	app.Action = func(c *cli.Context) error {
 		envs = &Envs{
