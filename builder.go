@@ -41,13 +41,13 @@ func beegoBuild() error {
 }
 
 func dockerBuild(url string) error {
-	fmt.Println("Executing docker build")
+	fmt.Println("Executing docker build. docker url: ", url)
 	_, err := executer("docker build", "docker", []string{"build", "-t", url, "."}, true)
 	return err
 }
 
 func dockerPush(url string) error {
-	fmt.Println("Executing docker push")
+	fmt.Println("Executing docker push. docker url: ", url)
 	_, err := executer("docker push", "docker", []string{"push", url}, true)
 	return err
 }
@@ -118,7 +118,7 @@ func waitCommentRouterFile(commentRouterExist chan bool) {
 			}
 			subDirectoryFiles(filepath.Join(envs.RootPath, "routers"), func(info os.FileInfo) error {
 				if strings.Index(info.Name(), "commentsRouter") == 0 {
-					fmt.Println("Suceessed finding resource of beego")
+					fmt.Println("Suceessed finding resource of beego. Find file name: ", info.Name())
 					t.Stop()
 					commentRouterExist <- true
 				}
