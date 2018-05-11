@@ -106,6 +106,7 @@ func main() {
 			OnlyModels:      c.Bool("onlyModels"),
 			OnlyRequests:    c.Bool("onlyRequests"),
 			OnlyResponses:   c.Bool("onlyResponses"),
+			DockerImageURL:  c.String("dockerImageURL"),
 		}
 
 		if err := envsValid(); err != nil {
