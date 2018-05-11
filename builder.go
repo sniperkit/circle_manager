@@ -70,7 +70,6 @@ func executeSys(cmdType string, cmdName string, cmdArgs []string) error {
 func executer(cmdType string, cmdName string, cmdArgs []string, cmdWait bool) (*os.Process, error) {
 	cmd := exec.Command(cmdName, cmdArgs...)
 	cmd.Dir = envs.RootPath
-	cmd.SysProcAttr = &syscall.SysProcAttr{Setsid: true}
 	cmdReader, err := cmd.StdoutPipe()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Error creating StdoutPipe for Cmd", err)
