@@ -2,7 +2,7 @@ package synchronization
 
 import (
 	trello "github.com/VojtechVitek/go-trello"
-	"github.com/jungju/circle_manager/example/beegoapp/models"
+	"github.com/jungju/circle_manager/_example/beegoapp/models"
 	"github.com/jungju/circle_manager/modules"
 	"github.com/sirupsen/logrus"
 )

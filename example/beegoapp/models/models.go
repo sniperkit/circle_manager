@@ -2,8 +2,8 @@ package models
 
 import (
 	"github.com/jinzhu/gorm"
-	"github.com/jungju/circle_manager/example/beegoapp/envs"
-	"github.com/jungju/circle_manager/example/beegoapp/utils"
+	"github.com/jungju/circle_manager/_example/beegoapp/envs"
+	"github.com/jungju/circle_manager/_example/beegoapp/utils"
 	"github.com/jungju/circle_manager/modules"
 )
 

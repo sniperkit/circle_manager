@@ -7,11 +7,11 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	jwt "github.com/dgrijalva/jwt-go"
-	"github.com/jungju/circle_manager/example/beegoapp/envs"
-	"github.com/jungju/circle_manager/example/beegoapp/errors"
-	"github.com/jungju/circle_manager/example/beegoapp/models"
-	"github.com/jungju/circle_manager/example/beegoapp/requests"
-	"github.com/jungju/circle_manager/example/beegoapp/responses"
+	"github.com/jungju/circle_manager/_example/beegoapp/envs"
+	"github.com/jungju/circle_manager/_example/beegoapp/errors"
+	"github.com/jungju/circle_manager/_example/beegoapp/models"
+	"github.com/jungju/circle_manager/_example/beegoapp/requests"
+	"github.com/jungju/circle_manager/_example/beegoapp/responses"
 	"github.com/jungju/circle_manager/modules"
 )
 

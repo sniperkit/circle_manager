@@ -1,9 +1,9 @@
 package controllers
 
 import (
-	"github.com/jungju/circle_manager/example/beegoapp/models"
-	"github.com/jungju/circle_manager/example/beegoapp/requests"
-	"github.com/jungju/circle_manager/example/beegoapp/responses"
+	"github.com/jungju/circle_manager/_example/beegoapp/models"
+	"github.com/jungju/circle_manager/_example/beegoapp/requests"
+	"github.com/jungju/circle_manager/_example/beegoapp/responses"
 	"github.com/jungju/circle_manager/modules"
 )
 

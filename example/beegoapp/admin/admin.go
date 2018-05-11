@@ -5,7 +5,7 @@ import (
 
 	"github.com/astaxie/beego"
 	"github.com/jinzhu/gorm"
-	"github.com/jungju/circle_manager/example/beegoapp/admin/bindatafs"
+	"github.com/jungju/circle_manager/_example/beegoapp/admin/bindatafs"
 	"github.com/jungju/qor_admin_auth"
 	"github.com/rs/cors"
 )

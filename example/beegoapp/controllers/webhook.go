@@ -6,9 +6,9 @@ import (
 	"github.com/google/go-github/github"
 	"github.com/jinzhu/copier"
 	"github.com/jinzhu/gorm"
-	"github.com/jungju/circle_manager/example/beegoapp/models"
-	"github.com/jungju/circle_manager/example/beegoapp/requests"
-	"github.com/jungju/circle_manager/example/beegoapp/synchronization"
+	"github.com/jungju/circle_manager/_example/beegoapp/models"
+	"github.com/jungju/circle_manager/_example/beegoapp/requests"
+	"github.com/jungju/circle_manager/_example/beegoapp/synchronization"
 	"github.com/jungju/circle_manager/modules"
 	"github.com/sirupsen/logrus"
 )

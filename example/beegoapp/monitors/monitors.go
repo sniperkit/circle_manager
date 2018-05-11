@@ -3,8 +3,8 @@ package monitors
 import (
 	"time"
 
-	"github.com/jungju/circle_manager/example/beegoapp/models"
-	"github.com/jungju/circle_manager/example/beegoapp/synchronization"
+	"github.com/jungju/circle_manager/_example/beegoapp/models"
+	"github.com/jungju/circle_manager/_example/beegoapp/synchronization"
 	"github.com/jungju/circle_manager/modules"
 	"github.com/sirupsen/logrus"
 )

@@ -3,7 +3,7 @@ package admin
 import (
 	"github.com/jinzhu/gorm"
 	"github.com/jinzhu/inflection"
-	"github.com/jungju/circle_manager/example/beegoapp/models"
+	"github.com/jungju/circle_manager/_example/beegoapp/models"
 	"github.com/jungju/circle_manager/modules"
 	"github.com/qor/admin"
 	"github.com/qor/qor"

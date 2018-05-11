@@ -1,0 +1,969 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Circle",
+        "description": "wow",
+        "version": "0.1.10",
+        "termsOfService": "http://circle.land",
+        "contact": {
+            "email": "leejungju.go@gmail.com"
+        },
+        "license": {
+            "name": "MIT"
+        }
+    },
+    "basePath": "/v1",
+    "paths": null,
+    "definitions": {
+        "models.Employee": {
+            "title": "Employee",
+            "type": "object",
+            "properties": {
+                "CreatedAt": {
+                    "description": "등록일",
+                    "type": "string",
+                    "format": "string"
+                },
+                "CreatorID": {
+                    "description": "작성자",
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "Description": {
+                    "description": "설명",
+                    "type": "string"
+                },
+                "ID": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "Name": {
+                    "description": "이름",
+                    "type": "string"
+                },
+                "OriginName": {
+                    "type": "string"
+                },
+                "UpdatedAt": {
+                    "description": "수정일",
+                    "type": "string",
+                    "format": "string"
+                }
+            }
+        },
+        "models.Event": {
+            "title": "Event",
+            "type": "object",
+            "properties": {
+                "Attendees": {
+                    "type": "string"
+                },
+                "CreatedAt": {
+                    "description": "등록일",
+                    "type": "string",
+                    "format": "string"
+                },
+                "CreatorID": {
+                    "description": "작성자",
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "Description": {
+                    "description": "설명",
+                    "type": "string"
+                },
+                "EventBegins": {
+                    "type": "string",
+                    "format": "string"
+                },
+                "EventCreated": {
+                    "type": "string",
+                    "format": "string"
+                },
+                "EventEnds": {
+                    "$ref": "#/definitions/time.Time"
+                },
+                "EventID": {
+                    "type": "string"
+                },
+                "EventUser": {
+                    "type": "string"
+                },
+                "ID": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "Location": {
+                    "type": "string"
+                },
+                "Name": {
+                    "description": "이름",
+                    "type": "string"
+                },
+                "Organizer": {
+                    "type": "string"
+                },
+                "Source": {
+                    "type": "string"
+                },
+                "Summary": {
+                    "type": "string"
+                },
+                "UpdatedAt": {
+                    "description": "수정일",
+                    "type": "string",
+                    "format": "string"
+                }
+            }
+        },
+        "models.GithubCommit": {
+            "title": "GithubCommit",
+            "type": "object",
+            "properties": {
+                "BranchName": {
+                    "type": "string"
+                },
+                "Comments": {
+                    "type": "string"
+                },
+                "CreatedAt": {
+                    "description": "등록일",
+                    "type": "string",
+                    "format": "string"
+                },
+                "CreatorID": {
+                    "description": "작성자",
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "Description": {
+                    "description": "설명",
+                    "type": "string"
+                },
+                "ID": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "Name": {
+                    "description": "이름",
+                    "type": "string"
+                },
+                "RepoName": {
+                    "type": "string"
+                },
+                "UpdatedAt": {
+                    "description": "수정일",
+                    "type": "string",
+                    "format": "string"
+                },
+                "UserName": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.GithubRelease": {
+            "title": "GithubRelease",
+            "type": "object",
+            "properties": {
+                "CreatedAt": {
+                    "description": "등록일",
+                    "type": "string",
+                    "format": "string"
+                },
+                "CreatorID": {
+                    "description": "작성자",
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "Description": {
+                    "description": "설명",
+                    "type": "string"
+                },
+                "ID": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "Message": {
+                    "type": "string"
+                },
+                "Name": {
+                    "description": "이름",
+                    "type": "string"
+                },
+                "PreRelease": {
+                    "type": "boolean"
+                },
+                "RepoName": {
+                    "type": "string"
+                },
+                "TagName": {
+                    "type": "string"
+                },
+                "UpdatedAt": {
+                    "description": "수정일",
+                    "type": "string",
+                    "format": "string"
+                },
+                "UserName": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Ics": {
+            "title": "Ics",
+            "type": "object",
+            "properties": {
+                "CreatedAt": {
+                    "description": "등록일",
+                    "type": "string",
+                    "format": "string"
+                },
+                "CreatorID": {
+                    "description": "작성자",
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "Description": {
+                    "description": "설명",
+                    "type": "string"
+                },
+                "ICSURL": {
+                    "type": "string"
+                },
+                "ID": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "Name": {
+                    "description": "이름",
+                    "type": "string"
+                },
+                "UpdatedAt": {
+                    "description": "수정일",
+                    "type": "string",
+                    "format": "string"
+                }
+            }
+        },
+        "models.KeyEvent": {
+            "title": "KeyEvent",
+            "type": "object",
+            "properties": {
+                "CreatedAt": {
+                    "description": "등록일",
+                    "type": "string",
+                    "format": "string"
+                },
+                "CreatorID": {
+                    "description": "작성자",
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "Description": {
+                    "description": "설명",
+                    "type": "string"
+                },
+                "EventDate": {
+                    "type": "string",
+                    "format": "string"
+                },
+                "ID": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "Name": {
+                    "description": "이름",
+                    "type": "string"
+                },
+                "UpdatedAt": {
+                    "description": "수정일",
+                    "type": "string",
+                    "format": "string"
+                }
+            }
+        },
+        "models.Project": {
+            "title": "Project",
+            "type": "object",
+            "properties": {
+                "CreatedAt": {
+                    "description": "등록일",
+                    "type": "string",
+                    "format": "string"
+                },
+                "CreatorID": {
+                    "description": "작성자",
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "Description": {
+                    "description": "설명",
+                    "type": "string"
+                },
+                "ID": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "Name": {
+                    "description": "이름",
+                    "type": "string"
+                },
+                "Status": {
+                    "type": "string"
+                },
+                "UpdatedAt": {
+                    "description": "수정일",
+                    "type": "string",
+                    "format": "string"
+                }
+            }
+        },
+        "models.Sprint": {
+            "title": "Sprint",
+            "type": "object",
+            "properties": {
+                "CreatedAt": {
+                    "description": "등록일",
+                    "type": "string",
+                    "format": "string"
+                },
+                "CreatorID": {
+                    "description": "작성자",
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "Current": {
+                    "type": "boolean"
+                },
+                "Description": {
+                    "description": "설명",
+                    "type": "string"
+                },
+                "ID": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "Name": {
+                    "description": "이름",
+                    "type": "string"
+                },
+                "UpdatedAt": {
+                    "description": "수정일",
+                    "type": "string",
+                    "format": "string"
+                }
+            }
+        },
+        "models.Team": {
+            "title": "Team",
+            "type": "object",
+            "properties": {
+                "CreatedAt": {
+                    "description": "등록일",
+                    "type": "string",
+                    "format": "string"
+                },
+                "CreatorID": {
+                    "description": "작성자",
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "Description": {
+                    "description": "설명",
+                    "type": "string"
+                },
+                "ID": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "Name": {
+                    "description": "이름",
+                    "type": "string"
+                },
+                "UpdatedAt": {
+                    "description": "수정일",
+                    "type": "string",
+                    "format": "string"
+                }
+            }
+        },
+        "models.Todo": {
+            "title": "Todo",
+            "type": "object",
+            "properties": {
+                "BoardID": {
+                    "type": "string"
+                },
+                "BoardName": {
+                    "type": "string"
+                },
+                "CardID": {
+                    "type": "string"
+                },
+                "CreatedAt": {
+                    "description": "등록일",
+                    "type": "string",
+                    "format": "string"
+                },
+                "CreatorID": {
+                    "description": "작성자",
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "Description": {
+                    "description": "설명",
+                    "type": "string"
+                },
+                "ID": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "ListID": {
+                    "type": "string"
+                },
+                "ListName": {
+                    "type": "string"
+                },
+                "Name": {
+                    "description": "이름",
+                    "type": "string"
+                },
+                "Source": {
+                    "type": "string"
+                },
+                "Status": {
+                    "type": "string"
+                },
+                "UpdatedAt": {
+                    "description": "수정일",
+                    "type": "string",
+                    "format": "string"
+                }
+            }
+        },
+        "models.Trello": {
+            "title": "Trello",
+            "type": "object",
+            "properties": {
+                "CreatedAt": {
+                    "description": "등록일",
+                    "type": "string",
+                    "format": "string"
+                },
+                "CreatorID": {
+                    "description": "작성자",
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "Description": {
+                    "description": "설명",
+                    "type": "string"
+                },
+                "ID": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "Key": {
+                    "type": "string"
+                },
+                "Name": {
+                    "description": "이름",
+                    "type": "string"
+                },
+                "Token": {
+                    "type": "string"
+                },
+                "UpdatedAt": {
+                    "description": "수정일",
+                    "type": "string",
+                    "format": "string"
+                },
+                "UserName": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.User": {
+            "title": "User",
+            "type": "object",
+            "properties": {
+                "CreatedAt": {
+                    "description": "등록일",
+                    "type": "string",
+                    "format": "string"
+                },
+                "CreatorID": {
+                    "description": "작성자",
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "Description": {
+                    "description": "설명",
+                    "type": "string"
+                },
+                "Email": {
+                    "description": "사용자 이메일",
+                    "type": "string"
+                },
+                "EncryptedPassword": {
+                    "description": "암호화된 비밀번호",
+                    "type": "string"
+                },
+                "ID": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "Mobile": {
+                    "description": "사용자 핸드폰번호",
+                    "type": "string"
+                },
+                "Name": {
+                    "description": "이름",
+                    "type": "string"
+                },
+                "Password": {
+                    "description": "비밀번호",
+                    "type": "string"
+                },
+                "PosibleSendEmail": {
+                    "type": "boolean"
+                },
+                "PosibleSendSMS": {
+                    "type": "boolean"
+                },
+                "PosibleSendWeb": {
+                    "type": "boolean"
+                },
+                "PosibleSendWebhook": {
+                    "type": "boolean"
+                },
+                "UpdatedAt": {
+                    "description": "수정일",
+                    "type": "string",
+                    "format": "string"
+                },
+                "Username": {
+                    "description": "사용자 아이디",
+                    "type": "string"
+                }
+            }
+        },
+        "requests.LoginUser": {
+            "title": "LoginUser",
+            "type": "object",
+            "properties": {
+                "Password": {
+                    "type": "string"
+                },
+                "Username": {
+                    "type": "string"
+                }
+            }
+        },
+        "requests.UpdateUser": {
+            "title": "UpdateUser",
+            "type": "object",
+            "properties": {
+                "Description": {
+                    "type": "string"
+                },
+                "Email": {
+                    "type": "string"
+                },
+                "Mobile": {
+                    "type": "string"
+                },
+                "Name": {
+                    "type": "string"
+                },
+                "Password": {
+                    "type": "string"
+                },
+                "Username": {
+                    "type": "string"
+                }
+            }
+        },
+        "responses.Employee": {
+            "title": "Employee",
+            "type": "object",
+            "properties": {
+                "CreatedAt": {
+                    "type": "string",
+                    "format": "string"
+                },
+                "Description": {
+                    "type": "string"
+                },
+                "ID": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "Name": {
+                    "type": "string"
+                },
+                "OriginName": {
+                    "type": "string"
+                },
+                "UpdatedAt": {
+                    "type": "string",
+                    "format": "string"
+                }
+            }
+        },
+        "responses.Event": {
+            "title": "Event",
+            "type": "object",
+            "properties": {
+                "Attendees": {
+                    "type": "string"
+                },
+                "CreatedAt": {
+                    "type": "string",
+                    "format": "string"
+                },
+                "Description": {
+                    "type": "string"
+                },
+                "EventBegins": {
+                    "type": "string",
+                    "format": "string"
+                },
+                "EventCreated": {
+                    "type": "string",
+                    "format": "string"
+                },
+                "EventEnds": {
+                    "$ref": "#/definitions/time.Time"
+                },
+                "EventID": {
+                    "type": "string"
+                },
+                "EventUser": {
+                    "type": "string"
+                },
+                "ID": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "Location": {
+                    "type": "string"
+                },
+                "Name": {
+                    "type": "string"
+                },
+                "Organizer": {
+                    "type": "string"
+                },
+                "Source": {
+                    "type": "string"
+                },
+                "Summary": {
+                    "type": "string"
+                },
+                "UpdatedAt": {
+                    "type": "string",
+                    "format": "string"
+                }
+            }
+        },
+        "responses.GithubCommit": {
+            "title": "GithubCommit",
+            "type": "object",
+            "properties": {
+                "BranchName": {
+                    "type": "string"
+                },
+                "Comments": {
+                    "type": "string"
+                },
+                "CreatedAt": {
+                    "type": "string",
+                    "format": "string"
+                },
+                "Description": {
+                    "type": "string"
+                },
+                "ID": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "Name": {
+                    "type": "string"
+                },
+                "RepoName": {
+                    "type": "string"
+                },
+                "UpdatedAt": {
+                    "type": "string",
+                    "format": "string"
+                },
+                "UserName": {
+                    "type": "string"
+                }
+            }
+        },
+        "responses.GithubRelease": {
+            "title": "GithubRelease",
+            "type": "object",
+            "properties": {
+                "CreatedAt": {
+                    "type": "string",
+                    "format": "string"
+                },
+                "Description": {
+                    "type": "string"
+                },
+                "ID": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "Message": {
+                    "type": "string"
+                },
+                "Name": {
+                    "type": "string"
+                },
+                "PreRelease": {
+                    "type": "boolean"
+                },
+                "RepoName": {
+                    "type": "string"
+                },
+                "TagName": {
+                    "type": "string"
+                },
+                "UpdatedAt": {
+                    "type": "string",
+                    "format": "string"
+                },
+                "UserName": {
+                    "type": "string"
+                }
+            }
+        },
+        "responses.Ics": {
+            "title": "Ics",
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "responses.KeyEvent": {
+            "title": "KeyEvent",
+            "type": "object",
+            "properties": {
+                "CreatedAt": {
+                    "type": "string",
+                    "format": "string"
+                },
+                "Description": {
+                    "type": "string"
+                },
+                "EventDate": {
+                    "type": "string",
+                    "format": "string"
+                },
+                "ID": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "Name": {
+                    "type": "string"
+                },
+                "UpdatedAt": {
+                    "type": "string",
+                    "format": "string"
+                }
+            }
+        },
+        "responses.Project": {
+            "title": "Project",
+            "type": "object",
+            "properties": {
+                "CreatedAt": {
+                    "type": "string",
+                    "format": "string"
+                },
+                "Description": {
+                    "type": "string"
+                },
+                "ID": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "Name": {
+                    "type": "string"
+                },
+                "Status": {
+                    "type": "string"
+                },
+                "UpdatedAt": {
+                    "type": "string",
+                    "format": "string"
+                }
+            }
+        },
+        "responses.Sprint": {
+            "title": "Sprint",
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "responses.Team": {
+            "title": "Team",
+            "type": "object",
+            "properties": {
+                "CreatedAt": {
+                    "type": "string",
+                    "format": "string"
+                },
+                "Description": {
+                    "type": "string"
+                },
+                "ID": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "Name": {
+                    "type": "string"
+                },
+                "UpdatedAt": {
+                    "type": "string",
+                    "format": "string"
+                }
+            }
+        },
+        "responses.Todo": {
+            "title": "Todo",
+            "type": "object",
+            "properties": {
+                "BoardID": {
+                    "type": "string"
+                },
+                "BoardName": {
+                    "type": "string"
+                },
+                "CardID": {
+                    "type": "string"
+                },
+                "CreatedAt": {
+                    "type": "string",
+                    "format": "string"
+                },
+                "Description": {
+                    "type": "string"
+                },
+                "ID": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "ListID": {
+                    "type": "string"
+                },
+                "ListName": {
+                    "type": "string"
+                },
+                "Name": {
+                    "type": "string"
+                },
+                "Source": {
+                    "type": "string"
+                },
+                "Status": {
+                    "type": "string"
+                },
+                "UpdatedAt": {
+                    "type": "string",
+                    "format": "string"
+                }
+            }
+        },
+        "responses.Trello": {
+            "title": "Trello",
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "responses.User": {
+            "title": "User",
+            "type": "object",
+            "properties": {
+                "CreatedAt": {
+                    "type": "string",
+                    "format": "string"
+                },
+                "CreatorID": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "Description": {
+                    "type": "string"
+                },
+                "Email": {
+                    "type": "string"
+                },
+                "EncryptedPassword": {
+                    "type": "string"
+                },
+                "ID": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "Mobile": {
+                    "type": "string"
+                },
+                "Name": {
+                    "type": "string"
+                },
+                "Password": {
+                    "type": "string"
+                },
+                "PosibleSendEmail": {
+                    "type": "boolean"
+                },
+                "PosibleSendSMS": {
+                    "type": "boolean"
+                },
+                "PosibleSendWeb": {
+                    "type": "boolean"
+                },
+                "PosibleSendWebhook": {
+                    "type": "boolean"
+                },
+                "UpdatedAt": {
+                    "type": "string",
+                    "format": "string"
+                },
+                "Username": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "userAPIKey": {
+            "type": "apiKey",
+            "description": "I love auto-generated docs",
+            "name": "X-USER-AUTH-TOKEN",
+            "in": "header"
+        }
+    }
+}

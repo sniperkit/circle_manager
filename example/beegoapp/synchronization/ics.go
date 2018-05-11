@@ -6,7 +6,7 @@ import (
 	"time"
 
 	ics "github.com/PuloV/ics-golang"
-	"github.com/jungju/circle_manager/example/beegoapp/models"
+	"github.com/jungju/circle_manager/_example/beegoapp/models"
 	"github.com/jungju/circle_manager/modules"
 	"github.com/sirupsen/logrus"
 )

@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/jungju/circle_manager/example/beegoapp/admin/bindatafs"
+	"github.com/jungju/circle_manager/_example/beegoapp/admin/bindatafs"
 )
 
 func main() {

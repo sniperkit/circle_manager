@@ -1,6 +1,6 @@
 package requests
 
-import "github.com/jungju/circle_manager/example/beegoapp/errors"
+import "github.com/jungju/circle_manager/_example/beegoapp/errors"
 
 type CreateAdmin struct {
 	Username    string `validate:"required,min=2,max=36"`

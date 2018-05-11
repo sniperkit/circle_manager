@@ -12,7 +12,7 @@ RUN go get -u github.com/tools/godep && \
 # Recompile the standard library without CGO
 RUN CGO_ENABLED=0 go install -a std
 
-ENV APP_DIR $GOPATH/src/github.com/jungju/circle_manager/example/beegoapp
+ENV APP_DIR $GOPATH/src/github.com/jungju/circle_manager/_example/beegoapp
 RUN mkdir -p $APP_DIR
 
 # Set the entrypoint

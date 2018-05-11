@@ -1,7 +1,7 @@
 package admin
 
 import (
-	"github.com/jungju/circle_manager/example/beegoapp/models"
+	"github.com/jungju/circle_manager/_example/beegoapp/models"
 	"github.com/qor/admin"
 )
 
