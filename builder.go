@@ -34,17 +34,20 @@ func genBeegoAppResource() error {
 }
 
 func beegoBuild() error {
+	fmt.Println("Executing app build")
 	var err error
 	beegoAppProcess, err = executer("beego run", "bee", []string{"run", "-runmode=dev", "-gendoc=true", "-e=./"}, false)
 	return err
 }
 
 func dockerBuild(url string) error {
+	fmt.Println("Executing docker build")
 	_, err := executer("docker build", "docker", []string{"build", "-t", url, "."}, true)
 	return err
 }
 
 func dockerPush(url string) error {
+	fmt.Println("Executing docker push")
 	_, err := executer("docker push", "docker", []string{"push", url}, true)
 	return err
 }
