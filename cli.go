@@ -120,7 +120,7 @@ func main() {
 		} else if envs.Mode == "import" {
 			return runImport()
 		} else if envs.Mode == "build" {
-			if err := beegoBuild(); err != nil {
+			if err := genBeegoAppResource(); err != nil {
 				return err
 			}
 			url := "jungju/circle_x"
