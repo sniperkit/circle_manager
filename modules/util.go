@@ -107,6 +107,8 @@ func convInterface(raw interface{}) string {
 			return "true"
 		}
 		return "false"
+	case nil:
+		return ""
 	}
 
 	fmt.Printf("Unknown type: %s. values: %s\n", reflect.New(reflect.TypeOf(raw)), raw)
