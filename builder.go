@@ -27,7 +27,8 @@ func genBeegoAppResource() error {
 	commentRouterExist := <-commentRouterExistChan
 	if commentRouterExist {
 		fmt.Println("Genarated resources! Exit app of beego")
-		return beegoAppProcess.Kill()
+		beegoAppProcess.Kill()
+		return nil
 	}
 	return errors.New("비정상 종료")
 }
