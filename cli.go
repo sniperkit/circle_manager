@@ -130,12 +130,11 @@ func main() {
 			if err := genBeegoAppResource(); err != nil {
 				return err
 			}
-			url := "jungju/circle_x"
-			if err := dockerBuild(url); err != nil {
+			if err := dockerBuild(envs.DockerImageURL); err != nil {
 				return err
 			}
 
-			if err := dockerPush(url); err != nil {
+			if err := dockerPush(envs.DockerImageURL); err != nil {
 				return err
 			}
 		}
