@@ -1,7 +1,6 @@
 package modules
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"reflect"
@@ -305,15 +304,6 @@ func (c *BaseCrudController) addEvent(action string) {
 	}); err != nil {
 		fmt.Println(err)
 	}
-}
-
-func convJsonData(obj interface{}) string {
-	if obj != nil {
-		if jsonObj, err := json.Marshal(obj); err == nil {
-			return string(jsonObj)
-		}
-	}
-	return ""
 }
 
 // func EventThenCreate(modelItem ModelItem, currentUserID *uint) {

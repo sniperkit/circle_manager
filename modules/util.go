@@ -161,3 +161,12 @@ func MakeFirstLowerCase(s string) string {
 
 	return string(bytes.Join([][]byte{lc, rest}, nil))
 }
+
+func convJsonData(obj interface{}) string {
+	if obj != nil {
+		if jsonObj, err := json.Marshal(obj); err == nil {
+			return string(jsonObj)
+		}
+	}
+	return ""
+}
