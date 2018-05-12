@@ -18,7 +18,7 @@ type CircleQor struct {
 	QorAdmin *admin.Admin
 }
 
-func (m *CircleQor) CrudEvent(result interface{}, context *qor.Context, oldData string) {
+func (m *CircleQor) CrudEvent(currentUserID uint, result interface{}, context *qor.Context, oldData string) {
 	modelItem, ok := result.(ModelItem)
 	if !ok {
 		return
@@ -28,9 +28,10 @@ func (m *CircleQor) CrudEvent(result interface{}, context *qor.Context, oldData 
 	modelItem.SetCreatorID(userID)
 
 	action := ""
-	if context.Request.Method == "POST" {
+	if context.ResourceID == "" && context.Request.Method == "POST" {
 		action = "create"
-	} else if context.Request.Method == "PUT" {
+	} else if (context.Request.Method == "PUT") ||
+		(context.ResourceID != "" && context.Request.Method == "POST") {
 		action = "update"
 	} else if context.Request.Method == "DELETE" {
 		action = "delete"
@@ -45,7 +46,7 @@ func (m *CircleQor) CrudEvent(result interface{}, context *qor.Context, oldData 
 		Action:       action,
 		TargetID:     targetID,
 		TargetObject: inflection.Plural(gorm.ToDBName(structs.Name(modelItem))),
-		CreatorID:    userID,
+		CreatorID:    currentUserID,
 		Where:        "QOR",
 		UpdatedData:  convJsonData(modelItem),
 		OldData:      oldData,
@@ -57,6 +58,14 @@ func (m *CircleQor) CrudEvent(result interface{}, context *qor.Context, oldData 
 func (m *CircleQor) AddResourceAndMenu(value interface{}, menuViewName string, parentMenu string, permission *roles.Permission, priority int) *admin.Resource {
 	res := m.QorAdmin.AddResource(value, &admin.Config{Menu: []string{parentMenu}, Permission: permission, Priority: priority})
 	res.SaveHandler = func(result interface{}, context *qor.Context) error {
+		currentUserID := uint(0)
+		if modelItem, ok := result.(ModelItem); ok {
+			currentUserID = structs.New(context.CurrentUser).Field("ID").Value().(uint)
+			if context.ResourceID == "" {
+				modelItem.SetCreatorID(currentUserID)
+			}
+		}
+
 		oldData := ""
 		if context.ResourceID != "" {
 			if resIDUint64, err := strconv.ParseUint(context.ResourceID, 10, 64); err == nil {
@@ -74,19 +83,24 @@ func (m *CircleQor) AddResourceAndMenu(value interface{}, menuViewName string, p
 			if err := context.GetDB().Save(result).Error; err != nil {
 				return err
 			}
-			go m.CrudEvent(result, context, oldData)
+			go m.CrudEvent(currentUserID, result, context, oldData)
 			return nil
 		}
 		return roles.ErrPermissionDenied
 	}
 	res.DeleteHandler = func(result interface{}, context *qor.Context) error {
+		currentUserID := uint(0)
+		if _, ok := result.(ModelItem); ok {
+			currentUserID = structs.New(context.CurrentUser).Field("ID").Value().(uint)
+		}
+
 		if res.HasPermission(roles.Delete, context) {
 			if primaryQuerySQL, primaryParams := res.ToPrimaryQueryParams(context.ResourceID, context); primaryQuerySQL != "" {
 				if !context.GetDB().First(result, append([]interface{}{primaryQuerySQL}, primaryParams...)...).RecordNotFound() {
 					if err := context.GetDB().Delete(result).Error; err != nil {
 						return err
 					}
-					go m.CrudEvent(result, context, "")
+					go m.CrudEvent(currentUserID, result, context, "")
 					return nil
 				}
 			}
