@@ -62,7 +62,7 @@ func (m *TemplateKeyValueMaker) LoadValues() {
 			m.GetedValues[key] = convInterface(getValueParam.Value)
 			continue
 		}
-		if valueInterface, err := GetValueByKeyOfTableName(getValueParam); err == nil {
+		if valueInterface, err := GetValueByKeyOfTableName(getValueParam.TableName, getValueParam.Key, getValueParam.ID); err == nil {
 			m.GetedValues[key] = convInterface(valueInterface)
 		} else {
 			fmt.Println(err)

@@ -9,7 +9,6 @@ import (
 	"github.com/fatih/structs"
 	"github.com/jinzhu/gorm"
 	"github.com/jinzhu/inflection"
-	"github.com/jungju/circle/models"
 	"github.com/qor/admin"
 	"github.com/qor/qor"
 	"github.com/qor/roles"
@@ -25,11 +24,8 @@ func (m *CircleQor) CrudEvent(result interface{}, context *qor.Context, oldData 
 		return
 	}
 
-	userID := uint(0)
-	if user, userOk := context.CurrentUser.(*models.User); userOk {
-		userID = user.ID
-		modelItem.SetCreatorID(userID)
-	}
+	userID := structs.New(context.CurrentUser).Field("ID").Value().(uint)
+	modelItem.SetCreatorID(userID)
 
 	action := ""
 	if context.Request.Method == "POST" {
@@ -134,8 +130,8 @@ func (m *CircleQor) AddResourceAndMenu(value interface{}, menuViewName string, p
 		res.Meta(&admin.Meta{Name: "CreatorID", Label: "작성자", Valuer: func(result interface{}, context *qor.Context) interface{} {
 			if modelItem, ok := result.(ModelItem); ok {
 				if modelItem.GetCreatorID() > 0 {
-					if user, err := models.GetOnlyUserByID(modelItem.GetCreatorID()); err == nil {
-						return user.Name
+					if value, err := GetValueByKeyOfTableName("users", "name", modelItem.GetCreatorID()); err == nil {
+						return value.(string)
 					}
 				}
 			}

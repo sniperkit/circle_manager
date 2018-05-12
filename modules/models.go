@@ -82,9 +82,9 @@ func GetItems(items interface{}, queryPage *QueryPage) error {
 	return gGormDB.Find(items).Error
 }
 
-func GetValueByKeyOfTableName(param ParamGetValueByKeyOfTableName) (interface{}, error) {
+func GetValueByKeyOfTableName(tableName, key string, id uint) (interface{}, error) {
 	var value interface{}
-	if err := gGormDB.Table(param.TableName).Select(param.Key).Where("id = ?", param.ID).Row().Scan(&value); err != nil {
+	if err := gGormDB.Table(tableName).Select(key).Where("id = ?", id).Row().Scan(&value); err != nil {
 		return nil, err
 	}
 	if value != nil {
