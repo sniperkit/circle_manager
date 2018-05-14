@@ -123,12 +123,15 @@ func (m *CircleQor) AddResourceAndMenu(value interface{}, menuViewName string, p
 		if resStruct.Field(name).Kind() == reflect.Bool {
 			res.Meta(&admin.Meta{Name: name, Setter: mata.GetSetter(), Valuer: func(result interface{}, context *qor.Context) interface{} {
 				value := structs.New(result).Field(name).Value()
-				if boolValue, ok := value.(bool); ok {
-					if boolValue {
-						return template.HTML(`<input type="checkbox" checked="checked" readonly/>`)
+				if context.ResourceID == "" {
+					if boolValue, ok := value.(bool); ok {
+						if boolValue {
+							return template.HTML(`<input type="checkbox" checked="checked" readonly/>`)
+						}
 					}
+					return template.HTML(`<input type="checkbox" readonly/>`)
 				}
-				return template.HTML(`<input type="checkbox" readonly/>`)
+				return value
 			}})
 		}
 	}
