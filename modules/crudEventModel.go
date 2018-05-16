@@ -1,7 +1,6 @@
 package modules
 
 import (
-	"encoding/json"
 	"fmt"
 	"time"
 )
@@ -35,21 +34,6 @@ func (m *CrudEvent) SetCreatorID(creatorID uint) {
 
 func (m *CrudEvent) GetTags() string {
 	return fmt.Sprintf("%s,%s", m.TargetObject, m.Action)
-}
-
-func (m *CrudEvent) GetMapUpdatedItems() map[string]interface{} {
-	mapUpdateItems := map[string]interface{}{}
-	if m.UpdatedData != "" {
-		if err := json.Unmarshal([]byte(m.UpdatedData), &mapUpdateItems); err != nil {
-			fmt.Println(err)
-		}
-	}
-
-	retMapUpdateItems := map[string]interface{}{}
-	for key, value := range mapUpdateItems {
-		retMapUpdateItems[toDBName(key)] = value
-	}
-	return retMapUpdateItems
 }
 
 func AddCrudEvent(crudEvent *CrudEvent) (id uint, err error) {

@@ -120,8 +120,8 @@ func sendActiveNotificationsEachCrudEvent(crudEvent *CrudEvent, notificationType
 		}
 
 		templateKeyValueMaker := NewTemplateKeyValueMaker(crudEvent, &notificationType)
-		templateKeyValueMaker.MakeGetValueParams()
-		templateKeyValueMaker.LoadValues()
+		getDBValueParams := templateKeyValueMaker.MakeGetValueParams()
+		templateKeyValueMaker.LoadValues(getDBValueParams)
 
 		notification := MakeNotification(&notificationType, templateKeyValueMaker.GetedValues, nil)
 		notification.EventUserID = crudEvent.CreatorID

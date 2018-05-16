@@ -9,6 +9,8 @@ import (
 	"reflect"
 	"strings"
 	"time"
+
+	"github.com/jinzhu/inflection"
 )
 
 type strCase bool
@@ -169,4 +171,8 @@ func convJsonData(obj interface{}) string {
 		}
 	}
 	return ""
+}
+
+func toDBTableName(object string) string {
+	return toDBName(inflection.Plural(object))
 }

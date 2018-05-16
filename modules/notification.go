@@ -1,22 +1,21 @@
 package modules
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"regexp"
 	"strings"
 	"time"
-
-	"github.com/jinzhu/inflection"
 )
 
 const (
-	_listCountText   = "listCount"
-	_listDefaultText = "listItem"
-	_nowText         = "now"
-	_nowDayText      = "nowDay"
-	_nowMonthText    = "nowMonth"
-	_nowYearText     = "nowYear"
+	_listCountText   = "ConstListCount"
+	_listDefaultText = "ConstListItem"
+	_nowText         = "ConstNow"
+	_nowDayText      = "ConstNowDay"
+	_nowMonthText    = "ConstNowMonth"
+	_nowYearText     = "ConstNowYear"
 )
 
 type KeyValue map[string]string
@@ -25,26 +24,30 @@ type TemplateKeyValueMaker struct {
 	CrudEvent       *CrudEvent
 	MapUpdateItems  map[string]interface{}
 	TemplateStrings []string
-	getValueParams  map[string]ParamGetValueByKeyOfTableName
 	GetedValues     map[string]string
 }
 
 func NewTemplateKeyValueMaker(crudEvent *CrudEvent, notificationType *NotificationType) *TemplateKeyValueMaker {
+	mapUpdateItems := map[string]interface{}{}
+	if crudEvent.UpdatedData != "" {
+		if err := json.Unmarshal([]byte(crudEvent.UpdatedData), &mapUpdateItems); err != nil {
+			fmt.Println(err)
+		}
+	}
+
 	return &TemplateKeyValueMaker{
 		CrudEvent:      crudEvent,
-		MapUpdateItems: crudEvent.GetMapUpdatedItems(),
+		MapUpdateItems: mapUpdateItems,
 		TemplateStrings: []string{
 			notificationType.TitleTemplate,
 			notificationType.MessageTemplate,
 		},
+		GetedValues: map[string]string{},
 	}
 }
 
-func (m TemplateKeyValueMaker) GetIDOfTable(subTableName string) (uint, error) {
-	tableKey := "id"
-	if subTableName != m.CrudEvent.TargetObject {
-		tableKey = fmt.Sprintf("%s_id", inflection.Singular(subTableName))
-	}
+func (m TemplateKeyValueMaker) GetForienKeyValue(objectName string) (uint, error) {
+	tableKey := fmt.Sprintf("%sID", objectName)
 
 	if subIDInterface, ok := m.MapUpdateItems[tableKey]; ok {
 		if subIDFloat, ok := subIDInterface.(float64); ok {
@@ -55,14 +58,10 @@ func (m TemplateKeyValueMaker) GetIDOfTable(subTableName string) (uint, error) {
 	return 0, errors.New("Not found column")
 }
 
-func (m *TemplateKeyValueMaker) LoadValues() {
+func (m *TemplateKeyValueMaker) LoadValues(getDBValueParams map[string]ParamGetValueByKeyOfTableName) {
 	m.GetedValues = map[string]string{}
-	for key, getValueParam := range m.getValueParams {
-		if getValueParam.Value != nil {
-			m.GetedValues[key] = convInterface(getValueParam.Value)
-			continue
-		}
-		if valueInterface, err := GetValueByKeyOfTableName(getValueParam.TableName, getValueParam.Key, getValueParam.ID); err == nil {
+	for key, getValueParam := range getDBValueParams {
+		if valueInterface, err := GetValueByKeyOfTableName(getValueParam.TableName, getValueParam.ColumnName, getValueParam.ID); err == nil {
 			m.GetedValues[key] = convInterface(valueInterface)
 		} else {
 			fmt.Println(err)
@@ -71,7 +70,7 @@ func (m *TemplateKeyValueMaker) LoadValues() {
 	}
 }
 
-func (m *TemplateKeyValueMaker) MakeGetValueParams() {
+func (m *TemplateKeyValueMaker) MakeGetValueParams() map[string]ParamGetValueByKeyOfTableName {
 	matchs := []string{}
 	for _, str := range m.TemplateStrings {
 		re := regexp.MustCompile("\\{\\{\\.(.*?)\\}\\}")
@@ -81,27 +80,29 @@ func (m *TemplateKeyValueMaker) MakeGetValueParams() {
 		}
 	}
 
-	m.getValueParams = map[string]ParamGetValueByKeyOfTableName{}
+	getDBValueParams := map[string]ParamGetValueByKeyOfTableName{}
 	for _, match := range matchs {
-		objectAndKey := strings.Split(match, "__")
+		objectAndKey := strings.Split(match, ".")
 
-		if len(objectAndKey) == 2 {
-			if subID, err := m.GetIDOfTable(objectAndKey[0]); err == nil {
-				m.getValueParams[match] = ParamGetValueByKeyOfTableName{
-					TableName: objectAndKey[0],
-					ID:        subID,
-					Key:       objectAndKey[1],
-				}
+		if len(objectAndKey) == 1 {
+			fieldName := objectAndKey[0]
+			m.GetedValues[match] = convInterface(m.MapUpdateItems[fieldName])
+		} else if len(objectAndKey) == 2 {
+			subID, err := m.GetForienKeyValue(objectAndKey[0])
+			if err != nil {
+				fmt.Println("알수없는 ObjectID : ", objectAndKey)
 			}
-		} else if len(objectAndKey) == 1 {
-			m.getValueParams[match] = ParamGetValueByKeyOfTableName{
-				TableName: m.CrudEvent.TargetObject,
-				ID:        m.CrudEvent.TargetID,
-				Key:       objectAndKey[0],
-				Value:     m.MapUpdateItems[objectAndKey[0]],
+
+			getDBValueParams[match] = ParamGetValueByKeyOfTableName{
+				TableName:  toDBTableName(objectAndKey[0]),
+				ID:         subID,
+				ColumnName: toDBName(objectAndKey[1]),
 			}
+		} else {
+			fmt.Println("알수없는 Object : ", objectAndKey)
 		}
 	}
+	return getDBValueParams
 }
 
 func MakeNotification(notificationType *NotificationType, baseGetedValues KeyValue, listValuesGroup []KeyValue) (notification *Notification) {
@@ -109,18 +110,18 @@ func MakeNotification(notificationType *NotificationType, baseGetedValues KeyVal
 	for key, value := range baseGetedValues {
 		builtinKeyValues[key] = value
 	}
-	creatingTitleText := changTeamplate(notificationType.TitleTemplate, builtinKeyValues)
-	creatingMessageText := changTeamplate(notificationType.MessageTemplate, builtinKeyValues)
-	creatingListTemplate := changTeamplate(notificationType.ListItemTemplate, builtinKeyValues)
+	creatingTitleText := changeTeamplate(notificationType.TitleTemplate, builtinKeyValues)
+	creatingMessageText := changeTeamplate(notificationType.MessageTemplate, builtinKeyValues)
+	creatingListTemplate := changeTeamplate(notificationType.ListItemTemplate, builtinKeyValues)
 
 	if creatingListTemplate != "" &&
 		len(listValuesGroup) > 0 &&
 		strings.Index(creatingMessageText, _listDefaultText) >= 0 {
 		list := ""
 		for _, listValues := range listValuesGroup {
-			list += changTeamplate(creatingListTemplate, listValues)
+			list += changeTeamplate(creatingListTemplate, listValues)
 		}
-		creatingMessageText = changTeamplate(creatingMessageText, KeyValue{_listDefaultText: list})
+		creatingMessageText = changeTeamplate(creatingMessageText, KeyValue{_listDefaultText: list})
 	}
 
 	return &Notification{
@@ -140,7 +141,7 @@ func getBuiltinKeyValues() KeyValue {
 	}
 }
 
-func changTeamplate(teamplate string, keyValue KeyValue) string {
+func changeTeamplate(teamplate string, keyValue KeyValue) string {
 	ret := teamplate
 
 	for key, value := range keyValue {

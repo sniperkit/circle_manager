@@ -49,10 +49,9 @@ var (
 )
 
 type ParamGetValueByKeyOfTableName struct {
-	TableName string
-	ID        uint
-	Key       string
-	Value     interface{}
+	TableName  string
+	ID         uint
+	ColumnName string
 }
 
 func CreateItem(item interface{}) error {
