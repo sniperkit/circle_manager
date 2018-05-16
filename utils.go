@@ -13,3 +13,10 @@ func subDirectoryFiles(rootPath string, actionFunc func(os.FileInfo) error) erro
 		return nil
 	})
 }
+
+func existsFile(filepath string) bool {
+	if _, err := os.Stat(filepath); os.IsNotExist(err) {
+		return false
+	}
+	return true
+}

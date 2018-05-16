@@ -18,20 +18,16 @@ var (
 )
 
 type Envs struct {
-	Mode            string
-	Name            string
-	DBHost          string
-	DBPort          int
-	DBName          string
-	DBUser          string
-	DBPassWord      string
-	CircleID        uint
-	RootPath        string
-	OnlyControllers bool
-	OnlyModels      bool
-	OnlyRequests    bool
-	OnlyResponses   bool
-	DockerImageURL  string
+	Mode           string
+	Name           string
+	DBHost         string
+	DBPort         int
+	DBName         string
+	DBUser         string
+	DBPassWord     string
+	CircleID       uint
+	RootPath       string
+	DockerImageURL string
 }
 
 func envsValid() error {
@@ -93,20 +89,16 @@ func main() {
 	}
 	app.Action = func(c *cli.Context) error {
 		envs = &Envs{
-			Mode:            c.String("mode"),
-			Name:            c.String("name"),
-			DBHost:          c.String("dbHost"),
-			DBPort:          c.Int("dbPort"),
-			DBName:          c.String("dbName"),
-			DBUser:          c.String("dbUser"),
-			DBPassWord:      c.String("dbPassword"),
-			CircleID:        c.Uint("circleID"),
-			RootPath:        c.String("rootPath"),
-			OnlyControllers: c.Bool("onlyControllers"),
-			OnlyModels:      c.Bool("onlyModels"),
-			OnlyRequests:    c.Bool("onlyRequests"),
-			OnlyResponses:   c.Bool("onlyResponses"),
-			DockerImageURL:  c.String("dockerImageURL"),
+			Mode:           c.String("mode"),
+			Name:           c.String("name"),
+			DBHost:         c.String("dbHost"),
+			DBPort:         c.Int("dbPort"),
+			DBName:         c.String("dbName"),
+			DBUser:         c.String("dbUser"),
+			DBPassWord:     c.String("dbPassword"),
+			CircleID:       c.Uint("circleID"),
+			RootPath:       c.String("rootPath"),
+			DockerImageURL: c.String("dockerImageURL"),
 		}
 
 		if err := envsValid(); err != nil {
@@ -117,9 +109,9 @@ func main() {
 		if envs.Mode == "generate" {
 			return runGen()
 		} else if envs.Mode == "add" {
-			return runAdd()
+			//return runAdd()
 		} else if envs.Mode == "delete" {
-			return runDelete()
+			//return runDelete()
 		} else if envs.Mode == "safe" {
 			return runSafemode()
 		} else if envs.Mode == "envs" {
@@ -153,7 +145,6 @@ func runImport() error {
 	}
 
 	cm := &CircleManager{}
-	cm.prepare()
 
 	cs, err := cm.ImportCircle()
 	if err != nil {
@@ -173,19 +164,18 @@ func runSafemode() error {
 	return nil
 }
 
-func runDelete() error {
-	cm := &CircleManager{}
-	cm.prepare()
+// func runDelete() error {
+// 	cm := &CircleManager{}
 
-	return cm.DeleteManual()
-}
+// 	return cm.DeleteManual()
+// }
 
-func runAdd() error {
-	cm := &CircleManager{}
-	cm.prepare()
+// func runAdd() error {
+// 	cm := &CircleManager{}
+// 	cm.prepare()
 
-	return cm.AppendManual()
-}
+// 	return cm.AppendManual()
+// }
 
 func runGen() error {
 	if err := initDB(); err != nil {
@@ -193,7 +183,6 @@ func runGen() error {
 	}
 
 	cm := &CircleManager{}
-	cm.prepare()
 
 	cs, err := modules.GetCircleSetByIDForGen(envs.CircleID)
 	if err != nil {

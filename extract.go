@@ -32,43 +32,38 @@ type FlagRead struct {
 }
 
 func (cm *CircleManager) ImportCircle() (*modules.CircleSet, error) {
-	adminCircleSet, err := cm.ImportCircleAdmin()
-	if err != nil {
-		return nil, err
-	}
-
 	routerCircleSet, err := cm.ImportCircleRouter()
 	if err != nil {
 		return nil, err
 	}
 
-	if err := mergeFromAdmin(routerCircleSet, adminCircleSet); err != nil {
-		return nil, err
-	}
+	// if err := mergeFromAdmin(routerCircleSet, adminCircleSet); err != nil {
+	// 	return nil, err
+	// }
 
-	controllersCircleSet, err := scanSource("controllers", cm.MapTemplateSets["controllers"].SourcePath)
-	if err != nil {
-		return nil, err
-	}
+	// controllersCircleSet, err := scanSource("controllers", cm.MapTemplateSets["controllers"].SourcePath)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	modelsCircleSet, err := scanSource("models", cm.MapTemplateSets["models"].SourcePath)
-	if err != nil {
-		return nil, err
-	}
+	// modelsCircleSet, err := scanSource("models", cm.MapTemplateSets["models"].SourcePath)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	requestsCircleSet, err := scanSource("requests", cm.MapTemplateSets["requests"].SourcePath)
-	if err != nil {
-		return nil, err
-	}
+	// requestsCircleSet, err := scanSource("requests", cm.MapTemplateSets["requests"].SourcePath)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	responsesCircleSet, err := scanSource("responses", cm.MapTemplateSets["responses"].SourcePath)
-	if err != nil {
-		return nil, err
-	}
+	// responsesCircleSet, err := scanSource("responses", cm.MapTemplateSets["responses"].SourcePath)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	if err := mergeFromModelsAndRequestsAndResponses(routerCircleSet, controllersCircleSet, modelsCircleSet, requestsCircleSet, responsesCircleSet); err != nil {
-		return nil, err
-	}
+	// if err := mergeFromModelsAndRequestsAndResponses(routerCircleSet, controllersCircleSet, modelsCircleSet, requestsCircleSet, responsesCircleSet); err != nil {
+	// 	return nil, err
+	// }
 
 	return routerCircleSet, nil
 }
@@ -236,32 +231,11 @@ func mergeFromModelsAndRequestsAndResponses(
 	return nil
 }
 
-func (cm *CircleManager) ImportCircleAdmin() (*modules.CircleSet, error) {
-	flagRead := &FlagRead{}
-	cs := &modules.CircleSet{}
-
-	inFile, _ := os.Open(cm.MapTemplateSets["admin"].SourcePath)
-	defer inFile.Close()
-	scanner := bufio.NewScanner(inFile)
-	scanner.Split(bufio.ScanLines)
-
-	currentWhere := "meta"
-	for scanner.Scan() {
-		l := scanner.Text()
-		l = strings.TrimSpace(l)
-		curWhere(&currentWhere, l)
-
-		scanLineForAdmin(flagRead, cs, &currentWhere, l)
-	}
-
-	return cs, nil
-}
-
 func (cm *CircleManager) ImportCircleRouter() (*modules.CircleSet, error) {
 	flagRead := &FlagRead{}
 	cs := &modules.CircleSet{}
 
-	inFile, _ := os.Open(cm.MapTemplateSets["router"].SourcePath)
+	inFile, _ := os.Open(ROUTER_PATH)
 	defer inFile.Close()
 	scanner := bufio.NewScanner(inFile)
 	scanner.Split(bufio.ScanLines)
