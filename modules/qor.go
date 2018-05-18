@@ -138,8 +138,6 @@ func (m *CircleQor) AddResourceAndMenu(value interface{}, menuViewName string, p
 	}
 
 	if meta := res.GetMeta("CreatorID"); meta != nil {
-		res.EditAttrs("-CreatorID")
-		res.NewAttrs("-CreatorID")
 		res.Meta(&admin.Meta{Name: "Description", Label: "설명"})
 		res.Meta(&admin.Meta{Name: "Name", Label: "이름"})
 		res.Meta(&admin.Meta{Name: "CreatedAt", Label: "작성일"})
@@ -172,7 +170,16 @@ func (m *CircleQor) AddResourceAndMenu(value interface{}, menuViewName string, p
 		}})
 	}
 
-	res.IndexAttrs("-Description")
+	res.IndexAttrs("ID", "Name", "CreatorID", "CreatedAt", "UpdaterID", "UpdatedAt")
+	res.EditAttrs("CreatorID", "CreatedAt", "UpdaterID", "UpdatedAt")
+	res.NewAttrs("CreatorID", "CreatedAt", "UpdaterID", "UpdatedAt")
 
 	return res
+}
+
+func GetIndexAttrs(res *admin.Resource, attr ...interface{}) {
+	indexAttr := []interface{}{"ID", "Name"}
+	indexAttr = append(indexAttr, attr...)
+	indexAttr = append(indexAttr, "CreatorID", "CreatedAt", "UpdaterID", "UpdatedAt")
+	res.IndexAttrs(indexAttr...)
 }
