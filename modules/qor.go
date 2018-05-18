@@ -119,8 +119,12 @@ func (m *CircleQor) AddResourceAndMenu(value interface{}, menuViewName string, p
 
 	matas := res.GetMetas(nil)
 	resStruct := structs.New(res.NewStruct())
+	appendAttr := []interface{}{}
 	for _, mata := range matas {
 		name := mata.GetName()
+		if name != "ID" && name != "CreatedAt" && name != "UpdatedAt" && name != "CreatorID" && name != "UpdaterID" && name != "Description" {
+			appendAttr = append(appendAttr, name)
+		}
 		if resStruct.Field(name).Kind() == reflect.Bool {
 			res.Meta(&admin.Meta{Name: name, Setter: mata.GetSetter(), Valuer: func(result interface{}, context *qor.Context) interface{} {
 				value := structs.New(result).Field(name).Value()
@@ -172,7 +176,7 @@ func (m *CircleQor) AddResourceAndMenu(value interface{}, menuViewName string, p
 
 	res.EditAttrs("CreatorID", "CreatedAt", "UpdaterID", "UpdatedAt")
 	res.NewAttrs("CreatorID", "CreatedAt", "UpdaterID", "UpdatedAt")
-
+	SetIndexAttrs(res, appendAttr...)
 	return res
 }
 
