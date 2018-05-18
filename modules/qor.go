@@ -142,11 +142,7 @@ func (m *CircleQor) AddResourceAndMenu(value interface{}, menuViewName string, p
 	}
 
 	if meta := res.GetMeta("CreatorID"); meta != nil {
-		res.Meta(&admin.Meta{Name: "Description", Label: "설명"})
-		res.Meta(&admin.Meta{Name: "Name", Label: "이름"})
-		res.Meta(&admin.Meta{Name: "CreatedAt", Label: "작성일"})
-		res.Meta(&admin.Meta{Name: "UpdatedAt", Label: "수정일"})
-		res.Meta(&admin.Meta{Name: "CreatorID", Label: "작성자", Valuer: func(result interface{}, context *qor.Context) interface{} {
+		res.Meta(&admin.Meta{Name: "CreatorID", Label: "작성자", Type: "readonly", Valuer: func(result interface{}, context *qor.Context) interface{} {
 			if modelItem, ok := result.(ModelItem); ok {
 				if modelItem.GetCreatorID() > 0 {
 					if value, err := GetValueByKeyOfTableName("users", "name", modelItem.GetCreatorID()); err == nil {
@@ -162,7 +158,7 @@ func (m *CircleQor) AddResourceAndMenu(value interface{}, menuViewName string, p
 	if meta := res.GetMeta("UpdaterID"); meta != nil {
 		res.EditAttrs("-UpdaterID")
 		res.NewAttrs("-UpdaterID")
-		res.Meta(&admin.Meta{Name: "UpdaterID", Label: "최종수정자", Valuer: func(result interface{}, context *qor.Context) interface{} {
+		res.Meta(&admin.Meta{Name: "UpdaterID", Label: "최종수정자", Type: "readonly", Valuer: func(result interface{}, context *qor.Context) interface{} {
 			if updateField := structs.New(result).Field("UpdaterID"); updateField != nil {
 				updaterID := updateField.Value().(uint)
 				if value, err := GetValueByKeyOfTableName("users", "name", updaterID); err == nil {
@@ -174,6 +170,10 @@ func (m *CircleQor) AddResourceAndMenu(value interface{}, menuViewName string, p
 		}})
 	}
 
+	res.Meta(&admin.Meta{Name: "Description", Label: "설명"})
+	res.Meta(&admin.Meta{Name: "Name", Label: "이름"})
+	res.Meta(&admin.Meta{Name: "CreatedAt", Label: "작성일", Type: "readonly"})
+	res.Meta(&admin.Meta{Name: "UpdatedAt", Label: "수정일", Type: "readonly"})
 	res.EditAttrs("CreatorID", "CreatedAt", "UpdaterID", "UpdatedAt")
 	res.NewAttrs("CreatorID", "CreatedAt", "UpdaterID", "UpdatedAt")
 	SetIndexAttrs(res, appendAttr...)
