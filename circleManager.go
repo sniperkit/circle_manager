@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/alecthomas/template"
 	"github.com/jinzhu/copier"
 	"github.com/jungju/circle_manager/modules"
@@ -23,7 +25,6 @@ const ROUTER_PATH = "_example/routers/router.go"
 
 type CircleManager struct{}
 
-//func (cm *CircleManager) GenerateSource(cs *modules.CircleSet) error {
 func (cm *CircleManager) GenerateSource(cs *modules.CircleSet) error {
 	read, err := ioutil.ReadFile(ROUTER_PATH)
 	if err != nil {
@@ -34,24 +35,15 @@ func (cm *CircleManager) GenerateSource(cs *modules.CircleSet) error {
 	if err != nil {
 		return err
 	}
+
 	if err := ioutil.WriteFile(ROUTER_PATH, []byte(output), 0); err != nil {
 		return err
 	}
 
-	if err := generateItems("models", cs); err != nil {
-		return err
-	}
-	if err := generateItems("controllers", cs); err != nil {
-		return err
-	}
-	if err := generateItems("models", cs); err != nil {
-		return err
-	}
-	if err := generateItems("requests", cs); err != nil {
-		return err
-	}
-	if err := generateItems("responses", cs); err != nil {
-		return err
+	for _, sourceTypes := range []string{"models", "controllers", "requests", "responses"} {
+		if err := generateItems(sourceTypes, cs); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -59,7 +51,9 @@ func (cm *CircleManager) GenerateSource(cs *modules.CircleSet) error {
 
 func generateRouter(rawSource string, cs *modules.CircleSet) (string, error) {
 	routerCodes := ""
+	logrus.Infof("Generate Total %d", len(cs.Units))
 	for _, unit := range cs.Units {
+		logrus.Infof("Start generate %s", unit.Name)
 		if !unit.EnableControllerSource {
 			fmt.Println("Skip controller : ", unit.Name)
 			continue
@@ -79,7 +73,7 @@ func generateRouter(rawSource string, cs *modules.CircleSet) (string, error) {
 func cleanRouterSource(sources string) string {
 	start := strings.Index(sources, CIRCLE_AUTO_START_WORD)
 	end := strings.Index(sources, CIRCLE_AUTO_END_WORD)
-	return sources[0:start+len(CIRCLE_AUTO_START_WORD)+1] + "\t\t" + sources[end:len(sources)-1]
+	return sources[0:start+len(CIRCLE_AUTO_START_WORD)+1] + "\t\t" + sources[end:len(sources)]
 }
 
 func generateItems(sourceType string, cs *modules.CircleSet) error {

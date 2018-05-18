@@ -4,21 +4,32 @@ dev:
   cmds:
     - go run ./cli.go ./circleManager.go --dbHost 127.0.0.1 --dbPort 3306 --dbName circle --dbUser root --dbPassword jjgo --circleID 1 --rootPath _example
 
+gen:
+  cmds:
+    - go run ./cli.go ./circleManager.go ./extract.go ./templates.go ./builder.go ./utils.go --mode generate --circleID 35 --rootPath _example
+  env:
+    PRODENV: dev
+    SECRET_KEY: superjjgo
+    DB_HOST: 127.0.0.1
+    DB_NAME: circle
+    DB_USER: root
+    DB_PASSWORD: olim
+
 add:
   cmds:
-    - go run ./cli.go ./circleManager.go ./extract.go --mode add --name Test --rootPath _example
+    - go run ./cli.go ./circleManager.go ./extract.go ./templates.go ./builder.go ./utils.go --mode add --name Test --rootPath _example
 
 delete:
   cmds:
-    - go run ./cli.go ./circleManager.go ./extract.go --mode delete --name Test --rootPath _example
+    - go run ./cli.go ./circleManager.go ./extract.go  ./templates.go ./builder.go ./utils.go --mode delete --name Test --rootPath _example
 
 import:
   cmds:
-    - go run ./cli.go ./circleManager.go ./extract.go --circleID 35 --dbHost 127.0.0.1 --dbPort 3306 --dbName circle --dbUser root --dbPassword olim --mode import --rootPath _example
+    - go run ./cli.go ./circleManager.go ./extract.go  ./templates.go ./builder.go ./utils.go --circleID 1 --dbHost 127.0.0.1 --dbPort 3306 --dbName circle --dbUser root --dbPassword olim --mode import --rootPath _example
 
 build:
   cmds:
-    - go run ./cli.go ./circleManager.go ./extract.go ./builder.go ./utils.go --mode build --rootPath _example/beegoapp
+    - go run ./cli.go ./circleManager.go ./extract.go ./builder.go ./utils.go  ./templates.go ./builder.go --mode build --rootPath _example/beegoapp
 
 
 test:

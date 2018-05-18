@@ -125,12 +125,10 @@ func main() {
 			if err := dockerBuild(envs.DockerImageURL); err != nil {
 				return err
 			}
-
 			if err := dockerPush(envs.DockerImageURL); err != nil {
 				return err
 			}
 		}
-
 		return nil
 	}
 

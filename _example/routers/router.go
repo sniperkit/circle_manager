@@ -10,6 +10,7 @@ package routers
 import (
 	"github.com/astaxie/beego"
 	"github.com/jungju/circle/controllers"
+	"github.com/jungju/circle_manager/modules"
 )
 
 func init() {
@@ -88,10 +89,12 @@ func init() {
 				&controllers.TeamController{},
 			),
 		),
-		
+
 		// circle:manual:end
 
 		// circle:auto:start
 		// circle:auto:end
 	)
-	be
+
+	beego.AddNamespace(ns)
+}

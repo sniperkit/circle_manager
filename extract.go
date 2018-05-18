@@ -21,49 +21,40 @@ import (
 	"github.com/jungju/circle_manager/modules"
 )
 
-type FlagRead struct {
-	RouterReadedAppTitle              bool
-	RouterReadedAppVersion            bool
-	RouterReadedAppDescription        bool
-	RouterReadedAppContact            bool
-	RouterReadedAppTermsOfServiceUrl  bool
-	RouterReadedAppLicense            bool
-	RouterReadedAppSecurityDefinition bool
-}
-
 func (cm *CircleManager) ImportCircle() (*modules.CircleSet, error) {
-	routerCircleSet, err := cm.ImportCircleRouter()
+	// get router.go
+	routerCircleSet, err := importCircleRouter()
 	if err != nil {
 		return nil, err
 	}
 
-	// if err := mergeFromAdmin(routerCircleSet, adminCircleSet); err != nil {
-	// 	return nil, err
-	// }
+	// get sources of controller
+	controllersCircleSet, err := scanSource("controllers")
+	if err != nil {
+		return nil, err
+	}
 
-	// controllersCircleSet, err := scanSource("controllers", cm.MapTemplateSets["controllers"].SourcePath)
-	// if err != nil {
-	// 	return nil, err
-	// }
+	// get sources of models
+	modelsCircleSet, err := scanSource("models")
+	if err != nil {
+		return nil, err
+	}
 
-	// modelsCircleSet, err := scanSource("models", cm.MapTemplateSets["models"].SourcePath)
-	// if err != nil {
-	// 	return nil, err
-	// }
+	// get sources of requests
+	requestsCircleSet, err := scanSource("requests")
+	if err != nil {
+		return nil, err
+	}
 
-	// requestsCircleSet, err := scanSource("requests", cm.MapTemplateSets["requests"].SourcePath)
-	// if err != nil {
-	// 	return nil, err
-	// }
+	// get sources of responses
+	responsesCircleSet, err := scanSource("responses")
+	if err != nil {
+		return nil, err
+	}
 
-	// responsesCircleSet, err := scanSource("responses", cm.MapTemplateSets["responses"].SourcePath)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// if err := mergeFromModelsAndRequestsAndResponses(routerCircleSet, controllersCircleSet, modelsCircleSet, requestsCircleSet, responsesCircleSet); err != nil {
-	// 	return nil, err
-	// }
+	if err := mergeFromModelsAndRequestsAndResponses(routerCircleSet, controllersCircleSet, modelsCircleSet, requestsCircleSet, responsesCircleSet); err != nil {
+		return nil, err
+	}
 
 	return routerCircleSet, nil
 }
@@ -231,81 +222,58 @@ func mergeFromModelsAndRequestsAndResponses(
 	return nil
 }
 
-func (cm *CircleManager) ImportCircleRouter() (*modules.CircleSet, error) {
-	flagRead := &FlagRead{}
+func importCircleRouter() (*modules.CircleSet, error) {
 	cs := &modules.CircleSet{}
 
-	inFile, _ := os.Open(ROUTER_PATH)
+	inFile, err := os.Open(ROUTER_PATH)
+	if err != nil {
+		return nil, err
+	}
 	defer inFile.Close()
 	scanner := bufio.NewScanner(inFile)
 	scanner.Split(bufio.ScanLines)
 
 	currentWhere := "meta"
+
 	for scanner.Scan() {
-		l := scanner.Text()
-		l = strings.TrimSpace(l)
+		l := strings.TrimSpace(scanner.Text())
 		curWhere(&currentWhere, l)
 
-		scanLineForRouter(flagRead, cs, &currentWhere, l)
+		switch currentWhere {
+		case "meta":
+			cs.SetAppMeta(getMetaKeyAndValueOfRouter(l))
+		case "system", "manual", "auto":
+			name := getWord(l, "&controllers.", "Controller{},")
+			if name == "" {
+				//return nil, errors.New("Empty name")
+				continue
+			}
+
+			cs.Units = append(cs.Units, &modules.CircleUnit{
+				Name:      name,
+				IsSystem:  currentWhere == "system",
+				IsManual:  currentWhere == "manual",
+				IsAutogen: currentWhere == "auto",
+			})
+		}
 	}
 
 	return cs, nil
 }
 
-func scanLineForRouter(flagRead *FlagRead, cs *modules.CircleSet, currentWhere *string, l string) {
-	if *currentWhere == "meta" {
-		flagRead.RouterReadedAppTitle, cs.AppTitle = extract(flagRead.RouterReadedAppTitle, cs.AppTitle, l, "// @Title")
-		flagRead.RouterReadedAppVersion, cs.AppVersion = extract(flagRead.RouterReadedAppVersion, cs.AppVersion, l, "// @APIVersion")
-		flagRead.RouterReadedAppDescription, cs.AppDescription = extract(flagRead.RouterReadedAppDescription, cs.AppDescription, l, "// @Description")
-		flagRead.RouterReadedAppContact, cs.AppContact = extract(flagRead.RouterReadedAppContact, cs.AppContact, l, "// @Contact")
-		flagRead.RouterReadedAppTermsOfServiceUrl, cs.AppTermsOfServiceUrl = extract(flagRead.RouterReadedAppTermsOfServiceUrl, cs.AppTermsOfServiceUrl, l, "// @TermsOfServiceUrl")
-		flagRead.RouterReadedAppLicense, cs.AppLicense = extract(flagRead.RouterReadedAppLicense, cs.AppLicense, l, "// @License")
-		flagRead.RouterReadedAppSecurityDefinition, cs.AppSecurityDefinition = extract(flagRead.RouterReadedAppSecurityDefinition, cs.AppSecurityDefinition, l, "// @SecurityDefinition")
-	}
-
-	switch *currentWhere {
-	case "manual", "auto":
-		name := ""
-		if strings.Index(l, "&modules.") >= 0 {
-			name = getWord(l, "&modules.", "Controller{},")
-		} else if strings.Index(l, "&controllers.") >= 0 {
-			name = getWord(l, "&controllers.", "Controller{},")
-		}
-
-		if name == "" {
-			return
-		}
-		cs.Units = append(cs.Units, &modules.CircleUnit{
-			Name:      name,
-			IsSystem:  *currentWhere == "system",
-			IsManual:  *currentWhere == "manual",
-			IsAutogen: *currentWhere == "auto",
-		})
-	}
+func getMetaKeyAndValueOfRouter(l string) (metaKey string, value string) {
+	metaLine := strings.Replace(l, "// @", "", 1)
+	splitMetaLine := strings.Split(metaLine, " ")
+	metaKey = strings.TrimSpace(splitMetaLine[0])
+	comment := fmt.Sprintf("// @%s", metaKey)
+	value = strings.TrimSpace(strings.Replace(l, comment, "", -1))
+	return
 }
 
-func scanLineForAdmin(flagRead *FlagRead, cs *modules.CircleSet, currentWhere *string, l string) {
-	switch *currentWhere {
-	case "system", "manual", "auto":
-		name := getWord(l, "addResourceAndMenu(&models.", "{}, \"")
-		if name == "" {
-			return
-		}
-		cs.Units = append(cs.Units, &modules.CircleUnit{
-			Name:              name,
-			MenuGroup:         getWord(l, "\", \"", "\", anyoneAllow, -1)"),
-			MenuName:          getWord(l, "{}, \"", "\", \""),
-			IsSystem:          *currentWhere == "system",
-			IsManual:          *currentWhere == "manual",
-			EnableAdminSource: true,
-		})
-	}
-}
-
-func scanSource(sourceType string, sourceDirPath string) (*modules.CircleSet, error) {
+func scanSource(sourceType string) (*modules.CircleSet, error) {
 	cs := &modules.CircleSet{}
 
-	if err := filepath.Walk(sourceDirPath, func(path string, info os.FileInfo, err error) error {
+	if err := filepath.Walk(sourceType, func(path string, info os.FileInfo, err error) error {
 		fset := token.NewFileSet()
 		d, err := parser.ParseDir(fset, path, nil, parser.ParseComments)
 		if err != nil {
@@ -318,16 +286,14 @@ func scanSource(sourceType string, sourceDirPath string) (*modules.CircleSet, er
 			p := doc.New(f, "./", 0)
 
 			// TODO
-			if sourceType == "models" ||
-				sourceType == "requests" ||
-				sourceType == "responses" {
-				if err := scanSourceModel(sourceType, cs, p); err != nil {
-					continue
-				}
-			} else if sourceType == "controllers" {
+			if sourceType == "controllers" {
 				if err := scanSourceForControllers(cs, p); err != nil {
 					continue
 				}
+			}
+
+			if err := scanSourceModel(sourceType, cs, p); err != nil {
+				continue
 			}
 		}
 		return nil
@@ -343,30 +309,30 @@ func scanSourceForControllers(cs *modules.CircleSet, p *doc.Package) error {
 			continue
 		}
 
-		isCreateble := false
-		isUpdateble := false
-		isDeleteble := false
-		isGetAllable := false
-		isGetOneable := false
+		cu := &modules.CircleUnit{
+			Name: strings.Replace(t.Name, "Controller", "", 1),
+			EnableControllerSource: true,
+		}
 
 		for _, method := range t.Methods {
 			// requestCreateBodyName := ""
 			// requestUpdateBodyName := ""
 			// responseBodyName := ""
 			// routerURL := ""
-			routerMethod := ""
 			//requestBodyName := ""
 
+			routerMethod := ""
+
 			if method.Name == "Post" {
-				isCreateble = true
+				cu.IsCreateble = true
 			} else if method.Name != "Put" {
-				isUpdateble = true
+				cu.IsUpdateble = true
 			} else if method.Name != "GetOne" {
-				isGetOneable = true
+				cu.IsGetOneable = true
 			} else if method.Name != "GetAll" {
-				isGetAllable = true
+				cu.IsGetAllable = true
 			} else if method.Name != "Delete" {
-				isDeleteble = true
+				cu.IsDeleteble = true
 			} else {
 				//TODO: 다른 메소드 지원은 나중에
 				continue
@@ -397,8 +363,9 @@ func scanSourceForControllers(cs *modules.CircleSet, p *doc.Package) error {
 					tempDocLine = strings.Replace(tempDocLine, "]", " ", -1)
 					tempDocLine = strings.Replace(tempDocLine, "[", " ", -1)
 					tempDocLineArray := strings.Split(tempDocLine, " ")
-					//routerURL = tempDocLineArray[1]
+
 					routerMethod = tempDocLineArray[2]
+					//routerURL = tempDocLineArray[1]
 				}
 
 				if routerMethod == "post" {
@@ -408,16 +375,7 @@ func scanSourceForControllers(cs *modules.CircleSet, p *doc.Package) error {
 				}
 			}
 		}
-		name := strings.Replace(t.Name, "Controller", "", 1)
-		cu := &modules.CircleUnit{
-			Name: name,
-			EnableControllerSource: true,
-			IsCreateble:            isCreateble,
-			IsUpdateble:            isUpdateble,
-			IsGetAllable:           isGetAllable,
-			IsGetOneable:           isGetOneable,
-			IsDeleteble:            isDeleteble,
-		}
+
 		// TODO:
 		// spew.Dump(t.Doc)
 		// spew.Dump(t.Methods[0].Orig)
@@ -441,6 +399,7 @@ func scanSourceModel(sourceType string, cs *modules.CircleSet, p *doc.Package) e
 
 		structDecl := t.Decl.Specs[0].(*ast.TypeSpec).Type.(*ast.StructType)
 		fields := structDecl.Fields.List
+
 		cu := &modules.CircleUnit{
 			Name:                 t.Name,
 			EnableModelSource:    sourceType == "models",
@@ -525,17 +484,6 @@ func curWhere(currentWhere *string, l string) {
 	}
 }
 
-func extract(isReaded bool, value string, line string, target string) (bool, string) {
-	if isReaded {
-		return true, value
-	}
-	if strings.Index(line, target) >= 0 {
-		replace := strings.Replace(line, target, "", -1)
-		return true, strings.TrimSpace(replace)
-	}
-	return false, ""
-}
-
 func getWord(s string, start string, end string) string {
 	startIndex := strings.Index(s, start) + len(start)
 	endIndex := strings.Index(s, end)
@@ -548,11 +496,4 @@ func getWord(s string, start string, end string) string {
 	}
 
 	return s[startIndex:endIndex]
-}
-
-func removeRigth(s, indexChar string) string {
-	if i := strings.Index(s, indexChar); i >= 0 {
-		return s[0:i]
-	}
-	return s
 }

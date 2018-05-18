@@ -19,13 +19,13 @@ const (
 	
 	// gen:qs
 	type {{.Name}} struct {
-		ID          uint      ` + "description:\"\"`" + `   ss
-		CreatedAt   time.Time ` + "description:\"등록일\"`" + `
-		UpdatedAt   time.Time ` + "description:\"수정일\"`" + `
-		Name        string    ` + "description:\"이름\"`" + `
-		Description string    ` + "description:\"설명\" sql:\"type:text\"`" + `
-		CreatorID   uint      ` + "description:\"작성자\"`" + `
-		{{range $i, $property := .Properties}}{{.Name}} {{.GetTypeInModel}} ` + "description:\"{{.Description}}\"`" + `
+		ID          uint      ` + "`description:\"\"`" + `
+		CreatedAt   time.Time ` + "`description:\"등록일\"`" + `
+		UpdatedAt   time.Time ` + "`description:\"수정일\"`" + `
+		Name        string    ` + "`description:\"이름\"`" + `
+		Description string    ` + "`description:\"설명\" sql:\"type:text\"`" + `
+		CreatorID   uint      ` + "`description:\"작성자\"`" + `
+		{{range $i, $property := .Properties}}{{.Name}} {{.GetTypeInModel}} ` + "`description:\"{{.Description}}\"`" + `
 		{{end}}
 	}
 	
