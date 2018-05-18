@@ -170,13 +170,15 @@ func (m *CircleQor) AddResourceAndMenu(value interface{}, menuViewName string, p
 		}})
 	}
 
-	res.Meta(&admin.Meta{Name: "Description", Label: "설명"})
-	res.Meta(&admin.Meta{Name: "Name", Label: "이름"})
-	res.Meta(&admin.Meta{Name: "CreatedAt", Label: "작성일", Type: "readonly"})
-	res.Meta(&admin.Meta{Name: "UpdatedAt", Label: "수정일", Type: "readonly"})
-	res.EditAttrs("CreatorID", "CreatedAt", "UpdaterID", "UpdatedAt")
-	res.NewAttrs("CreatorID", "CreatedAt", "UpdaterID", "UpdatedAt")
-	SetIndexAttrs(res, appendAttr...)
+	if _, ok := value.(ModelItem); ok {
+		res.Meta(&admin.Meta{Name: "Description", Label: "설명"})
+		res.Meta(&admin.Meta{Name: "Name", Label: "이름"})
+		res.Meta(&admin.Meta{Name: "CreatedAt", Label: "작성일", Type: "readonly"})
+		res.Meta(&admin.Meta{Name: "UpdatedAt", Label: "수정일", Type: "readonly"})
+		res.EditAttrs("CreatorID", "CreatedAt", "UpdaterID", "UpdatedAt")
+		res.NewAttrs("CreatorID", "CreatedAt", "UpdaterID", "UpdatedAt")
+		SetIndexAttrs(res, appendAttr...)
+	}
 	return res
 }
 
