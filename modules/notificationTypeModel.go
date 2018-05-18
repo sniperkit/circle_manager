@@ -17,6 +17,7 @@ type NotificationType struct {
 	Name             string    `description:"이름"`
 	Description      string    `description:"설명" sql:"type:text"`
 	CreatorID        uint      `description:"작성자"`
+	UpdaterID        uint      `description:"최종수정자"`
 	IsEnable         bool      `description:""`
 	IsManual         bool      `description:""`
 	TargetObject     string    `description:""`
@@ -39,6 +40,10 @@ func (c *NotificationType) GetCreatorID() uint {
 
 func (m *NotificationType) SetCreatorID(creatorID uint) {
 	m.CreatorID = creatorID
+}
+
+func (m *NotificationType) SetUpdaterID(updaterID uint) {
+	m.UpdaterID = updaterID
 }
 
 func (c *NotificationType) IsMatchTags(tags string) bool {

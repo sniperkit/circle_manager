@@ -14,6 +14,7 @@ type CircleSet struct {
 	Name                  string        `description:"이름"`
 	Description           string        `description:"설명" sql:"type:text"`
 	CreatorID             uint          `description:"작성자"`
+	UpdaterID             uint          `description:"최종수정자"`
 	Import                string        `description:""`
 	Units                 []*CircleUnit `description:""`
 	IsEnable              bool          `description:"사용여부"`
@@ -33,6 +34,10 @@ func (c *CircleSet) GetCreatorID() uint {
 
 func (m *CircleSet) SetCreatorID(creatorID uint) {
 	m.CreatorID = creatorID
+}
+
+func (m *CircleSet) SetUpdaterID(updaterID uint) {
+	m.UpdaterID = updaterID
 }
 
 func (c CircleSet) GetUnit(unitName string) *CircleUnit {
@@ -55,6 +60,25 @@ func (c CircleSet) GetAutoGenUnits() []*CircleUnit {
 		}
 	}
 	return units
+}
+
+func (c *CircleSet) SetAppMeta(metaKey, value string) {
+	switch metaKey {
+	case "Title":
+		c.AppTitle = value
+	case "APIVersion":
+		c.AppVersion = value
+	case "Description":
+		c.AppDescription = value
+	case "Contact":
+		c.AppContact = value
+	case "TermsOfServiceUrl":
+		c.AppTermsOfServiceUrl = value
+	case "License":
+		c.AppLicense = value
+	case "SecurityDefinition":
+		c.AppSecurityDefinition = value
+	}
 }
 
 func AddCircleSet(circleSet *CircleSet) (id uint, err error) {

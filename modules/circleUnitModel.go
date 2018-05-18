@@ -17,6 +17,7 @@ type CircleUnit struct {
 	Name                           string                `description:"이름"`
 	Description                    string                `description:"설명" sql:"type:text"`
 	CreatorID                      uint                  `description:"작성자"`
+	UpdaterID                      uint                  `description:"최종수정자"`
 	CircleSet                      CircleSet             `description:""`
 	CircleSetID                    uint                  `description:""`
 	Properties                     []*CircleUnitProperty `description:""`
@@ -78,6 +79,10 @@ func (c *CircleUnit) GetCreatorID() uint {
 
 func (m *CircleUnit) SetCreatorID(creatorID uint) {
 	m.CreatorID = creatorID
+}
+
+func (m *CircleUnit) SetUpdaterID(updaterID uint) {
+	m.UpdaterID = updaterID
 }
 
 func (c CircleUnit) GetVariableName() string {

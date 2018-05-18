@@ -64,6 +64,7 @@ func (m *CircleQor) AddResourceAndMenu(value interface{}, menuViewName string, p
 			if context.ResourceID == "" {
 				modelItem.SetCreatorID(currentUserID)
 			}
+			modelItem.SetUpdaterID(currentUserID)
 		}
 
 		oldData := ""
@@ -150,6 +151,20 @@ func (m *CircleQor) AddResourceAndMenu(value interface{}, menuViewName string, p
 					if value, err := GetValueByKeyOfTableName("users", "name", modelItem.GetCreatorID()); err == nil {
 						return value.(string)
 					}
+				}
+			}
+
+			return "-"
+		}})
+	}
+
+	if meta := res.GetMeta("UpdaterID"); meta != nil {
+		res.IndexAttrs("UpdaterID")
+		res.Meta(&admin.Meta{Name: "UpdaterID", Label: "최종수정자", Valuer: func(result interface{}, context *qor.Context) interface{} {
+			if updateField := structs.New(result).Field("UpdaterID"); updateField != nil {
+				updaterID := updateField.Value().(uint)
+				if value, err := GetValueByKeyOfTableName("users", "name", updaterID); err == nil {
+					return value.(string)
 				}
 			}
 

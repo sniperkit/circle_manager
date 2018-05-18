@@ -13,6 +13,7 @@ import (
 type ModelItem interface {
 	GetCreatorID() uint
 	SetCreatorID(uint)
+	SetUpdaterID(uint)
 }
 
 type ModelItems interface {
