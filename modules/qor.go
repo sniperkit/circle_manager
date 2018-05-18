@@ -177,7 +177,7 @@ func (m *CircleQor) AddResourceAndMenu(value interface{}, menuViewName string, p
 	return res
 }
 
-func GetIndexAttrs(res *admin.Resource, attr ...interface{}) {
+func SetIndexAttrs(res *admin.Resource, attr ...interface{}) {
 	indexAttr := []interface{}{"ID", "Name"}
 	indexAttr = append(indexAttr, attr...)
 	indexAttr = append(indexAttr, "CreatorID", "CreatedAt", "UpdaterID", "UpdatedAt")
