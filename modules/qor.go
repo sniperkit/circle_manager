@@ -170,7 +170,6 @@ func (m *CircleQor) AddResourceAndMenu(value interface{}, menuViewName string, p
 		}})
 	}
 
-	res.IndexAttrs("ID", "Name", "CreatorID", "CreatedAt", "UpdaterID", "UpdatedAt")
 	res.EditAttrs("CreatorID", "CreatedAt", "UpdaterID", "UpdatedAt")
 	res.NewAttrs("CreatorID", "CreatedAt", "UpdaterID", "UpdatedAt")
 
