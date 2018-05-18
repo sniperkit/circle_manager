@@ -138,7 +138,6 @@ func (m *CircleQor) AddResourceAndMenu(value interface{}, menuViewName string, p
 	}
 
 	if meta := res.GetMeta("CreatorID"); meta != nil {
-		res.IndexAttrs("-Description")
 		res.EditAttrs("-CreatorID")
 		res.NewAttrs("-CreatorID")
 		res.Meta(&admin.Meta{Name: "Description", Label: "설명"})
@@ -159,7 +158,8 @@ func (m *CircleQor) AddResourceAndMenu(value interface{}, menuViewName string, p
 	}
 
 	if meta := res.GetMeta("UpdaterID"); meta != nil {
-		res.IndexAttrs("UpdaterID")
+		res.EditAttrs("-UpdaterID")
+		res.NewAttrs("-UpdaterID")
 		res.Meta(&admin.Meta{Name: "UpdaterID", Label: "최종수정자", Valuer: func(result interface{}, context *qor.Context) interface{} {
 			if updateField := structs.New(result).Field("UpdaterID"); updateField != nil {
 				updaterID := updateField.Value().(uint)
@@ -171,6 +171,8 @@ func (m *CircleQor) AddResourceAndMenu(value interface{}, menuViewName string, p
 			return "-"
 		}})
 	}
+
+	res.IndexAttrs("-Description")
 
 	return res
 }
