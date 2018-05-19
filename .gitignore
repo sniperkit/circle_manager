@@ -1,3 +1,5 @@
 circle_manager
 .vscode
 debug*
+circle
+*.tmp

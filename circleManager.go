@@ -21,12 +21,13 @@ const (
 	CIRCLE_AUTO_END_WORD   = "// circle:auto:end"
 )
 
-const ROUTER_PATH = "_example/routers/router.go"
+const ROUTER_PATH = "routers/router.go"
 
 type CircleManager struct{}
 
 func (cm *CircleManager) GenerateSource(cs *modules.CircleSet) error {
-	read, err := ioutil.ReadFile(ROUTER_PATH)
+	routerPath := filepath.Join(envs.RootPath, ROUTER_PATH)
+	read, err := ioutil.ReadFile(routerPath)
 	if err != nil {
 		return err
 	}
@@ -36,7 +37,7 @@ func (cm *CircleManager) GenerateSource(cs *modules.CircleSet) error {
 		return err
 	}
 
-	if err := ioutil.WriteFile(ROUTER_PATH, []byte(output), 0); err != nil {
+	if err := ioutil.WriteFile(routerPath, []byte(output), 0); err != nil {
 		return err
 	}
 
@@ -51,11 +52,11 @@ func (cm *CircleManager) GenerateSource(cs *modules.CircleSet) error {
 
 func generateRouter(rawSource string, cs *modules.CircleSet) (string, error) {
 	routerCodes := ""
-	logrus.Infof("Generate Total %d", len(cs.Units))
+	logrus.Info("Generate Total : ", len(cs.Units))
 	for _, unit := range cs.Units {
-		logrus.Infof("Start generate %s", unit.Name)
+		logrus.Infof("Start generate : ", unit.Name)
 		if !unit.EnableControllerSource {
-			fmt.Println("Skip controller : ", unit.Name)
+			logrus.Warn("Skip controller : ", unit.Name)
 			continue
 		}
 		if routerCode, err := saveRouterSource(routerTemplate, unit); err == nil {
@@ -74,6 +75,17 @@ func cleanRouterSource(sources string) string {
 	start := strings.Index(sources, CIRCLE_AUTO_START_WORD)
 	end := strings.Index(sources, CIRCLE_AUTO_END_WORD)
 	return sources[0:start+len(CIRCLE_AUTO_START_WORD)+1] + "\t\t" + sources[end:len(sources)]
+}
+
+func removeRouterSource(sources string, targetName string) string {
+	routerCode, err := saveRouterSource(routerTemplate, &modules.CircleUnit{
+		Name: targetName,
+	})
+	if err != nil {
+		return sources
+	}
+
+	return strings.Replace(sources, routerCode, "", -1)
 }
 
 func generateItems(sourceType string, cs *modules.CircleSet) error {

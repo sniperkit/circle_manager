@@ -14,9 +14,13 @@ func TestCleanRouterSource(t *testing.T) {
 	i := strings.Index(regenRouterSource, CIRCLE_AUTO_START_WORD+"\n\t\t"+CIRCLE_AUTO_END_WORD)
 	assert.NotEqual(t, -1, i)
 	regenRouterSource = strings.TrimSpace(strings.Replace(regenRouterSource, "\n", "", -1))
-	fmt.Println(regenRouterSource)
 	assert.Equal(t, "}", regenRouterSource[len(regenRouterSource)-1:len(regenRouterSource)])
-	fmt.Println(regenRouterSource)
+}
+
+func TestRemoveRouterSource(t *testing.T) {
+	regenRouterSource := removeRouterSource(routerSource, "CircleSet")
+	i := strings.Index(regenRouterSource, "CircleSet")
+	assert.Equal(t, -1, i)
 }
 
 func TestSaveRouterSource(t *testing.T) {
@@ -32,7 +36,6 @@ func TestSaveRouterSource(t *testing.T) {
 
 func TestGenerateRouter(t *testing.T) {
 	newRouterSource, err := generateRouter(routerSource, testCS)
-	fmt.Println(newRouterSource)
 	assert.Nil(t, err)
 	assert.NotEqual(t, -1, strings.Index(newRouterSource, testCS.Units[0].Name))
 }
@@ -144,31 +147,53 @@ var routerSource = `// @APIVersion 0.1.10
 // @Title Circle
 // @Description wow
 // @Contact leejungju.go@gmail.com
-// @TermsOfServiceUrl http://circle.land
+// @TermsOfServiceUrl http://circle.circle
 // @License MIT
 // @SecurityDefinition userAPIKey apiKey X-USER-AUTH-TOKEN header "I love auto-generated docs"
 package routers
 
 import (
 	"github.com/astaxie/beego"
-	"github.com/jungju/circle_manager/_example/beegoapp/controllers"
+	"github.com/jungju/circle_manager/modules"
 )
 
 func init() {
-	ns := beego.NewNamespace("/v1")
-	beego.NSNamespace("/webhooks",
-		beego.NSInclude(
-			&controllers.WebhookController{},
+	ns := beego.NewNamespace("/v1",
+		// circle:system:start
+		beego.NSNamespace("/circleSets",
+			beego.NSInclude(
+				&controllers.CircleSetController{},
+			),
 		),
+		beego.NSNamespace("/circleUnits",
+			beego.NSInclude(
+				&modules.CircleUnitController{},
+			),
+		),
+		beego.NSNamespace("/circleUnitProperties",
+			beego.NSInclude(
+				&modules.CircleUnitPropertyController{},
+			),
+		),
+		beego.NSNamespace("/notifications",
+			beego.NSInclude(
+				&modules.NotificationController{},
+			),
+		),
+		beego.NSNamespace("/notificationTypes",
+			beego.NSInclude(
+				&modules.NotificationTypeController{},
+			),
+		),
+		// circle:system:end
+
+		// circle:manual:start
+		// circle:manual:end
+
+		// circle:auto:start
+
+		// circle:auto:end
 	)
-	// // circle:system:end
-
-	// // circle:manual:start
-	// // circle:manual:end
-
-	// // circle:auto:start
-
-	// // circle:auto:end
-
 	beego.AddNamespace(ns)
-}`
+}
+`

@@ -52,7 +52,7 @@ func (cm *CircleManager) ImportCircle() (*modules.CircleSet, error) {
 		return nil, err
 	}
 
-	if err := mergeFromModelsAndRequestsAndResponses(routerCircleSet, controllersCircleSet, modelsCircleSet, requestsCircleSet, responsesCircleSet); err != nil {
+	if err := mergeUnits(routerCircleSet, controllersCircleSet, modelsCircleSet, requestsCircleSet, responsesCircleSet); err != nil {
 		return nil, err
 	}
 
@@ -60,9 +60,7 @@ func (cm *CircleManager) ImportCircle() (*modules.CircleSet, error) {
 }
 
 func (cm *CircleManager) SaveManualCircleSetToDB(manualCS *modules.CircleSet) error {
-	fmt.Println("SaveManualCircleSetToDB")
 	var dbCircleSet *modules.CircleSet
-	createDB := false
 	if manualCS.ID > 0 {
 		var err error
 		dbCircleSet, err = modules.GetCircleSetByID(manualCS.ID)
@@ -70,7 +68,6 @@ func (cm *CircleManager) SaveManualCircleSetToDB(manualCS *modules.CircleSet) er
 			if err != gorm.ErrRecordNotFound {
 				return err
 			}
-			createDB = true
 			dbCircleSet = nil
 		}
 	}
@@ -95,14 +92,7 @@ func (cm *CircleManager) SaveManualCircleSetToDB(manualCS *modules.CircleSet) er
 		}
 	}
 
-	//TODO: Save로 처리 할것
-	if createDB {
-		fmt.Println("CS 추가")
-		_, err := modules.AddCircleSet(dbCircleSet)
-		return err
-	}
-	fmt.Println("CS 수정")
-	return modules.UpdateCircleSetByID(dbCircleSet)
+	return modules.SaveItem(dbCircleSet)
 }
 
 func mergeFromAdmin(routerCircleSet *modules.CircleSet, adminCircleSet *modules.CircleSet) error {
@@ -137,7 +127,7 @@ func mergeFromAdmin(routerCircleSet *modules.CircleSet, adminCircleSet *modules.
 	return nil
 }
 
-func mergeFromModelsAndRequestsAndResponses(
+func mergeUnits(
 	routerCircleSet *modules.CircleSet,
 	controllersCircleSet *modules.CircleSet,
 	modelsCircleSet *modules.CircleSet,
@@ -225,7 +215,7 @@ func mergeFromModelsAndRequestsAndResponses(
 func importCircleRouter() (*modules.CircleSet, error) {
 	cs := &modules.CircleSet{}
 
-	inFile, err := os.Open(ROUTER_PATH)
+	inFile, err := os.Open(filepath.Join(envs.RootPath, ROUTER_PATH))
 	if err != nil {
 		return nil, err
 	}

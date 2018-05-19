@@ -109,9 +109,9 @@ func main() {
 		if envs.Mode == "generate" {
 			return runGen()
 		} else if envs.Mode == "add" {
-			//return runAdd()
+			return runAdd()
 		} else if envs.Mode == "delete" {
-			//return runDelete()
+			return runDelete()
 		} else if envs.Mode == "safe" {
 			return runSafemode()
 		} else if envs.Mode == "envs" {
@@ -162,18 +162,23 @@ func runSafemode() error {
 	return nil
 }
 
-// func runDelete() error {
-// 	cm := &CircleManager{}
+func runDelete() error {
+	//cm := &CircleManager{}
 
-// 	return cm.DeleteManual()
-// }
+	//return cm.DeleteManual()
+	return nil
+}
 
-// func runAdd() error {
-// 	cm := &CircleManager{}
-// 	cm.prepare()
-
-// 	return cm.AppendManual()
-// }
+func runAdd() error {
+	cm := &CircleManager{}
+	return cm.GenerateSource(&modules.CircleSet{
+		Units: []*modules.CircleUnit{
+			&modules.CircleUnit{
+				Name: envs.Name,
+			},
+		},
+	})
+}
 
 func runGen() error {
 	if err := initDB(); err != nil {
