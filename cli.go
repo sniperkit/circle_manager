@@ -3,9 +3,12 @@ package main
 import (
 	"errors"
 	"fmt"
-	"log"
+	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
+
+	"github.com/sirupsen/logrus"
 
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/jungju/circle_manager/modules"
@@ -88,6 +91,8 @@ func main() {
 		cli.StringFlag{Name: "dockerImageURL", Value: "", Usage: "jungju/circle", EnvVar: "DOCKER_IMAGE_URL"},
 	}
 	app.Action = func(c *cli.Context) error {
+		logrus.Info("Set flag for prepare action")
+
 		envs = &Envs{
 			Mode:           c.String("mode"),
 			Name:           c.String("name"),
@@ -101,11 +106,13 @@ func main() {
 			DockerImageURL: c.String("dockerImageURL"),
 		}
 
+		logrus.Info("Start circle cmd.")
+
 		if err := envsValid(); err != nil {
-			fmt.Println(err.Error())
-			return err
+			logrus.WithError(err).Error()
 		}
 
+		logrus.WithField("mode", envs.Mode).Info("Start action for request mode.")
 		if envs.Mode == "generate" {
 			return runGen()
 		} else if envs.Mode == "add" {
@@ -119,25 +126,33 @@ func main() {
 		} else if envs.Mode == "import" {
 			return runImport()
 		} else if envs.Mode == "build" {
-			if err := genBeegoAppResource(); err != nil {
-				return err
-			}
-			if err := dockerBuild(envs.DockerImageURL); err != nil {
-				return err
-			}
-			if err := dockerPush(envs.DockerImageURL); err != nil {
-				return err
-			}
+			return runBuild()
 		}
 		return nil
 	}
 
 	if err := app.Run(os.Args); err != nil {
-		log.Fatal(err)
+		logrus.Fatal(err)
 	}
+
+	logrus.Info("End app.")
+}
+
+func runBuild() error {
+	logrus.Info("Start build")
+
+	if err := genBeegoAppResource(); err != nil {
+		return err
+	}
+	if err := dockerBuild(envs.DockerImageURL); err != nil {
+		return err
+	}
+	return dockerPush(envs.DockerImageURL)
 }
 
 func runImport() error {
+	logrus.Info("Start import")
+
 	if err := initDB(); err != nil {
 		return err
 	}
@@ -146,7 +161,7 @@ func runImport() error {
 
 	cs, err := cm.ImportCircle()
 	if err != nil {
-		fmt.Println("임포트중 에러 발생", err.Error())
+		logrus.WithError(err).Error()
 		return err
 	}
 	cs.ID = envs.CircleID
@@ -155,6 +170,8 @@ func runImport() error {
 }
 
 func runSafemode() error {
+	logrus.Info("Start safe mode")
+
 	cm := &CircleManager{}
 	if err := cm.GenerateSource(&modules.CircleSet{}); err != nil {
 		return err
@@ -163,18 +180,40 @@ func runSafemode() error {
 }
 
 func runDelete() error {
-	//cm := &CircleManager{}
+	logrus.WithField("name", envs.Name).Info("Start delete sources and code")
 
-	//return cm.DeleteManual()
+	source := removeRouterSource(routerTemplate, envs.Name)
+	routerPath := filepath.Join(envs.RootPath, ROUTER_PATH)
+	if err := ioutil.WriteFile(routerPath, []byte(source), 0); err != nil {
+		return err
+	}
+
+	executeGofmtW(routerPath)
+
+	logrus.WithField("name", envs.Name).Infof("Deleting all sources")
+	for _, sourceTypes := range []string{"models", "controllers", "requests", "responses"} {
+		removeFile := filepath.Join(envs.RootPath, sourceTypes, fmt.Sprintf("%s.go", modules.MakeFirstLowerCase(envs.Name)))
+		logrus.WithField("removeFile", removeFile).Info("Delet source file")
+		if err := os.Remove(removeFile); err != nil {
+			logrus.WithError(err).Error()
+		}
+	}
+	logrus.WithField("name", envs.Name).Infof("Deleted all sources")
 	return nil
 }
 
 func runAdd() error {
+	logrus.WithField("name", envs.Name).Info("Start add sources and code")
+
 	cm := &CircleManager{}
 	return cm.GenerateSource(&modules.CircleSet{
 		Units: []*modules.CircleUnit{
 			&modules.CircleUnit{
 				Name: envs.Name,
+				EnableControllerSource: true,
+				EnableModelSource:      true,
+				EnableRequestSource:    true,
+				EnableResponseSource:   true,
 			},
 		},
 	})

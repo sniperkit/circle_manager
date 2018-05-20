@@ -10,6 +10,8 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/jungju/circle_manager/modules"
 )
 
 var beegoAppProcess *os.Process
@@ -118,7 +120,7 @@ func waitCommentRouterFile(commentRouterExist chan bool) {
 				commentRouterExist <- false
 				return
 			}
-			subDirectoryFiles(filepath.Join(envs.RootPath, "routers"), func(info os.FileInfo) error {
+			modules.SubDirectoryFiles(filepath.Join(envs.RootPath, "routers"), func(info os.FileInfo) error {
 				if strings.Index(info.Name(), "commentsRouter") == 0 {
 					fmt.Println("Suceessed finding resource of beego. Find file name: ", info.Name())
 					t.Stop()

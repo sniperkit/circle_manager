@@ -41,6 +41,8 @@ func (cm *CircleManager) GenerateSource(cs *modules.CircleSet) error {
 		return err
 	}
 
+	executeGofmtW(ROUTER_PATH)
+
 	for _, sourceTypes := range []string{"models", "controllers", "requests", "responses"} {
 		if err := generateItems(sourceTypes, cs); err != nil {
 			return err
@@ -54,7 +56,7 @@ func generateRouter(rawSource string, cs *modules.CircleSet) (string, error) {
 	routerCodes := ""
 	logrus.Info("Generate Total : ", len(cs.Units))
 	for _, unit := range cs.Units {
-		logrus.Infof("Start generate : ", unit.Name)
+		logrus.Info("Start generate : ", unit.Name)
 		if !unit.EnableControllerSource {
 			logrus.Warn("Skip controller : ", unit.Name)
 			continue
@@ -67,13 +69,17 @@ func generateRouter(rawSource string, cs *modules.CircleSet) (string, error) {
 	}
 
 	cleanedSource := cleanRouterSource(rawSource)
-	append := fmt.Sprintf("// circle:manual:end\n\t\t%s\n\t\t// circle:manual:end", routerCodes)
-	return strings.Replace(cleanedSource, "// circle:manual:start\n\t\t// circle:manual:end", append, -1), nil
+	appendCode := fmt.Sprintf("// circle:auto:end\n\t\t%s\n\t\t// circle:auto:end", routerCodes)
+	logrus.WithField("code", appendCode).Info("Adding code")
+	return strings.Replace(cleanedSource, "// circle:auto:start\n\t\t// circle:auto:end", appendCode, -1), nil
 }
 
 func cleanRouterSource(sources string) string {
 	start := strings.Index(sources, CIRCLE_AUTO_START_WORD)
 	end := strings.Index(sources, CIRCLE_AUTO_END_WORD)
+	if start <= 0 || end <= 0 {
+		logrus.Error("Failed clean code.")
+	}
 	return sources[0:start+len(CIRCLE_AUTO_START_WORD)+1] + "\t\t" + sources[end:len(sources)]
 }
 
@@ -82,9 +88,9 @@ func removeRouterSource(sources string, targetName string) string {
 		Name: targetName,
 	})
 	if err != nil {
+		logrus.WithError(err).Warn()
 		return sources
 	}
-
 	return strings.Replace(sources, routerCode, "", -1)
 }
 
@@ -94,7 +100,7 @@ func generateItems(sourceType string, cs *modules.CircleSet) error {
 			continue
 		}
 		unitSourceFile := filepath.Join(envs.RootPath, sourceType, fmt.Sprintf("%s.go", unit.GetVariableName()))
-		fmt.Printf("Start ExecuteTemplate %s\n", unitSourceFile)
+		logrus.Info("Start ExecuteTemplate %s\n", unitSourceFile)
 
 		newCU := &modules.CircleUnit{}
 		copier.Copy(newCU, unit)
@@ -102,7 +108,7 @@ func generateItems(sourceType string, cs *modules.CircleSet) error {
 		for _, property := range unit.Properties {
 			if (sourceType == "requests" || sourceType == "responses") &&
 				strings.Index(property.Type, "models.") == 0 {
-				fmt.Println("Skip Property : ", property.Name, property.Type)
+				logrus.Info("Skip Property : ", property.Name, property.Type)
 				continue
 			}
 			newCU.Properties = append(newCU.Properties, property)
@@ -125,7 +131,7 @@ func generateItems(sourceType string, cs *modules.CircleSet) error {
 			teamplateSource,
 			newCU,
 		); err != nil {
-			fmt.Printf("Error : %s\n", err.Error())
+			logrus.WithError(err).Error()
 			return err
 		}
 
@@ -151,14 +157,25 @@ func saveRouterSource(appendText string, unit *modules.CircleUnit) (string, erro
 	return tpl.String(), nil
 }
 
+func executeGofmtW(filepath string) {
+	logrus.WithField("filepath", filepath).Info("executeGofmtW")
+	cmd := exec.Command("gofmt", "-w", filepath)
+	cmd.Dir = envs.RootPath
+	if out, err := cmd.Output(); err != nil {
+		logrus.WithError(err).WithField("output", out).Error()
+	} else {
+		logrus.WithField("output", out).Info("executeGofmtW")
+	}
+}
+
 func executeQueryset(varName string) {
-	fmt.Printf("goqueryset 실행 %s\n", fmt.Sprintf("%s.go", varName))
+	logrus.WithField("varName", varName).Info("goqueryset")
 	cmd := exec.Command("goqueryset", "-in", fmt.Sprintf("%s.go", varName))
 	cmd.Dir = envs.RootPath
 	if out, err := cmd.Output(); err != nil {
-		fmt.Printf("Error : %s. %s\n", err.Error(), out)
+		logrus.WithError(err).WithField("output", out).Error()
 	} else {
-		fmt.Printf("goqueryset : %s\n", out)
+		logrus.WithField("output", out).Info("goqueryset")
 	}
 }
 
@@ -176,7 +193,7 @@ func executeTemplate(dest string, templateSource string, templateObject interfac
 		return err
 	}
 
-	fmt.Printf("Excuted source : %s\n", dest)
+	logrus.WithField("dest", dest).Info("Excuted source")
 
 	if _, err = exec.Command("gofmt", "-w", dest).Output(); err != nil {
 		fmt.Printf("Error : %s\n", err.Error())

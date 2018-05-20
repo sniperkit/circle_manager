@@ -7,8 +7,7 @@ const (
 			beego.NSInclude(
 				&controllers.{{.Name}}Controller{},
 			),
-		),
-		`
+		),`
 	MODEL_TEMPLATE = `package models
 
 	import (
