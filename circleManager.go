@@ -68,10 +68,17 @@ func generateRouter(rawSource string, cs *modules.CircleSet) (string, error) {
 		}
 	}
 
+	targetPlace := "manual"
+	if envs.Mode == "gen" {
+		targetPlace = "auto"
+	}
+	targetStartComment := fmt.Sprintf("// circle:%s:start", targetPlace)
+	targetEndComment := fmt.Sprintf("// circle:%s:end", targetPlace)
+
 	cleanedSource := cleanRouterSource(rawSource)
-	appendCode := fmt.Sprintf("// circle:auto:end\n\t\t%s\n\t\t// circle:auto:end", routerCodes)
+	appendCode := fmt.Sprintf("%s\n\t\t%s\n\t\t%s", targetStartComment, routerCodes, targetEndComment)
 	logrus.WithField("code", appendCode).Info("Adding code")
-	return strings.Replace(cleanedSource, "// circle:auto:start\n\t\t// circle:auto:end", appendCode, -1), nil
+	return strings.Replace(cleanedSource, fmt.Sprintf("%s\n\t\t%s", targetStartComment, targetEndComment), appendCode, -1), nil
 }
 
 func cleanRouterSource(sources string) string {
@@ -196,7 +203,7 @@ func executeTemplate(dest string, templateSource string, templateObject interfac
 	logrus.WithField("dest", dest).Info("Excuted source")
 
 	if _, err = exec.Command("gofmt", "-w", dest).Output(); err != nil {
-		fmt.Printf("Error : %s\n", err.Error())
+		logrus.WithError(err).Error()
 	}
 
 	return nil

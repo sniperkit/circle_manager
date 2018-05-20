@@ -214,6 +214,7 @@ func runAdd() error {
 				EnableModelSource:      true,
 				EnableRequestSource:    true,
 				EnableResponseSource:   true,
+				IsManual:               true,
 			},
 		},
 	})

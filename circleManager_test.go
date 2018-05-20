@@ -38,6 +38,10 @@ func TestSaveRouterSource(t *testing.T) {
 }
 
 func TestGenerateRouter(t *testing.T) {
+	envs = &Envs{
+		RootPath: "_example",
+		Mode:     "gen",
+	}
 	newRouterSource, err := generateRouter(routerSource, testCS)
 	assert.Nil(t, err)
 	assert.NotEqual(t, -1, strings.Index(newRouterSource, testCS.Units[0].Name))
@@ -146,24 +150,23 @@ var testCS = &modules.CircleSet{
 	},
 }
 
-var routerSource = `// @APIVersion 10.1.1
+var routerSource = `// @APIVersion 0.1.10
 // @Title Circle
 // @Description wow
-// @Contact myapp@myapp.com
+// @Contact leejungju.go@gmail.com
 // @TermsOfServiceUrl http://circle.circle
 // @License MIT
-// @SecurityDefinition "userAPIKey apiKey X-USER-AUTH-TOKEN header "I love auto-generated docs"
+// @SecurityDefinition userAPIKey apiKey X-USER-AUTH-TOKEN header "I love auto-generated docs"
 package routers
 
 import (
 	"github.com/astaxie/beego"
-	"github.com/jungju/circle/controllers"
 	"github.com/jungju/circle_manager/modules"
 )
 
 func init() {
-	// circle:system:start
 	ns := beego.NewNamespace("/v1",
+		// circle:system:start
 		beego.NSNamespace("/circleSets",
 			beego.NSInclude(
 				&modules.CircleSetController{},
@@ -179,11 +182,6 @@ func init() {
 				&modules.CircleUnitPropertyController{},
 			),
 		),
-		beego.NSNamespace("/webhooks",
-			beego.NSInclude(
-				&controllers.WebhookController{},
-			),
-		),
 		beego.NSNamespace("/notifications",
 			beego.NSInclude(
 				&modules.NotificationController{},
@@ -196,55 +194,14 @@ func init() {
 		),
 		// circle:system:end
 
-		// circle:manual:end
-		beego.NSNamespace("/githubCommits",
-			beego.NSInclude(
-				&controllers.GithubCommitController{},
-			),
-		),
-		beego.NSNamespace("/githubReleases",
-			beego.NSInclude(
-				&controllers.GithubReleaseController{},
-			),
-		),
-		beego.NSNamespace("/events",
-			beego.NSInclude(
-				&controllers.EventController{},
-			),
-		),
-		beego.NSNamespace("/employees",
-			beego.NSInclude(
-				&controllers.EmployeeController{},
-			),
-		),
-		beego.NSNamespace("/keyEvents",
-			beego.NSInclude(
-				&controllers.KeyEventController{},
-			),
-		),
-		beego.NSNamespace("/projects",
-			beego.NSInclude(
-				&controllers.ProjectController{},
-			),
-		),
-		beego.NSNamespace("/todos",
-			beego.NSInclude(
-				&controllers.TodoController{},
-			),
-		),
-		beego.NSNamespace("/teams",
-			beego.NSInclude(
-				&controllers.TeamController{},
-			),
-		),
-
+		// circle:manual:start
 		// circle:manual:end
 
 		// circle:auto:start
 		// circle:auto:end
 	)
-
 	beego.AddNamespace(ns)
 }
+
 
 `
