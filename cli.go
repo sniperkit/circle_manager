@@ -181,9 +181,14 @@ func runSafemode() error {
 
 func runDelete() error {
 	logrus.WithField("name", envs.Name).Info("Start delete sources and code")
-
-	source := removeRouterSource(routerTemplate, envs.Name)
 	routerPath := filepath.Join(envs.RootPath, ROUTER_PATH)
+
+	read, err := ioutil.ReadFile(routerPath)
+	if err != nil {
+		return err
+	}
+
+	source := removeRouterSource(string(read), envs.Name)
 	if err := ioutil.WriteFile(routerPath, []byte(source), 0); err != nil {
 		return err
 	}
