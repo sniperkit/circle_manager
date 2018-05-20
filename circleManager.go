@@ -26,7 +26,7 @@ const ROUTER_PATH = "routers/router.go"
 type CircleManager struct{}
 
 func (cm *CircleManager) GenerateSource(cs *modules.CircleSet) error {
-	routerPath := filepath.Join(envs.RootPath, ROUTER_PATH)
+	routerPath := filepath.Join(envs.AppDir, ROUTER_PATH)
 	read, err := ioutil.ReadFile(routerPath)
 	if err != nil {
 		return err
@@ -106,7 +106,7 @@ func generateItems(sourceType string, cs *modules.CircleSet) error {
 		if unit.IsManual && unit.IsSystem {
 			continue
 		}
-		unitSourceFile := filepath.Join(envs.RootPath, sourceType, fmt.Sprintf("%s.go", unit.GetVariableName()))
+		unitSourceFile := filepath.Join(envs.AppDir, sourceType, fmt.Sprintf("%s.go", unit.GetVariableName()))
 		logrus.Info("Start ExecuteTemplate %s\n", unitSourceFile)
 
 		newCU := &modules.CircleUnit{}
@@ -167,7 +167,7 @@ func saveRouterSource(appendText string, unit *modules.CircleUnit) (string, erro
 func executeGofmtW(filepath string) {
 	logrus.WithField("filepath", filepath).Info("executeGofmtW")
 	cmd := exec.Command("gofmt", "-w", filepath)
-	cmd.Dir = envs.RootPath
+	cmd.Dir = envs.AppDir
 	if out, err := cmd.Output(); err != nil {
 		logrus.WithError(err).WithField("output", out).Error()
 	} else {
@@ -178,7 +178,7 @@ func executeGofmtW(filepath string) {
 func executeQueryset(varName string) {
 	logrus.WithField("varName", varName).Info("goqueryset")
 	cmd := exec.Command("goqueryset", "-in", fmt.Sprintf("%s.go", varName))
-	cmd.Dir = envs.RootPath
+	cmd.Dir = envs.AppDir
 	if out, err := cmd.Output(); err != nil {
 		logrus.WithError(err).WithField("output", out).Error()
 	} else {

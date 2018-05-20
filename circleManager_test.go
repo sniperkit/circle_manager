@@ -39,8 +39,8 @@ func TestSaveRouterSource(t *testing.T) {
 
 func TestGenerateRouter(t *testing.T) {
 	envs = &Envs{
-		RootPath: "_example",
-		Mode:     "gen",
+		AppDir: "_example",
+		Mode:   "gen",
 	}
 	newRouterSource, err := generateRouter(routerSource, testCS)
 	assert.Nil(t, err)
@@ -50,7 +50,7 @@ func TestGenerateRouter(t *testing.T) {
 func TestGo(t *testing.T) {
 	cm := &CircleManager{}
 	envs = &Envs{
-		RootPath: "_example",
+		AppDir: "_example",
 	}
 
 	err := cm.GenerateSource(testCS)

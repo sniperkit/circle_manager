@@ -215,7 +215,7 @@ func mergeUnits(
 func importCircleRouter() (*modules.CircleSet, error) {
 	cs := &modules.CircleSet{}
 
-	inFile, err := os.Open(filepath.Join(envs.RootPath, ROUTER_PATH))
+	inFile, err := os.Open(filepath.Join(envs.AppDir, ROUTER_PATH))
 	if err != nil {
 		return nil, err
 	}

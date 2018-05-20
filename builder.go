@@ -55,7 +55,7 @@ func dockerPush(url string) error {
 }
 
 func executeSys(cmdType string, cmdName string, cmdArgs []string) error {
-	binary, lookErr := exec.LookPath(envs.RootPath)
+	binary, lookErr := exec.LookPath(envs.AppDir)
 	if lookErr != nil {
 		panic(lookErr)
 	}
@@ -71,7 +71,7 @@ func executeSys(cmdType string, cmdName string, cmdArgs []string) error {
 
 func executer(cmdType string, cmdName string, cmdArgs []string, cmdWait bool) (*os.Process, error) {
 	cmd := exec.Command(cmdName, cmdArgs...)
-	cmd.Dir = envs.RootPath
+	cmd.Dir = envs.AppDir
 	cmdReader, err := cmd.StdoutPipe()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Error creating StdoutPipe for Cmd", err)
@@ -120,7 +120,7 @@ func waitCommentRouterFile(commentRouterExist chan bool) {
 				commentRouterExist <- false
 				return
 			}
-			modules.SubDirectoryFiles(filepath.Join(envs.RootPath, "routers"), func(info os.FileInfo) error {
+			modules.SubDirectoryFiles(filepath.Join(envs.AppDir, "routers"), func(info os.FileInfo) error {
 				if strings.Index(info.Name(), "commentsRouter") == 0 {
 					fmt.Println("Suceessed finding resource of beego. Find file name: ", info.Name())
 					t.Stop()

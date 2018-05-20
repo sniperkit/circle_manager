@@ -115,7 +115,7 @@ func TestSacnLineForRouter(t *testing.T) {
 
 // func TestSourceMerge(t *testing.T) {
 // 	envs = &Envs{
-// 		RootPath: ".example",
+// 		AppDir: ".example",
 // 	}
 // 	cm := &CircleManager{}
 

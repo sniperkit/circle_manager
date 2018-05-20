@@ -29,7 +29,7 @@ type Envs struct {
 	DBUser         string
 	DBPassWord     string
 	CircleID       uint
-	RootPath       string
+	AppDir         string
 	DockerImageURL string
 }
 
@@ -53,8 +53,8 @@ func envsValid() error {
 		if envs.DBPassWord == "" {
 			return errors.New("Require DBPassWord")
 		}
-		if envs.RootPath == "" {
-			envs.RootPath = "./"
+		if envs.AppDir == "" {
+			envs.AppDir = "./"
 		}
 	} else if envs.Mode == "add" || envs.Mode == "delete" {
 		if envs.Name == "" {
@@ -83,7 +83,7 @@ func main() {
 		cli.StringFlag{Name: "dbUser", Value: "root", Usage: "DB User", EnvVar: "DB_USER"},
 		cli.StringFlag{Name: "dbPassword", Value: "password", Usage: "DB Password", EnvVar: "DB_PASSWORD"},
 		cli.UintFlag{Name: "circleID", Value: 0, Usage: "CircleID", EnvVar: "CIRCLE_ID"},
-		cli.StringFlag{Name: "rootPath", Value: "./", Usage: "RootPath", EnvVar: "ROOT_PATH"},
+		cli.StringFlag{Name: "appDir", Value: "./", Usage: "AppDir", EnvVar: "APP_DIR"},
 		cli.BoolFlag{Name: "onlyControllers", Usage: "RootPaths"},
 		cli.BoolFlag{Name: "onlyModels", Usage: "onlyModels"},
 		cli.BoolFlag{Name: "onlyRequests", Usage: "onlyRequests"},
@@ -102,7 +102,7 @@ func main() {
 			DBUser:         c.String("dbUser"),
 			DBPassWord:     c.String("dbPassword"),
 			CircleID:       c.Uint("circleID"),
-			RootPath:       c.String("rootPath"),
+			AppDir:         c.String("appDir"),
 			DockerImageURL: c.String("dockerImageURL"),
 		}
 
@@ -181,7 +181,7 @@ func runSafemode() error {
 
 func runDelete() error {
 	logrus.WithField("name", envs.Name).Info("Start delete sources and code")
-	routerPath := filepath.Join(envs.RootPath, ROUTER_PATH)
+	routerPath := filepath.Join(envs.AppDir, ROUTER_PATH)
 
 	read, err := ioutil.ReadFile(routerPath)
 	if err != nil {
@@ -197,7 +197,7 @@ func runDelete() error {
 
 	logrus.WithField("name", envs.Name).Infof("Deleting all sources")
 	for _, sourceTypes := range []string{"models", "controllers", "requests", "responses"} {
-		removeFile := filepath.Join(envs.RootPath, sourceTypes, fmt.Sprintf("%s.go", modules.MakeFirstLowerCase(envs.Name)))
+		removeFile := filepath.Join(envs.AppDir, sourceTypes, fmt.Sprintf("%s.go", modules.MakeFirstLowerCase(envs.Name)))
 		logrus.WithField("removeFile", removeFile).Info("Delet source file")
 		if err := os.Remove(removeFile); err != nil {
 			logrus.WithError(err).Error()

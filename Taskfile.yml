@@ -5,12 +5,12 @@ build:
     - go build -o circle
 dev:
   cmds:
-    - ./circle --dbHost 127.0.0.1 --dbPort 3306 --dbName circle --dbUser root --dbPassword jjgo --circleID 1 --rootPath _example
+    - ./circle --dbHost 127.0.0.1 --dbPort 3306 --dbName circle --dbUser root --dbPassword jjgo --circleID 1 --appDir _example
 
 gen:
   cmds:
     - ^build
-    - ./circle --mode generate --circleID 1 --rootPath _example
+    - ./circle --mode generate --circleID 1 --appDir _example
   env:
     PRODENV: dev
     SECRET_KEY: superjjgo
@@ -22,22 +22,22 @@ gen:
 add:
   cmds:
     - ^build
-    - ./circle --mode add --name Test --rootPath _example
+    - ./circle --mode add --name Test --appDir _example
 
 delete:
   cmds:
     - ^build
-    - ./circle --mode delete --name Test --rootPath _example
+    - ./circle --mode delete --name Test --appDir _example
 
 import:
   cmds:
     - ^build
-    - ./circle --circleID 1 --dbHost 127.0.0.1 --dbPort 3306 --dbName circle --dbUser root --dbPassword olim --mode import --rootPath _example
+    - ./circle --circleID 1 --dbHost 127.0.0.1 --dbPort 3306 --dbName circle --dbUser root --dbPassword olim --mode import --appDir _example
 
 dev-build:
   cmds:
     - ^build
-    - ./circle --mode build --rootPath _example/beegoapp
+    - ./circle --mode build --appDir _example/beegoapp
 
 
 test:

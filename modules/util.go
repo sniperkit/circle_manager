@@ -179,8 +179,8 @@ func toDBTableName(object string) string {
 	return toDBName(inflection.Plural(object))
 }
 
-func SubDirectoryFiles(rootPath string, actionFunc func(os.FileInfo) error) error {
-	return filepath.Walk(rootPath, func(path string, info os.FileInfo, err error) error {
+func SubDirectoryFiles(appDir string, actionFunc func(os.FileInfo) error) error {
+	return filepath.Walk(appDir, func(path string, info os.FileInfo, err error) error {
 		if err := actionFunc(info); err != nil {
 			return err
 		}
