@@ -43,8 +43,8 @@ func InitLogsToES(logLevel logrus.Level, esURL string, httpLog bool, excludURLs 
 	initLogs(logLevel, esURL, httpLog, excludURLs...)
 }
 
-func InitLogs(logLevel logrus.Level, httpLog bool, excludURLs ...string) {
-	initLogs(logLevel, "", httpLog, excludURLs...)
+func InitLogs(logLevel logrus.Level) {
+	initLogs(logLevel, "", false)
 }
 
 func initLogs(logLevel logrus.Level, esURL string, httpLog bool, excludURLs ...string) {
@@ -55,6 +55,8 @@ func initLogs(logLevel logrus.Level, esURL string, httpLog bool, excludURLs ...s
 		if esClient, err = elastic.NewClient(elastic.SetURL(esURL), elastic.SetSniff(false)); err != nil {
 			panic(err)
 		}
+
+		go runESFlush()
 	}
 
 	if httpLog {
@@ -122,8 +124,6 @@ func initHTTPLog(excludURLs ...string) {
 			BodyBytesSent:  int64(len(context.Input.RequestBody)),
 		})
 	}, false)
-
-	go runESFlush()
 }
 
 func put(index string, esType string, data interface{}) error {
@@ -139,15 +139,13 @@ func put(index string, esType string, data interface{}) error {
 }
 
 func runESFlush() {
-	if esClient != nil {
-		t := time.NewTicker(5 * time.Second)
-		defer t.Stop()
-		for {
-			select {
-			case <-t.C:
-				if _, err := esClient.Flush().Do(context.Background()); err != nil {
-					logrus.WithError(err).Error("runESFlush")
-				}
+	t := time.NewTicker(5 * time.Second)
+	defer t.Stop()
+	for {
+		select {
+		case <-t.C:
+			if _, err := esClient.Flush().Do(context.Background()); err != nil {
+				logrus.WithError(err).Error("runESFlush")
 			}
 		}
 	}
