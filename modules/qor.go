@@ -122,7 +122,13 @@ func (m *CircleQor) AddResourceAndMenu(value interface{}, menuViewName string, p
 	appendAttr := []interface{}{}
 	for _, mata := range matas {
 		name := mata.GetName()
-		if name != "ID" && name != "CreatedAt" && name != "UpdatedAt" && name != "CreatorID" && name != "UpdaterID" && name != "Description" {
+		if name != "ID" &&
+			name != "CreatedAt" &&
+			name != "UpdatedAt" &&
+			name != "CreatorID" &&
+			name != "UpdaterID" &&
+			name != "Name" &&
+			name != "Description" {
 			appendAttr = append(appendAttr, name)
 		}
 		if resStruct.Field(name).Kind() == reflect.Bool {
