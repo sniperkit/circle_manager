@@ -8,7 +8,7 @@ import (
 
 	"github.com/astaxie/beego"
 	beegoContext "github.com/astaxie/beego/context"
-	"github.com/jungju/circle/utils"
+
 	"github.com/sirupsen/logrus"
 	elastic "gopkg.in/olivere/elastic.v5"
 	elogrus "gopkg.in/sohlich/elogrus.v2"
@@ -71,7 +71,7 @@ func initLogs(logLevel logrus.Level, esURL string, httpLog bool, excludURLs ...s
 func NewLCircleESLogger(logLevel logrus.Level, esURL string, esIndex string) (*logrus.Logger, error) {
 	logger := logrus.New()
 	if esURL != "" && esIndex != "" {
-		hostname := utils.GetHostname()
+		hostname := GetHostname()
 		client, err := elastic.NewClient(elastic.SetURL(esURL), elastic.SetSniff(false))
 		if err != nil {
 			return nil, err

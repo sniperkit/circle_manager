@@ -194,3 +194,10 @@ func existsFile(filepath string) bool {
 	}
 	return true
 }
+
+func GetHostname() string {
+	if hostname, err := os.Hostname(); err == nil {
+		return hostname
+	}
+	return "unknown"
+}
