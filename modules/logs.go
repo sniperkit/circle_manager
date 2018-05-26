@@ -8,8 +8,7 @@ import (
 
 	"github.com/astaxie/beego"
 	beegoContext "github.com/astaxie/beego/context"
-	"github.com/olimgroup/makezip/envs"
-	"github.com/olimgroup/makezip/utils"
+	"github.com/jungju/circle/utils"
 	"github.com/sirupsen/logrus"
 	elastic "gopkg.in/olivere/elastic.v5"
 	elogrus "gopkg.in/sohlich/elogrus.v2"
@@ -20,8 +19,13 @@ const (
 )
 
 var (
-	esClient *elastic.Client
+	esClient      *elastic.Client
+	esIndexPrefix string
 )
+
+func SetEsIndexPrefix(setEsIndexPrefix string) {
+	esIndexPrefix = setEsIndexPrefix
+}
 
 // AccessLogRecord struct for holding access log data.
 type AccessLogRecord struct {
@@ -82,7 +86,7 @@ func NewLCircleESLogger(logLevel logrus.Level, esURL string, esIndex string) (*l
 }
 
 func genIndex(typeName string) string {
-	return fmt.Sprintf("%s-%s", envs.EsIndexPrefix, typeName)
+	return fmt.Sprintf("%s-%s", esIndexPrefix, typeName)
 }
 
 func initHTTPLog(excludURLs ...string) {
