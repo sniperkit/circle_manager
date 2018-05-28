@@ -1,7 +1,6 @@
 package modules
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -13,9 +12,10 @@ type CrudEvent struct {
 	Name                string    `description:"이름"`
 	Description         string    `description:"설명" sql:"type:text"`
 	CreatorID           uint      `description:"작성자"`
-	Action              string    `description:"CRUD 타입"`
-	TargetObject        string    `description:"이벤트 대상"`
-	TargetID            uint      `description:"이벤트 대상 ID"`
+	ActionName          string    `description:"Action 이름"`
+	ActionType          string    `description:"CRUD 타입"`
+	ResourceName        string    `description:"이벤트 대상"`
+	ResourceID          uint      `description:"이벤트 대상 ID"`
 	Where               string    `description:"이벤트 발생 위치"`
 	UpdatedData         string    `description:"업데이트 된 대상 Data" sql:"type:text"`
 	OldData             string    `description:"업데이트 되기 전 대상 Data" sql:"type:text"`
@@ -30,10 +30,6 @@ func (c *CrudEvent) GetCreatorID() uint {
 
 func (m *CrudEvent) SetCreatorID(creatorID uint) {
 	m.CreatorID = creatorID
-}
-
-func (m *CrudEvent) GetTags() string {
-	return fmt.Sprintf("%s,%s", m.TargetObject, m.Action)
 }
 
 func AddCrudEvent(crudEvent *CrudEvent) (id uint, err error) {

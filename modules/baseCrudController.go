@@ -275,27 +275,27 @@ func (c *BaseCrudController) SuccessDelete() {
 	c.Success(http.StatusNoContent, nil)
 }
 
-func (c *BaseCrudController) addEvent(action string) {
+func (c *BaseCrudController) addEvent(actionName string) {
 	userID := uint(1)
 	if c.CurrentUserMeta != nil {
 		userID = c.CurrentUserMeta.UserID
 	}
 	requestData := ""
-	if action == "create" {
+	if actionName == "create" {
 		requestData = convJsonData(c.RequestCreateItem)
-	} else if action == "update" {
+	} else if actionName == "update" {
 		requestData = convJsonData(c.RequestUpdateItem)
 	}
 
-	targetID := uint(0)
+	resourceID := uint(0)
 	if field, ok := structs.New(c.ModelItem).FieldOk("ID"); ok {
-		targetID = field.Value().(uint)
+		resourceID = field.Value().(uint)
 	}
 
 	if _, err := AddCrudEvent(&CrudEvent{
-		Action:       action,
-		TargetID:     targetID,
-		TargetObject: structs.Name(c.ModelItem),
+		ActionName:   actionName,
+		ResourceID:   resourceID,
+		ResourceName: structs.Name(c.ModelItem),
 		CreatorID:    userID,
 		Where:        "API",
 		UpdatedData:  convJsonData(c.ModelItem),

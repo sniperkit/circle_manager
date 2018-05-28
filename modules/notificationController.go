@@ -44,7 +44,7 @@ func (c *NotificationController) PostMenualMessage() {
 
 	//TODO: key에 대한 처리
 
-	tags := c.Ctx.Input.Query("tags")
+	group := c.Ctx.Input.Query("group")
 
 	notificationTypes, err := GetNotificationsTypes(true)
 	if err != nil {
@@ -52,14 +52,14 @@ func (c *NotificationController) PostMenualMessage() {
 	}
 
 	for _, notificationType := range notificationTypes {
-		if !notificationType.IsMatchTags(tags) {
+		if notificationType.Group != group {
 			continue
 		}
 
 		listValueGroup := []KeyValue{}
-		if notificationType.TargetObject != "" {
+		if notificationType.ResourceName != "" {
 			var err error
-			rows, err := GetRows(notificationType.TargetObject, notificationType.TargetWhere)
+			rows, err := GetRows(notificationType.ResourceName, notificationType.TargetWhere)
 			if err != nil {
 				logrus.WithError(err).Error()
 				continue
@@ -111,9 +111,17 @@ func SendActiveNotifications() error {
 
 func sendActiveNotificationsEachCrudEvent(crudEvent *CrudEvent, notificationTypes []NotificationType) error {
 	for _, notificationType := range notificationTypes {
-		if !notificationType.IsMatchTags(crudEvent.GetTags()) {
+		if notificationType.ResourceName != "" && crudEvent.ResourceName != notificationType.ResourceName {
 			continue
-		} else if notificationType.DiffMode {
+		}
+		if notificationType.ActionName == "" && crudEvent.ActionName != notificationType.ActionName {
+			continue
+		}
+		if notificationType.ActionType == "" && crudEvent.ActionType != notificationType.ActionType {
+			continue
+		}
+
+		if notificationType.DiffMode {
 			if !notificationType.CheckDiff(crudEvent) {
 				continue
 			}

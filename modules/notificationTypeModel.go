@@ -3,7 +3,6 @@ package modules
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/fatih/structs"
@@ -18,11 +17,14 @@ type NotificationType struct {
 	Description      string    `description:"설명" sql:"type:text"`
 	CreatorID        uint      `description:"작성자"`
 	UpdaterID        uint      `description:"최종수정자"`
+	Group            string    `description:""`
 	IsEnable         bool      `description:""`
 	IsManual         bool      `description:""`
-	TargetObject     string    `description:""`
+	ActionName       string    `description:"Action 이름"`
+	ActionType       string    `description:"CRUD 타입"`
+	ResourceName     string    `description:"이벤트 대상"`
+	ResourceID       uint      `description:"이벤트 대상 ID"`
 	TargetWhere      string    `description:""`
-	Tags             string    `description:""`
 	TitleTemplate    string    `description:""`
 	MessageTemplate  string    `description:"" gorm:"size:2500"`
 	ListItemTemplate string    `description:"" gorm:"size:2500"`
@@ -44,25 +46,6 @@ func (m *NotificationType) SetCreatorID(creatorID uint) {
 
 func (m *NotificationType) SetUpdaterID(updaterID uint) {
 	m.UpdaterID = updaterID
-}
-
-func (c *NotificationType) IsMatchTags(tags string) bool {
-	mapTag := map[string]bool{}
-	for _, tag := range strings.Split(tags, ",") {
-		mapTag[tag] = true
-	}
-
-	mapNotiTypeTags := map[string]bool{}
-	for _, notiTypeTag := range strings.Split(c.Tags, ",") {
-		mapNotiTypeTags[notiTypeTag] = true
-	}
-
-	for _, tag := range strings.Split(tags, ",") {
-		if _, ok := mapNotiTypeTags[tag]; !ok {
-			return false
-		}
-	}
-	return true
 }
 
 func (m *NotificationType) CheckDiff(crudEvent *CrudEvent) bool {

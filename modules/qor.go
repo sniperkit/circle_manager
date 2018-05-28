@@ -27,25 +27,26 @@ func (m *CircleQor) CrudEvent(currentUserID uint, result interface{}, context *q
 	userID := structs.New(context.CurrentUser).Field("ID").Value().(uint)
 	modelItem.SetCreatorID(userID)
 
-	action := ""
+	actionName := ""
 	if context.ResourceID == "" && context.Request.Method == "POST" {
-		action = "create"
+		actionName = "create"
 	} else if (context.Request.Method == "PUT") ||
 		(context.ResourceID != "" && context.Request.Method == "POST") {
-		action = "update"
+		actionName = "update"
 	} else if context.Request.Method == "DELETE" {
-		action = "delete"
+		actionName = "delete"
 	}
 
-	targetID := uint(0)
+	// TODO: context의 ResourceID를 사용?
+	resourceID := uint(0)
 	if field, ok := structs.New(result).FieldOk("ID"); ok {
-		targetID = field.Value().(uint)
+		resourceID = field.Value().(uint)
 	}
 
 	if _, err := AddCrudEvent(&CrudEvent{
-		Action:       action,
-		TargetID:     targetID,
-		TargetObject: structs.Name(modelItem),
+		ActionName:   actionName,
+		ResourceID:   resourceID,
+		ResourceName: structs.Name(modelItem),
 		CreatorID:    currentUserID,
 		Where:        "QOR",
 		UpdatedData:  convJsonData(modelItem),
