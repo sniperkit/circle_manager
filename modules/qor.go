@@ -45,7 +45,7 @@ func (m *CircleQor) CrudEvent(currentUserID uint, result interface{}, context *q
 	if _, err := AddCrudEvent(&CrudEvent{
 		Action:       action,
 		TargetID:     targetID,
-		TargetObject: inflection.Plural(gorm.ToDBName(structs.Name(modelItem))),
+		TargetObject: structs.Name(modelItem),
 		CreatorID:    currentUserID,
 		Where:        "QOR",
 		UpdatedData:  convJsonData(modelItem),
