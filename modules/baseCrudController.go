@@ -294,6 +294,7 @@ func (c *BaseCrudController) addEvent(actionName string) {
 
 	if _, err := AddCrudEvent(&CrudEvent{
 		ActionName:   actionName,
+		ActionType:   actionName,
 		ResourceID:   resourceID,
 		ResourceName: structs.Name(c.ModelItem),
 		CreatorID:    userID,

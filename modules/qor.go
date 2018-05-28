@@ -45,6 +45,7 @@ func (m *CircleQor) CrudEvent(currentUserID uint, result interface{}, context *q
 
 	if _, err := AddCrudEvent(&CrudEvent{
 		ActionName:   actionName,
+		ActionType:   actionName,
 		ResourceID:   resourceID,
 		ResourceName: structs.Name(modelItem),
 		CreatorID:    currentUserID,
