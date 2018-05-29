@@ -17,8 +17,7 @@ type NotificationController struct {
 // PostMessage ...
 // @Title PostMessage
 // @Description create Notification
-// @Param	body		body 	modules.Notification	true		"body for Notification content"
-// @Success 201 {int} modules.Notification
+// @Success 204
 // @Failure 403 body is empty
 // @router /post [post]
 func (c *NotificationController) PostMessage() {
@@ -32,8 +31,7 @@ func (c *NotificationController) PostMessage() {
 // PostMenualMessage ...
 // @Title PostMenualMessage
 // @Description create Notification
-// @Param	body		body 	modules.Notification	true		"body for Notification content"
-// @Success 201 {int} modules.Notification
+// @Success 204
 // @Failure 403 body is empty
 // @router /post/:key [post]
 func (c *NotificationController) PostMenualMessage() {
