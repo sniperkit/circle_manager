@@ -103,7 +103,7 @@ func SendActiveNotifications() error {
 	}
 
 	if err := UpdateCheckedNotificationByCrudEventIDs(mapCheckedCrudEvent, true); err != nil {
-		fmt.Println(err)
+		logrus.WithError(err).Error()
 	}
 
 	return nil
@@ -114,10 +114,10 @@ func sendActiveNotificationsEachCrudEvent(crudEvent *CrudEvent, notificationType
 		if notificationType.ResourceName != "" && crudEvent.ResourceName != notificationType.ResourceName {
 			continue
 		}
-		if notificationType.ActionName == "" && crudEvent.ActionName != notificationType.ActionName {
+		if notificationType.ActionName != "" && crudEvent.ActionName != notificationType.ActionName {
 			continue
 		}
-		if notificationType.ActionType == "" && crudEvent.ActionType != notificationType.ActionType {
+		if notificationType.ActionType != "" && crudEvent.ActionType != notificationType.ActionType {
 			continue
 		}
 
@@ -135,7 +135,7 @@ func sendActiveNotificationsEachCrudEvent(crudEvent *CrudEvent, notificationType
 		notification.EventUserID = crudEvent.CreatorID
 
 		if err := addNotificationAndSendNotification(notification); err != nil {
-			logrus.Error(err)
+			logrus.WithError(err).Error()
 		}
 	}
 	return nil
@@ -160,7 +160,7 @@ func addNotificationAndSendNotification(notification *Notification) error {
 		webhookURL.RawQuery = parameters.Encode()
 
 		if _, err := req("GET", webhookURL.String(), nil, nil, nil); err != nil {
-			fmt.Printf("Error : %s", err.Error())
+			logrus.WithError(err).Error()
 		}
 	}
 

@@ -7,15 +7,17 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 const (
-	_listCountText   = "ConstListCount"
-	_listDefaultText = "ConstListItem"
-	_nowText         = "ConstNow"
-	_nowDayText      = "ConstNowDay"
-	_nowMonthText    = "ConstNowMonth"
-	_nowYearText     = "ConstNowYear"
+	_listCountText   = "constListCount"
+	_listDefaultText = "constListItem"
+	_nowText         = "constNow"
+	_nowDayText      = "constNowDay"
+	_nowMonthText    = "constNowMonth"
+	_nowYearText     = "constNowYear"
 )
 
 type KeyValue map[string]string
@@ -31,7 +33,7 @@ func NewTemplateKeyValueMaker(crudEvent *CrudEvent, notificationType *Notificati
 	mapUpdateItems := map[string]interface{}{}
 	if crudEvent.UpdatedData != "" {
 		if err := json.Unmarshal([]byte(crudEvent.UpdatedData), &mapUpdateItems); err != nil {
-			fmt.Println(err)
+			logrus.WithError(err).Error()
 		}
 	}
 
@@ -59,12 +61,14 @@ func (m TemplateKeyValueMaker) GetForienKeyValue(objectName string) (uint, error
 }
 
 func (m *TemplateKeyValueMaker) LoadValues(getDBValueParams map[string]ParamGetValueByKeyOfTableName) {
-	m.GetedValues = map[string]string{}
+	if m.GetedValues == nil {
+		m.GetedValues = map[string]string{}
+	}
 	for key, getValueParam := range getDBValueParams {
 		if valueInterface, err := GetValueByKeyOfTableName(getValueParam.TableName, getValueParam.ColumnName, getValueParam.ID); err == nil {
 			m.GetedValues[key] = convInterface(valueInterface)
 		} else {
-			fmt.Println(err)
+			logrus.WithError(err).Error()
 			continue
 		}
 	}
@@ -73,7 +77,7 @@ func (m *TemplateKeyValueMaker) LoadValues(getDBValueParams map[string]ParamGetV
 func (m *TemplateKeyValueMaker) MakeGetValueParams() map[string]ParamGetValueByKeyOfTableName {
 	matchs := []string{}
 	for _, str := range m.TemplateStrings {
-		re := regexp.MustCompile("\\{\\{\\.(.*?)\\}\\}")
+		re := regexp.MustCompile("\\{\\{(.*?)\\}\\}")
 		allMatch := re.FindAllStringSubmatch(str, -1)
 		for _, match := range allMatch {
 			matchs = append(matchs, match[1:len(match)]...)
@@ -84,24 +88,45 @@ func (m *TemplateKeyValueMaker) MakeGetValueParams() map[string]ParamGetValueByK
 	for _, match := range matchs {
 		objectAndKey := strings.Split(match, ".")
 
-		if len(objectAndKey) == 1 {
-			fieldName := objectAndKey[0]
-			m.GetedValues[match] = convInterface(m.MapUpdateItems[fieldName])
-		} else if len(objectAndKey) == 2 {
-			subID, err := m.GetForienKeyValue(objectAndKey[0])
-			if err != nil {
-				fmt.Println("알수없는 ObjectID : ", objectAndKey)
-			}
+		logrus.WithField("match", match).
+			WithField("objectAndKey", objectAndKey).
+			Debug("Match")
 
-			getDBValueParams[match] = ParamGetValueByKeyOfTableName{
-				TableName:  toDBTableName(objectAndKey[0]),
-				ID:         subID,
-				ColumnName: toDBName(objectAndKey[1]),
-			}
-		} else {
-			fmt.Println("알수없는 Object : ", objectAndKey)
+		if len(objectAndKey) != 2 {
+			logrus.WithField("objectAndKey", objectAndKey).
+				Warn("Invalid objectAndKey")
+			continue
+		}
+
+		tabaleName := toDBTableName(objectAndKey[0])
+		columnName := toDBName(objectAndKey[1])
+		resourceName := objectAndKey[0]
+		resourceFieldName := objectAndKey[1]
+		eventResourceName := m.CrudEvent.ResourceName
+
+		if resourceName == eventResourceName {
+			m.GetedValues[match] = convInterface(m.MapUpdateItems[resourceFieldName])
+			continue
+		}
+
+		subID, err := m.GetForienKeyValue(resourceName)
+		if err != nil {
+			logrus.WithField("resourceName", resourceName).
+				Warn("GetForienKeyValue")
+		}
+
+		logrus.WithField("TableName", tabaleName).
+			WithField("subID", subID).
+			WithField("ColumnName", columnName).
+			Debug("Collect sql")
+
+		getDBValueParams[match] = ParamGetValueByKeyOfTableName{
+			TableName:  tabaleName,
+			ID:         subID,
+			ColumnName: columnName,
 		}
 	}
+
 	return getDBValueParams
 }
 
@@ -145,7 +170,8 @@ func changeTeamplate(teamplate string, keyValue KeyValue) string {
 	ret := teamplate
 
 	for key, value := range keyValue {
-		ret = strings.Replace(ret, fmt.Sprintf("{{.%s}}", key), convInterface(value), -1)
+		logrus.Debug(key, "->", value)
+		ret = strings.Replace(ret, fmt.Sprintf("{{%s}}", key), convInterface(value), -1)
 	}
 
 	return ret
