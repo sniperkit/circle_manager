@@ -34,7 +34,7 @@ func init() {
 }
 
 // Gorm
-func toDBName(name string) string {
+func ToDBName(name string) string {
 	if name == "" {
 		return ""
 	}
@@ -166,7 +166,7 @@ func MakeFirstLowerCase(s string) string {
 	return string(bytes.Join([][]byte{lc, rest}, nil))
 }
 
-func convJsonData(obj interface{}) string {
+func ConvJsonData(obj interface{}) string {
 	if obj != nil {
 		if jsonObj, err := json.Marshal(obj); err == nil {
 			return string(jsonObj)
@@ -175,8 +175,15 @@ func convJsonData(obj interface{}) string {
 	return ""
 }
 
-func toDBTableName(object string) string {
-	return toDBName(inflection.Plural(object))
+func ToDBTableName(object string) string {
+	return ToDBName(inflection.Plural(object))
+}
+
+func GetHostname() string {
+	if hostname, err := os.Hostname(); err == nil {
+		return hostname
+	}
+	return "unknown"
 }
 
 func SubDirectoryFiles(appDir string, actionFunc func(string, os.FileInfo) error) error {
@@ -186,18 +193,4 @@ func SubDirectoryFiles(appDir string, actionFunc func(string, os.FileInfo) error
 		}
 		return nil
 	})
-}
-
-func existsFile(filepath string) bool {
-	if _, err := os.Stat(filepath); os.IsNotExist(err) {
-		return false
-	}
-	return true
-}
-
-func GetHostname() string {
-	if hostname, err := os.Hostname(); err == nil {
-		return hostname
-	}
-	return "unknown"
 }

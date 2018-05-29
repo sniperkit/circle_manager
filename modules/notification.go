@@ -12,12 +12,12 @@ import (
 )
 
 const (
-	_listCountText   = "constListCount"
-	_listDefaultText = "constListItem"
-	_nowText         = "constNow"
-	_nowDayText      = "constNowDay"
-	_nowMonthText    = "constNowMonth"
-	_nowYearText     = "constNowYear"
+	_listCountText   = "ListCount"
+	_listDefaultText = "ListItem"
+	_nowText         = "Now"
+	_nowDayText      = "NowDay"
+	_nowMonthText    = "NowMonth"
+	_nowYearText     = "NowYear"
 )
 
 type KeyValue map[string]string
@@ -98,14 +98,20 @@ func (m *TemplateKeyValueMaker) MakeGetValueParams() map[string]ParamGetValueByK
 			continue
 		}
 
-		tabaleName := toDBTableName(objectAndKey[0])
-		columnName := toDBName(objectAndKey[1])
+		tabaleName := ToDBTableName(objectAndKey[0])
+		columnName := ToDBName(objectAndKey[1])
 		resourceName := objectAndKey[0]
 		resourceFieldName := objectAndKey[1]
 		eventResourceName := m.CrudEvent.ResourceName
 
 		if resourceName == eventResourceName {
-			m.GetedValues[match] = convInterface(m.MapUpdateItems[resourceFieldName])
+			value := convInterface(m.MapUpdateItems[resourceFieldName])
+			m.GetedValues[resourceFieldName] = value
+
+			logrus.WithField("resourceName", resourceName).
+				WithField("resourceFieldName", resourceFieldName).
+				WithField("value", value).
+				Debug("root resource.")
 			continue
 		}
 

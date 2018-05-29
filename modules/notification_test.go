@@ -30,15 +30,15 @@ func TestGetMapUpdatedItems(t *testing.T) {
 
 func TestTemplateKeyValueMaker(t *testing.T) {
 	crudEvent := &CrudEvent{
-		TargetID:     1111,
-		TargetObject: "Product",
+		ResourceID:   1111,
+		ResourceName: "Product",
 		UpdatedData:  `{"ID":1111,"Name":"GoodName","ContentID":1,"IsCheck":false}`,
 	}
 
 	notificationType := &NotificationType{
-		TitleTemplate:    "title {{.Name}} {{.Content.Name}} {{.IsCheck}}",
-		MessageTemplate:  "message {{.Content.Version}}",
-		ListItemTemplate: "list {{.Name}}",
+		TitleTemplate:    "title {{Product.Name}} {{Content.Name}} {{Product.IsCheck}}",
+		MessageTemplate:  "message {{Content.Version}}",
+		ListItemTemplate: "list {{Product.Name}}",
 	}
 
 	templateKeyValueMaker := NewTemplateKeyValueMaker(crudEvent, notificationType)
@@ -87,9 +87,9 @@ func TestMakeNotification(t *testing.T) {
 
 	// Template
 	notiType := &NotificationType{
-		TitleTemplate:    "title {{.Key}} {{.ConstNowMonth}}",
-		MessageTemplate:  "message {{.Key}} {{.Key1}}\n{{.ConstListItem}}",
-		ListItemTemplate: "- {{.Key}} {{.List.Key}} {{.List.Key1}} {{.List.Key2}}\n",
+		TitleTemplate:    "title {{Key}} {{NowMonth}}",
+		MessageTemplate:  "message {{Key}} {{Key1}}\n{{ListItem}}",
+		ListItemTemplate: "- {{Key}} {{List.Key}} {{List.Key1}} {{List.Key2}}\n",
 		ReplaceText:      "old:new,test1:newtest1",
 	}
 

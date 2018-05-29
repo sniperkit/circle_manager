@@ -50,7 +50,7 @@ func (m *CircleQor) CrudEvent(currentUserID uint, result interface{}, context *q
 		ResourceName: structs.Name(modelItem),
 		CreatorID:    currentUserID,
 		Where:        "QOR",
-		UpdatedData:  convJsonData(modelItem),
+		UpdatedData:  ConvJsonData(modelItem),
 		OldData:      oldData,
 	}); err != nil {
 		fmt.Println(err)
@@ -74,7 +74,7 @@ func (m *CircleQor) AddResourceAndMenu(value interface{}, menuViewName string, p
 			if resIDUint64, err := strconv.ParseUint(context.ResourceID, 10, 64); err == nil {
 				oldModelItem := reflect.New(reflect.ValueOf(result).Elem().Type()).Interface()
 				if err := GetItemByID(uint(resIDUint64), oldModelItem); err == nil {
-					oldData = convJsonData(oldModelItem)
+					oldData = ConvJsonData(oldModelItem)
 				}
 			}
 		}

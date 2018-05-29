@@ -79,7 +79,7 @@ func (m *NotificationType) CheckDiff(crudEvent *CrudEvent) bool {
 			}
 
 			mapUpdateProperties[key] = UpdateProperty{
-				Key:      toDBName(key),
+				Key:      ToDBName(key),
 				NewValue: convInterface(value),
 				OldValue: oldValue,
 			}

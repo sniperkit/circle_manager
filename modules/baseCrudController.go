@@ -281,10 +281,18 @@ func (c *BaseCrudController) addEvent(actionName string) {
 		userID = c.CurrentUserMeta.UserID
 	}
 	requestData := ""
-	if actionName == "create" {
-		requestData = convJsonData(c.RequestCreateItem)
-	} else if actionName == "update" {
-		requestData = convJsonData(c.RequestUpdateItem)
+	UpdatedData := ""
+	oldData := ""
+	switch actionName {
+	case "create":
+		requestData = ConvJsonData(c.RequestCreateItem)
+		UpdatedData = ConvJsonData(c.ModelItem)
+	case "update":
+		requestData = ConvJsonData(c.RequestUpdateItem)
+		UpdatedData = ConvJsonData(c.ModelItem)
+		oldData = ConvJsonData(c.OldModelItem)
+	case "delete":
+		oldData = ConvJsonData(c.ModelItem)
 	}
 
 	resourceID := uint(0)
@@ -299,10 +307,10 @@ func (c *BaseCrudController) addEvent(actionName string) {
 		ResourceName: structs.Name(c.ModelItem),
 		CreatorID:    userID,
 		Where:        "API",
-		UpdatedData:  convJsonData(c.ModelItem),
+		UpdatedData:  UpdatedData,
 		RequestData:  requestData,
-		OldData:      convJsonData(c.OldModelItem),
-		ResponseData: convJsonData(c.ResponseItem),
+		OldData:      oldData,
+		ResponseData: ConvJsonData(c.ResponseItem),
 	}); err != nil {
 		fmt.Println(err)
 	}
