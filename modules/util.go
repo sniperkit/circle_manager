@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/jinzhu/inflection"
+	"github.com/sirupsen/logrus"
 )
 
 type strCase bool
@@ -115,7 +116,9 @@ func convInterface(raw interface{}) string {
 		return ""
 	}
 
-	fmt.Printf("Unknown type: %s. values: %s\n", reflect.New(reflect.TypeOf(raw)), raw)
+	logrus.WithField("type", reflect.New(reflect.TypeOf(raw))).
+		WithField("value", raw).
+		Debug("Unknown type")
 
 	return ""
 }

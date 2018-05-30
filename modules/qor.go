@@ -1,7 +1,6 @@
 package modules
 
 import (
-	"fmt"
 	"html/template"
 	"reflect"
 	"strconv"
@@ -24,12 +23,12 @@ func (m *CircleQor) CrudEvent(currentUserID uint, result interface{}, context *q
 	actionName := ""
 	if context.Request.Method == "POST" {
 		if context.ResourceID == "" {
-			actionName = "create"
+			actionName = CreateActionTypeName
 		} else {
-			actionName = "update"
+			actionName = UpdateActionTypeName
 		}
 	} else if context.Request.Method == "DELETE" {
-		actionName = "delete"
+		actionName = DeleteActionTypeName
 	} else {
 		logrus.
 			WithField("method", context.Request.Method).
@@ -53,7 +52,7 @@ func (m *CircleQor) CrudEvent(currentUserID uint, result interface{}, context *q
 		UpdatedData:  ConvJsonData(result),
 		OldData:      oldData,
 	}); err != nil {
-		fmt.Println(err)
+		logrus.WithError(err).Error("")
 	}
 }
 
@@ -82,10 +81,8 @@ func (m *CircleQor) AddResourceAndMenu(value interface{}, menuViewName string, p
 			res.Meta(&admin.Meta{Name: name, Setter: mata.GetSetter(), Valuer: func(result interface{}, context *qor.Context) interface{} {
 				value := resStruct.Field(name).Value()
 				if context.ResourceID == "" {
-					if boolValue, ok := value.(bool); ok {
-						if boolValue {
-							return template.HTML(`<input type="checkbox" checked="checked" readonly/>`)
-						}
+					if boolValue, ok := value.(bool); ok && boolValue {
+						return template.HTML(`<input type="checkbox" checked="checked" readonly/>`)
 					}
 					return template.HTML(`<input type="checkbox" readonly/>`)
 				}

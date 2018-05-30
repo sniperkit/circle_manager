@@ -1,13 +1,21 @@
 package modules
 
 import (
-	"fmt"
 	"net/http"
 	"reflect"
 
 	"github.com/fatih/structs"
+	"github.com/sirupsen/logrus"
 
 	"github.com/jinzhu/copier"
+)
+
+const (
+	CreateActionTypeName = "create"
+	GetOneActionTypeName = "getone"
+	GetAllActionTypeName = "getall"
+	UpdateActionTypeName = "update"
+	DeleteActionTypeName = "delete"
 )
 
 type ModelItem interface {
@@ -39,7 +47,7 @@ func (c *BaseCrudController) BasePost() {
 	c.SetRequestDataAndValid(c.RequestCreateItem)
 
 	// @step2. API 권한 체크
-	c.CheckAble("create")
+	c.CheckAble(CreateActionTypeName)
 
 	// @step3. 사용자 요청 데이터에서 모델 데이터로 가공
 	err := copier.Copy(c.ModelItem, c.RequestCreateItem)
@@ -61,7 +69,7 @@ func (c *BaseCrudController) BaseGetOne() {
 	id := c.GetParamID()
 
 	// @step2. API 권한 체크
-	c.CheckAble("getone")
+	c.CheckAble(GetOneActionTypeName)
 
 	// @step3. DB 요청 단계. Error이면 404, 500
 	err := GetItemByID(id, c.ModelItem)
@@ -79,7 +87,7 @@ func (c *BaseCrudController) BaseGetOne() {
 
 func (c *BaseCrudController) BaseGetAll() {
 	// @step1. API 권한 체크
-	c.CheckAble("list")
+	c.CheckAble(GetAllActionTypeName)
 
 	// @step2. DB 요청 단계. Error이면 500
 	err := c.GetItems()
@@ -98,7 +106,7 @@ func (c *BaseCrudController) BasePut() {
 	c.SetRequestDataAndValid(c.RequestUpdateItem)
 
 	// @step2. API 권한 체크
-	c.CheckAble("update")
+	c.CheckAble(UpdateActionTypeName)
 
 	// @step3. 사용자 요청에 대한 DB 데이터 유효성 확인. Error이면 404 or 500
 	err := GetItemByID(id, c.ModelItem)
@@ -131,7 +139,7 @@ func (c *BaseCrudController) BaseDelete() {
 	id := c.GetParamID()
 
 	// @step2. API 권한 체크
-	c.CheckAble("delete")
+	c.CheckAble(DeleteActionTypeName)
 
 	// @step3. 사용자 요청에 대한 DB 데이터 유효성 관계. Error이면 404 or 500
 	err := GetItemByID(id, c.ModelItem)
@@ -175,6 +183,65 @@ func (c *BaseCrudController) CheckUserData(thenErrorCode int) {
 		if userID != c.CurrentUserMeta.UserID {
 			c.ErrorAbort(thenErrorCode, nil)
 		}
+	}
+}
+
+// SuccessCreate ...
+func (c *BaseCrudController) SuccessCreate() {
+	go c.addEvent(CreateActionTypeName)
+	c.Success(http.StatusCreated, c.ResponseItem)
+}
+
+// SuccessUpdate ...
+func (c *BaseCrudController) SuccessUpdate() {
+	go c.addEvent(UpdateActionTypeName)
+	c.Success(http.StatusOK, c.ResponseItem)
+}
+
+// SuccessDelete ...
+func (c *BaseCrudController) SuccessDelete() {
+	go c.addEvent(DeleteActionTypeName)
+	c.Success(http.StatusNoContent, nil)
+}
+
+func (c *BaseCrudController) addEvent(actionName string) {
+	userID := uint(1)
+	if c.CurrentUserMeta != nil {
+		userID = c.CurrentUserMeta.UserID
+	}
+	requestData := ""
+	UpdatedData := ""
+	oldData := ""
+	switch actionName {
+	case CreateActionTypeName:
+		requestData = ConvJsonData(c.RequestCreateItem)
+		UpdatedData = ConvJsonData(c.ModelItem)
+	case UpdateActionTypeName:
+		requestData = ConvJsonData(c.RequestUpdateItem)
+		UpdatedData = ConvJsonData(c.ModelItem)
+		oldData = ConvJsonData(c.OldModelItem)
+	case DeleteActionTypeName:
+		oldData = ConvJsonData(c.ModelItem)
+	}
+
+	resourceID := uint(0)
+	if field, ok := structs.New(c.ModelItem).FieldOk("ID"); ok {
+		resourceID = field.Value().(uint)
+	}
+
+	if _, err := AddCrudEvent(&CrudEvent{
+		ActionName:   actionName,
+		ActionType:   actionName,
+		ResourceID:   resourceID,
+		ResourceName: structs.Name(c.ModelItem),
+		CreatorID:    userID,
+		Where:        "API",
+		UpdatedData:  UpdatedData,
+		RequestData:  requestData,
+		OldData:      oldData,
+		ResponseData: ConvJsonData(c.ResponseItem),
+	}); err != nil {
+		logrus.WithError(err).Error("")
 	}
 }
 
@@ -258,65 +325,6 @@ func (c *BaseCrudController) CheckAble(checkType string) {
 	// 		}
 	// 	}
 	// }
-}
-
-// SuccessCreate ...
-func (c *BaseCrudController) SuccessCreate() {
-	go c.addEvent("create")
-	c.Success(http.StatusCreated, c.ResponseItem)
-}
-
-// SuccessUpdate ...
-func (c *BaseCrudController) SuccessUpdate() {
-	go c.addEvent("update")
-	c.Success(http.StatusOK, c.ResponseItem)
-}
-
-// SuccessDelete ...
-func (c *BaseCrudController) SuccessDelete() {
-	go c.addEvent("delete")
-	c.Success(http.StatusNoContent, nil)
-}
-
-func (c *BaseCrudController) addEvent(actionName string) {
-	userID := uint(1)
-	if c.CurrentUserMeta != nil {
-		userID = c.CurrentUserMeta.UserID
-	}
-	requestData := ""
-	UpdatedData := ""
-	oldData := ""
-	switch actionName {
-	case "create":
-		requestData = ConvJsonData(c.RequestCreateItem)
-		UpdatedData = ConvJsonData(c.ModelItem)
-	case "update":
-		requestData = ConvJsonData(c.RequestUpdateItem)
-		UpdatedData = ConvJsonData(c.ModelItem)
-		oldData = ConvJsonData(c.OldModelItem)
-	case "delete":
-		oldData = ConvJsonData(c.ModelItem)
-	}
-
-	resourceID := uint(0)
-	if field, ok := structs.New(c.ModelItem).FieldOk("ID"); ok {
-		resourceID = field.Value().(uint)
-	}
-
-	if _, err := AddCrudEvent(&CrudEvent{
-		ActionName:   actionName,
-		ActionType:   actionName,
-		ResourceID:   resourceID,
-		ResourceName: structs.Name(c.ModelItem),
-		CreatorID:    userID,
-		Where:        "API",
-		UpdatedData:  UpdatedData,
-		RequestData:  requestData,
-		OldData:      oldData,
-		ResponseData: ConvJsonData(c.ResponseItem),
-	}); err != nil {
-		fmt.Println(err)
-	}
 }
 
 // func EventThenCreate(modelItem ModelItem, currentUserID *uint) {

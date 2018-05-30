@@ -148,7 +148,7 @@ func addNotificationAndSendNotification(notification *Notification) error {
 	for _, targetURL := range strings.Split(notification.NotificationType.WebhookURLs, "\n") {
 		webhookURL, err := url.Parse(strings.TrimSpace(targetURL))
 		if err != nil {
-			fmt.Printf("Error : %s", err.Error())
+			logrus.WithError(err).Error("")
 			continue
 		}
 

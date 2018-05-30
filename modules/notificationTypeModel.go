@@ -2,10 +2,10 @@ package modules
 
 import (
 	"encoding/json"
-	"fmt"
 	"time"
 
 	"github.com/fatih/structs"
+	"github.com/sirupsen/logrus"
 )
 
 // gen:qs
@@ -61,12 +61,12 @@ func (m *NotificationType) CheckDiff(crudEvent *CrudEvent) bool {
 
 	mapUpdateItem := map[string]interface{}{}
 	if err := json.Unmarshal([]byte(crudEvent.UpdatedData), &mapUpdateItem); err != nil {
-		fmt.Println(err)
+		logrus.WithError(err).Error("")
 		return false
 	}
 	mapOldItem := map[string]interface{}{}
 	if err := json.Unmarshal([]byte(crudEvent.OldData), &mapOldItem); err != nil {
-		fmt.Println(err)
+		logrus.WithError(err).Error("")
 		return false
 	}
 

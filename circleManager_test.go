@@ -19,7 +19,6 @@ func TestCleanRouterSource(t *testing.T) {
 
 func TestRemoveRouterSource(t *testing.T) {
 	regenRouterSource := removeRouterSource(routerSource, "Team")
-	//fmt.Println(regenRouterSource)
 	i := strings.Index(regenRouterSource, "Team")
 	assert.Equal(t, -1, i)
 	i = strings.Index(regenRouterSource, "beego.AddNamespace(ns)")

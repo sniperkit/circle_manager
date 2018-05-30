@@ -2,7 +2,6 @@ package modules
 
 import (
 	"encoding/json"
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -58,7 +57,7 @@ func getUserIDByUserMeta(userMeta *UserMeta) *uint {
 // ErrorAbort ...
 func (c *BaseController) ErrorAbort(code int, err error, withMsg ...interface{}) {
 	if err != nil {
-		fmt.Printf("Error : %s\n", err.Error())
+		logrus.WithError(err).Error("")
 		c.CustomAbort(code, err.Error())
 	}
 	c.CustomAbort(code, "")
