@@ -19,14 +19,6 @@ type CircleQor struct {
 }
 
 func (m *CircleQor) CrudEvent(currentUserID uint, result interface{}, context *qor.Context, oldData string) {
-	modelItem, ok := result.(ModelItem)
-	if !ok {
-		return
-	}
-
-	userID := structs.New(context.CurrentUser).Field("ID").Value().(uint)
-	modelItem.SetCreatorID(userID)
-
 	actionName := ""
 	if context.ResourceID == "" && context.Request.Method == "POST" {
 		actionName = "create"
@@ -47,10 +39,10 @@ func (m *CircleQor) CrudEvent(currentUserID uint, result interface{}, context *q
 		ActionName:   actionName,
 		ActionType:   actionName,
 		ResourceID:   resourceID,
-		ResourceName: structs.Name(modelItem),
+		ResourceName: structs.Name(result),
 		CreatorID:    currentUserID,
 		Where:        "QOR",
-		UpdatedData:  ConvJsonData(modelItem),
+		UpdatedData:  ConvJsonData(result),
 		OldData:      oldData,
 	}); err != nil {
 		fmt.Println(err)
@@ -149,17 +141,20 @@ func (m *CircleQor) AddResourceAndMenu(value interface{}, menuViewName string, p
 		}
 	}
 
+	getUserName := func(colName string, result interface{}) string {
+		if field := structs.New(result).Field(colName); field != nil {
+			userID := field.Value().(uint)
+			if value, err := GetValueByKeyOfTableName("users", "name", userID); err == nil {
+				return value.(string)
+			}
+		}
+
+		return "-"
+	}
+
 	if meta := res.GetMeta("CreatorID"); meta != nil {
 		res.Meta(&admin.Meta{Name: "CreatorID", Label: "작성자", Type: "readonly", Valuer: func(result interface{}, context *qor.Context) interface{} {
-			if modelItem, ok := result.(ModelItem); ok {
-				if modelItem.GetCreatorID() > 0 {
-					if value, err := GetValueByKeyOfTableName("users", "name", modelItem.GetCreatorID()); err == nil {
-						return value.(string)
-					}
-				}
-			}
-
-			return "-"
+			return getUserName("CreatorID", result)
 		}})
 	}
 
@@ -167,14 +162,7 @@ func (m *CircleQor) AddResourceAndMenu(value interface{}, menuViewName string, p
 		res.EditAttrs("-UpdaterID")
 		res.NewAttrs("-UpdaterID")
 		res.Meta(&admin.Meta{Name: "UpdaterID", Label: "최종수정자", Type: "readonly", Valuer: func(result interface{}, context *qor.Context) interface{} {
-			if updateField := structs.New(result).Field("UpdaterID"); updateField != nil {
-				updaterID := updateField.Value().(uint)
-				if value, err := GetValueByKeyOfTableName("users", "name", updaterID); err == nil {
-					return value.(string)
-				}
-			}
-
-			return "-"
+			return getUserName("UpdaterID", result)
 		}})
 	}
 
