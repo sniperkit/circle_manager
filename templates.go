@@ -32,14 +32,6 @@ const (
 		registModel(&{{.Name}}{})
 	}
 	
-	func (m *{{.Name}}) GetCreatorID() uint {
-		return m.CreatorID
-	}
-	
-	func (m *{{.Name}}) SetCreatorID(creatorID uint) {
-		m.CreatorID = creatorID
-	}
-	
 	func Add{{.Name}}({{.GetVariableName}} *{{.Name}}) (id uint, err error) {
 		err = {{.GetVariableName}}.Create(gGormDB)
 		id = {{.GetVariableName}}.ID

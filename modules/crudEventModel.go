@@ -24,14 +24,6 @@ type CrudEvent struct {
 	CheckedNotification bool      `description:"알림 체크"`
 }
 
-func (c *CrudEvent) GetCreatorID() uint {
-	return c.CreatorID
-}
-
-func (m *CrudEvent) SetCreatorID(creatorID uint) {
-	m.CreatorID = creatorID
-}
-
 func AddCrudEvent(crudEvent *CrudEvent) (id uint, err error) {
 	err = crudEvent.Create(gGormDB)
 	id = crudEvent.ID

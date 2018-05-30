@@ -28,18 +28,6 @@ type CircleSet struct {
 	RunAppEnvs            string        `description:""`
 }
 
-func (c *CircleSet) GetCreatorID() uint {
-	return c.CreatorID
-}
-
-func (m *CircleSet) SetCreatorID(creatorID uint) {
-	m.CreatorID = creatorID
-}
-
-func (m *CircleSet) SetUpdaterID(updaterID uint) {
-	m.UpdaterID = updaterID
-}
-
 func (c CircleSet) GetUnit(unitName string) *CircleUnit {
 	for _, unit := range c.Units {
 		if !unit.IsSystem {

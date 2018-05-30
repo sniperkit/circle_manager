@@ -57,10 +57,6 @@ type CircleUnitProperty struct {
 	UpdatableUserExcludeStatusIDs  string     `description:""`
 }
 
-func (c *CircleUnitProperty) GetCreatorID() uint {
-	return c.CreatorID
-}
-
 func (c *CircleUnitProperty) GetTypeInModel() string {
 	return strings.Replace(c.Type, "models.", "", -1)
 }

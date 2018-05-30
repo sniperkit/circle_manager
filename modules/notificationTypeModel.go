@@ -36,18 +36,6 @@ type NotificationType struct {
 	DiffOldValue     string    `description:""`
 }
 
-func (c *NotificationType) GetCreatorID() uint {
-	return c.CreatorID
-}
-
-func (m *NotificationType) SetCreatorID(creatorID uint) {
-	m.CreatorID = creatorID
-}
-
-func (m *NotificationType) SetUpdaterID(updaterID uint) {
-	m.UpdaterID = updaterID
-}
-
 func (m *NotificationType) CheckDiff(crudEvent *CrudEvent) bool {
 	if m.DiffKey == "" {
 		return true
