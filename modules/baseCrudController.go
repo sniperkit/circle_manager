@@ -11,9 +11,6 @@ import (
 )
 
 type ModelItem interface {
-	GetCreatorID() uint
-	SetCreatorID(uint)
-	SetUpdaterID(uint)
 }
 
 type ModelItems interface {
@@ -166,11 +163,17 @@ func (c *BaseCrudController) GetItems() error {
 }
 
 func (c *BaseCrudController) CheckUserData(thenErrorCode int) {
-	if c.CurrentCircleUnit != nil {
-		if c.CurrentCircleUnit.OlnyUserData {
-			if value := c.ModelItem.GetCreatorID(); value != c.CurrentUserMeta.UserID {
-				c.ErrorAbort(thenErrorCode, nil)
-			}
+	if c.CurrentCircleUnit == nil {
+		return
+	}
+	if !c.CurrentCircleUnit.OlnyUserData {
+		return
+	}
+
+	value := extractValueByField("CreatorID", c.ModelItem)
+	if userID, ok := value.(uint); ok {
+		if userID != c.CurrentUserMeta.UserID {
+			c.ErrorAbort(thenErrorCode, nil)
 		}
 	}
 }

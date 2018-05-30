@@ -6,6 +6,8 @@ import (
 	"reflect"
 	"strconv"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/fatih/structs"
 	"github.com/jinzhu/gorm"
 	"github.com/jinzhu/inflection"
@@ -20,13 +22,19 @@ type CircleQor struct {
 
 func (m *CircleQor) CrudEvent(currentUserID uint, result interface{}, context *qor.Context, oldData string) {
 	actionName := ""
-	if context.ResourceID == "" && context.Request.Method == "POST" {
-		actionName = "create"
-	} else if (context.Request.Method == "PUT") ||
-		(context.ResourceID != "" && context.Request.Method == "POST") {
-		actionName = "update"
+	if context.Request.Method == "POST" {
+		if context.ResourceID == "" {
+			actionName = "create"
+		} else {
+			actionName = "update"
+		}
 	} else if context.Request.Method == "DELETE" {
 		actionName = "delete"
+	} else {
+		logrus.
+			WithField("method", context.Request.Method).
+			WithField("resourceID", context.ResourceID).
+			Warn("Unknown action")
 	}
 
 	// TODO: context의 ResourceID를 사용?
@@ -51,14 +59,88 @@ func (m *CircleQor) CrudEvent(currentUserID uint, result interface{}, context *q
 
 func (m *CircleQor) AddResourceAndMenu(value interface{}, menuViewName string, parentMenu string, permission *roles.Permission, priority int) *admin.Resource {
 	res := m.QorAdmin.AddResource(value, &admin.Config{Menu: []string{parentMenu}, Permission: permission, Priority: priority})
+
+	menuName := res.Name
+	if !res.Config.Singleton {
+		menuName = inflection.Plural(res.Name)
+	}
+	menu := m.QorAdmin.GetMenu(menuName)
+	menu.Name = menuViewName
+
+	matas := res.GetMetas(nil)
+	resStruct := structs.New(res.NewStruct())
+	appendAttr := []interface{}{}
+	for _, mata := range matas {
+		name := mata.GetName()
+		switch name {
+		case "ID", "CreatedAt", "CreatorID", "UpdaterID", "Name", "Description":
+		default:
+			appendAttr = append(appendAttr, name)
+		}
+
+		if resStruct.Field(name).Kind() == reflect.Bool {
+			res.Meta(&admin.Meta{Name: name, Setter: mata.GetSetter(), Valuer: func(result interface{}, context *qor.Context) interface{} {
+				value := resStruct.Field(name).Value()
+				if context.ResourceID == "" {
+					if boolValue, ok := value.(bool); ok {
+						if boolValue {
+							return template.HTML(`<input type="checkbox" checked="checked" readonly/>`)
+						}
+					}
+					return template.HTML(`<input type="checkbox" readonly/>`)
+				}
+				return value
+			}})
+		}
+	}
+
+	if meta := res.GetMeta("CreatorID"); meta != nil {
+		res.Meta(&admin.Meta{Name: "CreatorID", Label: "작성자", Type: "readonly", Valuer: func(result interface{}, context *qor.Context) interface{} {
+			return extractUserNameByField("CreatorID", result)
+		}})
+	}
+
+	if meta := res.GetMeta("UpdaterID"); meta != nil {
+		res.EditAttrs("-UpdaterID")
+		res.NewAttrs("-UpdaterID")
+		res.Meta(&admin.Meta{Name: "UpdaterID", Label: "최종수정자", Type: "readonly", Valuer: func(result interface{}, context *qor.Context) interface{} {
+			return extractUserNameByField("UpdaterID", result)
+		}})
+	}
+
+	for _, meta := range []struct {
+		FieldName string
+		Label     string
+		Type      string
+	}{
+		{"Description", "설명", ""},
+		{"Name", "이름", ""},
+		{"CreatedAt", "작성일", "readonly"},
+		{"UpdatedAt", "수정일", "readonly"},
+	} {
+		if _, ok := resStruct.FieldOk(meta.FieldName); ok {
+			res.Meta(&admin.Meta{Name: meta.FieldName, Label: meta.Label, Type: meta.Type})
+		}
+	}
+
+	_, creatorIDOK := resStruct.FieldOk("CreatorID")
+	_, updaterIDOK := resStruct.FieldOk("UpdaterID")
+	_, createdAtIDOK := resStruct.FieldOk("CreatedAt")
+	_, updatedAtIDOK := resStruct.FieldOk("UpdatedAt")
+	if creatorIDOK && updaterIDOK && createdAtIDOK && updatedAtIDOK {
+		res.EditAttrs("-CreatorID", "-CreatedAt", "-UpdaterID", "-UpdatedAt")
+		res.NewAttrs("-CreatorID", "-CreatedAt", "-UpdaterID", "-UpdatedAt")
+	}
+
+	SetIndexAttrs(res, appendAttr...)
+
 	res.SaveHandler = func(result interface{}, context *qor.Context) error {
-		currentUserID := uint(0)
-		if modelItem, ok := result.(ModelItem); ok {
-			currentUserID = structs.New(context.CurrentUser).Field("ID").Value().(uint)
+		currentUserID := structs.New(context.CurrentUser).Field("ID").Value().(uint)
+		if currentUserID > 0 {
 			if context.ResourceID == "" {
-				modelItem.SetCreatorID(currentUserID)
+				structs.New(result).Field("CreatorID").Set(currentUserID)
 			}
-			modelItem.SetUpdaterID(currentUserID)
+			structs.New(result).Field("UpdaterID").Set(currentUserID)
 		}
 
 		oldData := ""
@@ -104,78 +186,25 @@ func (m *CircleQor) AddResourceAndMenu(value interface{}, menuViewName string, p
 		return roles.ErrPermissionDenied
 	}
 
-	menuName := res.Name
-	if !res.Config.Singleton {
-		menuName = inflection.Plural(res.Name)
-	}
-	menu := m.QorAdmin.GetMenu(menuName)
-	menu.Name = menuViewName
-
-	matas := res.GetMetas(nil)
-	resStruct := structs.New(res.NewStruct())
-	appendAttr := []interface{}{}
-	for _, mata := range matas {
-		name := mata.GetName()
-		if name != "ID" &&
-			name != "CreatedAt" &&
-			name != "UpdatedAt" &&
-			name != "CreatorID" &&
-			name != "UpdaterID" &&
-			name != "Name" &&
-			name != "Description" {
-			appendAttr = append(appendAttr, name)
-		}
-		if resStruct.Field(name).Kind() == reflect.Bool {
-			res.Meta(&admin.Meta{Name: name, Setter: mata.GetSetter(), Valuer: func(result interface{}, context *qor.Context) interface{} {
-				value := structs.New(result).Field(name).Value()
-				if context.ResourceID == "" {
-					if boolValue, ok := value.(bool); ok {
-						if boolValue {
-							return template.HTML(`<input type="checkbox" checked="checked" readonly/>`)
-						}
-					}
-					return template.HTML(`<input type="checkbox" readonly/>`)
-				}
-				return value
-			}})
-		}
-	}
-
-	getUserName := func(colName string, result interface{}) string {
-		if field := structs.New(result).Field(colName); field != nil {
-			userID := field.Value().(uint)
-			if value, err := GetValueByKeyOfTableName("users", "name", userID); err == nil {
-				return value.(string)
-			}
-		}
-
-		return "-"
-	}
-
-	if meta := res.GetMeta("CreatorID"); meta != nil {
-		res.Meta(&admin.Meta{Name: "CreatorID", Label: "작성자", Type: "readonly", Valuer: func(result interface{}, context *qor.Context) interface{} {
-			return getUserName("CreatorID", result)
-		}})
-	}
-
-	if meta := res.GetMeta("UpdaterID"); meta != nil {
-		res.EditAttrs("-UpdaterID")
-		res.NewAttrs("-UpdaterID")
-		res.Meta(&admin.Meta{Name: "UpdaterID", Label: "최종수정자", Type: "readonly", Valuer: func(result interface{}, context *qor.Context) interface{} {
-			return getUserName("UpdaterID", result)
-		}})
-	}
-
-	if _, ok := value.(ModelItem); ok {
-		res.Meta(&admin.Meta{Name: "Description", Label: "설명"})
-		res.Meta(&admin.Meta{Name: "Name", Label: "이름"})
-		res.Meta(&admin.Meta{Name: "CreatedAt", Label: "작성일", Type: "readonly"})
-		res.Meta(&admin.Meta{Name: "UpdatedAt", Label: "수정일", Type: "readonly"})
-		res.EditAttrs("-CreatorID", "-CreatedAt", "-UpdaterID", "-UpdatedAt")
-		res.NewAttrs("-CreatorID", "-CreatedAt", "-UpdaterID", "-UpdatedAt")
-		SetIndexAttrs(res, appendAttr...)
-	}
 	return res
+}
+
+func extractValueByField(fieldName string, result interface{}) interface{} {
+	if field := structs.New(result).Field(fieldName); field != nil {
+		return field.Value()
+	}
+	return nil
+}
+
+func extractUserNameByField(fieldName string, result interface{}) string {
+	value := extractValueByField(fieldName, result)
+	if userID, ok := value.(uint); ok {
+		if value, err := GetValueByKeyOfTableName("users", "name", userID); err == nil {
+			return value.(string)
+		}
+	}
+
+	return "-"
 }
 
 func SetIndexAttrs(res *admin.Resource, attr ...interface{}) {
