@@ -21,7 +21,7 @@ type CircleQor struct {
 
 func (m *CircleQor) CrudEvent(currentUserID uint, result interface{}, context *qor.Context, oldData string) {
 	actionName := ""
-	if context.Request.Method == "POST" {
+	if context.Request.Method == "POST" || context.Request.Method == "PUT" {
 		if context.ResourceID == "" {
 			actionName = CreateActionTypeName
 		} else {
